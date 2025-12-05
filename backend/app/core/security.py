@@ -118,9 +118,7 @@ class SecurityManager:
         if expires_delta:
             expire = datetime.now(UTC) + expires_delta
         else:
-            expire = datetime.now(UTC) + timedelta(
-                minutes=settings.access_token_expire_minutes
-            )
+            expire = datetime.now(UTC) + timedelta(minutes=settings.access_token_expire_minutes)
 
         to_encode.update({"exp": expire, "iat": datetime.now(UTC), "type": "access"})
 
