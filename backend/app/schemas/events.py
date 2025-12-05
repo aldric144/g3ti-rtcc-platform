@@ -97,9 +97,14 @@ class EventBase(RTCCBaseModel):
 class EventCreate(EventBase):
     """Schema for creating a new event."""
 
+    external_id: str | None = Field(
+        default=None, max_length=100, description="External event ID from source system"
+    )
     source_event_id: str | None = Field(
         default=None, max_length=100, description="Original event ID from source system"
     )
+    latitude: float | None = Field(default=None, ge=-90, le=90, description="Event latitude")
+    longitude: float | None = Field(default=None, ge=-180, le=180, description="Event longitude")
     related_entity_ids: list[str] = Field(
         default_factory=list, description="IDs of related entities (persons, vehicles, etc.)"
     )
@@ -136,6 +141,7 @@ class WebSocketMessageType(str, Enum):
 
     # Server to client
     EVENT = "event"
+    ALERT = "alert"
     SUBSCRIBED = "subscribed"
     UNSUBSCRIBED = "unsubscribed"
     ACKNOWLEDGED = "acknowledged"
@@ -169,6 +175,9 @@ class EventSubscription(RTCCBaseModel):
         default=None, description="Geographic bounding box (north, south, east, west)"
     )
     tags: list[str] = Field(default_factory=list, description="Tags to filter by")
+    include_entity_updates: bool = Field(
+        default=False, description="Whether to receive entity creation/update notifications"
+    )
 
 
 class EventAcknowledge(RTCCBaseModel):

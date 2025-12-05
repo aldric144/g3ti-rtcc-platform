@@ -10,6 +10,11 @@ Features:
 - Broadcast and targeted messaging
 - Heartbeat monitoring
 - Connection authentication
+- Normalized event emission from all data sources
+- Entity creation notifications
+- Priority-based event filtering
+- Geographic bounds filtering
+- Redis pub/sub integration for distributed broadcasting
 """
 
 import asyncio
@@ -23,8 +28,9 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 from app.core.config import settings
-from app.core.logging import get_logger
+from app.core.logging import audit_logger, get_logger
 from app.schemas.events import (
+    EventCreate,
     EventPriority,
     EventSource,
     EventSubscription,
@@ -34,6 +40,20 @@ from app.schemas.events import (
 )
 
 logger = get_logger(__name__)
+
+
+# Event source to human-readable name mapping
+SOURCE_DISPLAY_NAMES: dict[EventSource, str] = {
+    EventSource.FLOCK: "Flock LPR",
+    EventSource.SHOTSPOTTER: "ShotSpotter",
+    EventSource.MILESTONE: "Milestone VMS",
+    EventSource.ONESOLUTION: "OneSolution CAD/RMS",
+    EventSource.NESS: "NESS",
+    EventSource.BWC: "Body-Worn Camera",
+    EventSource.HOTSHEETS: "HotSheets BOLO",
+    EventSource.MANUAL: "Manual Entry",
+    EventSource.SYSTEM: "System",
+}
 
 
 class ClientConnection:
@@ -409,6 +429,302 @@ class WebSocketManager:
             return True
         except Exception:
             return False
+
+    async def broadcast_normalized_event(self, event: EventCreate) -> int:
+        """
+        Broadcast a normalized event from any data source.
+
+        This method handles events from all integrated sources (Flock, ShotSpotter,
+        Milestone, OneSolution, NESS, BWC, HotSheets) and broadcasts them to
+        subscribed clients based on their subscription filters.
+
+        Args:
+            event: Normalized EventCreate object
+
+        Returns:
+            int: Number of clients that received the event
+        """
+        location = None
+        if event.latitude is not None and event.longitude is not None:
+            location = {"lat": event.latitude, "lon": event.longitude}
+
+        source_name = SOURCE_DISPLAY_NAMES.get(event.source, event.source.value)
+
+        payload = {
+            "id": event.external_id or str(uuid.uuid4()),
+            "title": event.title,
+            "description": event.description,
+            "source": event.source.value,
+            "source_display": source_name,
+            "event_type": event.event_type.value,
+            "priority": event.priority.value,
+            "location": location,
+            "address": event.address,
+            "tags": event.tags,
+            "metadata": event.metadata,
+            "timestamp": (
+                event.timestamp.isoformat() if event.timestamp else datetime.now(UTC).isoformat()
+            ),
+        }
+
+        sent_count = await self.broadcast_event(
+            event_type=event.event_type,
+            source=event.source,
+            priority=event.priority,
+            payload=payload,
+            location=location,
+            tags=event.tags,
+        )
+
+        logger.info(
+            "normalized_event_broadcast",
+            source=event.source.value,
+            event_type=event.event_type.value,
+            priority=event.priority.value,
+            recipients=sent_count,
+        )
+
+        return sent_count
+
+    async def broadcast_entity_created(
+        self,
+        entity_type: str,
+        entity_id: str,
+        entity_data: dict[str, Any],
+        source_event_id: str | None = None,
+    ) -> int:
+        """
+        Broadcast an entity creation notification.
+
+        Called when a new entity (Person, Vehicle, Incident, etc.) is
+        auto-created from an ingested event.
+
+        Args:
+            entity_type: Type of entity (Person, Vehicle, Incident, etc.)
+            entity_id: Neo4j node ID
+            entity_data: Entity properties
+            source_event_id: ID of the event that triggered creation
+
+        Returns:
+            int: Number of clients that received the notification
+        """
+        message = WebSocketMessage(
+            type=WebSocketMessageType.EVENT,
+            payload={
+                "event_type": "entity_created",
+                "entity_type": entity_type,
+                "entity_id": entity_id,
+                "entity_data": entity_data,
+                "source_event_id": source_event_id,
+                "timestamp": datetime.now(UTC).isoformat(),
+            },
+            message_id=str(uuid.uuid4()),
+        )
+
+        sent_count = 0
+        for connection in list(self._connections.values()):
+            if connection.subscription.include_entity_updates:
+                try:
+                    await self._send_message(connection, message)
+                    sent_count += 1
+                except Exception as e:
+                    logger.warning(
+                        "entity_broadcast_error",
+                        client_id=connection.client_id,
+                        error=str(e),
+                    )
+
+        logger.debug(
+            "entity_created_broadcast",
+            entity_type=entity_type,
+            entity_id=entity_id,
+            recipients=sent_count,
+        )
+
+        return sent_count
+
+    async def broadcast_alert(
+        self,
+        alert_type: str,
+        title: str,
+        message_text: str,
+        priority: EventPriority = EventPriority.HIGH,
+        source: EventSource | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> int:
+        """
+        Broadcast a system alert to all connected clients.
+
+        Used for critical notifications like BOLO matches, officer safety
+        alerts, or system warnings.
+
+        Args:
+            alert_type: Type of alert (bolo_match, officer_safety, system_warning)
+            title: Alert title
+            message_text: Alert message
+            priority: Alert priority
+            source: Source system if applicable
+            metadata: Additional alert data
+
+        Returns:
+            int: Number of clients that received the alert
+        """
+        message = WebSocketMessage(
+            type=WebSocketMessageType.ALERT,
+            payload={
+                "alert_type": alert_type,
+                "title": title,
+                "message": message_text,
+                "priority": priority.value,
+                "source": source.value if source else None,
+                "metadata": metadata or {},
+                "timestamp": datetime.now(UTC).isoformat(),
+            },
+            message_id=str(uuid.uuid4()),
+        )
+
+        sent_count = 0
+        for connection in list(self._connections.values()):
+            if self._should_receive_alert(connection, priority):
+                try:
+                    await self._send_message(connection, message)
+                    sent_count += 1
+                except Exception as e:
+                    logger.warning(
+                        "alert_broadcast_error",
+                        client_id=connection.client_id,
+                        error=str(e),
+                    )
+
+        audit_logger.log_system_event(
+            event_type="alert_broadcast",
+            details={
+                "alert_type": alert_type,
+                "title": title,
+                "priority": priority.value,
+                "recipients": sent_count,
+            },
+        )
+
+        logger.info(
+            "alert_broadcast",
+            alert_type=alert_type,
+            priority=priority.value,
+            recipients=sent_count,
+        )
+
+        return sent_count
+
+    def _should_receive_alert(
+        self,
+        connection: ClientConnection,
+        priority: EventPriority,
+    ) -> bool:
+        """
+        Determine if a connection should receive an alert.
+
+        Critical alerts are always delivered. Other alerts respect
+        subscription priority filters.
+
+        Args:
+            connection: Client connection
+            priority: Alert priority
+
+        Returns:
+            bool: True if client should receive the alert
+        """
+        if priority == EventPriority.CRITICAL:
+            return True
+
+        sub = connection.subscription
+        if sub.priorities and priority not in sub.priorities:
+            return False
+
+        return True
+
+    async def broadcast_source_status(
+        self,
+        source: EventSource,
+        status: str,
+        details: dict[str, Any] | None = None,
+    ) -> int:
+        """
+        Broadcast a data source status update.
+
+        Used to notify clients when a data source comes online/offline
+        or experiences issues.
+
+        Args:
+            source: Data source
+            status: Status (online, offline, degraded, error)
+            details: Additional status details
+
+        Returns:
+            int: Number of clients that received the update
+        """
+        source_name = SOURCE_DISPLAY_NAMES.get(source, source.value)
+
+        message = WebSocketMessage(
+            type=WebSocketMessageType.EVENT,
+            payload={
+                "event_type": "source_status",
+                "source": source.value,
+                "source_display": source_name,
+                "status": status,
+                "details": details or {},
+                "timestamp": datetime.now(UTC).isoformat(),
+            },
+            message_id=str(uuid.uuid4()),
+        )
+
+        sent_count = 0
+        for connection in list(self._connections.values()):
+            try:
+                await self._send_message(connection, message)
+                sent_count += 1
+            except Exception:
+                pass
+
+        logger.info(
+            "source_status_broadcast",
+            source=source.value,
+            status=status,
+            recipients=sent_count,
+        )
+
+        return sent_count
+
+    def get_statistics(self) -> dict[str, Any]:
+        """
+        Get WebSocket manager statistics.
+
+        Returns:
+            dict: Statistics including connection counts, subscriptions, etc.
+        """
+        source_subscriptions: dict[str, int] = {}
+        priority_subscriptions: dict[str, int] = {}
+        authenticated_count = 0
+
+        for connection in self._connections.values():
+            if connection.is_authenticated:
+                authenticated_count += 1
+
+            for source in connection.subscription.sources:
+                source_subscriptions[source.value] = source_subscriptions.get(source.value, 0) + 1
+
+            for priority in connection.subscription.priorities:
+                priority_subscriptions[priority.value] = (
+                    priority_subscriptions.get(priority.value, 0) + 1
+                )
+
+        return {
+            "total_connections": len(self._connections),
+            "authenticated_connections": authenticated_count,
+            "unique_users": len(self._user_connections),
+            "source_subscriptions": source_subscriptions,
+            "priority_subscriptions": priority_subscriptions,
+            "running": self._running,
+        }
 
     def get_connection_count(self) -> int:
         """Get the number of active connections."""
