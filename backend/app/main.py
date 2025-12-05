@@ -1,0 +1,270 @@
+"""
+Main FastAPI application for the G3TI RTCC-UIP Backend.
+
+This module initializes the FastAPI application with all middleware,
+routers, and lifecycle events.
+
+The RTCC-UIP (Real Time Crime Center Unified Intelligence Platform)
+provides a comprehensive backend for law enforcement intelligence
+operations with CJIS-compliant security and audit logging.
+"""
+
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+from datetime import UTC, datetime
+
+from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from app.api import api_router
+from app.core.config import settings
+from app.core.exceptions import (
+    AuthenticationError,
+    AuthorizationError,
+    EntityNotFoundError,
+    RateLimitExceededError,
+    RTCCBaseException,
+    ValidationError,
+)
+from app.core.logging import audit_logger, get_logger, setup_logging
+from app.db.elasticsearch import close_elasticsearch, get_elasticsearch
+from app.db.neo4j import close_neo4j, get_neo4j
+from app.db.redis import close_redis, get_redis
+from app.services.events.websocket_manager import get_websocket_manager
+
+# Initialize logging
+setup_logging()
+logger = get_logger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """
+    Application lifespan manager.
+
+    Handles startup and shutdown events for the application,
+    including database connections and background services.
+    """
+    # Startup
+    logger.info(
+        "application_starting",
+        app_name=settings.app_name,
+        version=settings.app_version,
+        environment=settings.environment,
+    )
+
+    # Initialize database connections
+    try:
+        neo4j = await get_neo4j()
+        await neo4j.initialize_schema()
+        logger.info("neo4j_initialized")
+    except Exception as e:
+        logger.warning("neo4j_init_failed", error=str(e))
+
+    try:
+        es = await get_elasticsearch()
+        await es.initialize_indices()
+        logger.info("elasticsearch_initialized")
+    except Exception as e:
+        logger.warning("elasticsearch_init_failed", error=str(e))
+
+    try:
+        await get_redis()
+        logger.info("redis_initialized")
+    except Exception as e:
+        logger.warning("redis_init_failed", error=str(e))
+
+    # Start WebSocket manager
+    ws_manager = get_websocket_manager()
+    await ws_manager.start()
+    logger.info("websocket_manager_started")
+
+    # Log startup complete
+    audit_logger.log_system_event(
+        event_type="application_started",
+        details={"version": settings.app_version, "environment": settings.environment},
+    )
+
+    logger.info("application_started")
+
+    yield
+
+    # Shutdown
+    logger.info("application_stopping")
+
+    # Stop WebSocket manager
+    await ws_manager.stop()
+
+    # Close database connections
+    await close_neo4j()
+    await close_elasticsearch()
+    await close_redis()
+
+    audit_logger.log_system_event(
+        event_type="application_stopped", details={"reason": "normal_shutdown"}
+    )
+
+    logger.info("application_stopped")
+
+
+# Create FastAPI application
+app = FastAPI(
+    title=settings.app_name,
+    description="""
+    G3TI Real Time Crime Center Unified Intelligence Platform (RTCC-UIP) API.
+
+    This API provides comprehensive backend services for law enforcement
+    intelligence operations including:
+
+    - **Authentication**: JWT-based authentication with role-based access control
+    - **Entities**: Graph-based entity management (persons, vehicles, incidents, etc.)
+    - **Investigations**: Case management and investigative search
+    - **Real-time**: WebSocket-based real-time event streaming
+    - **System**: Health checks and system monitoring
+
+    All operations are logged for CJIS compliance.
+    """,
+    version=settings.app_version,
+    openapi_url=f"{settings.api_v1_prefix}/openapi.json",
+    docs_url=f"{settings.api_v1_prefix}/docs",
+    redoc_url=f"{settings.api_v1_prefix}/redoc",
+    lifespan=lifespan,
+)
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# Exception handlers
+
+
+@app.exception_handler(RTCCBaseException)
+async def rtcc_exception_handler(request: Request, exc: RTCCBaseException) -> JSONResponse:
+    """Handle RTCC-specific exceptions."""
+    logger.warning(
+        "rtcc_exception", error_code=exc.error_code, message=exc.message, path=str(request.url.path)
+    )
+
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+    if isinstance(exc, AuthenticationError):
+        status_code = status.HTTP_401_UNAUTHORIZED
+    elif isinstance(exc, AuthorizationError):
+        status_code = status.HTTP_403_FORBIDDEN
+    elif isinstance(exc, EntityNotFoundError):
+        status_code = status.HTTP_404_NOT_FOUND
+    elif isinstance(exc, ValidationError):
+        status_code = status.HTTP_400_BAD_REQUEST
+    elif isinstance(exc, RateLimitExceededError):
+        status_code = status.HTTP_429_TOO_MANY_REQUESTS
+
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "error_code": exc.error_code,
+            "message": exc.message,
+            "details": exc.details,
+            "timestamp": datetime.now(UTC).isoformat(),
+        },
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    """Handle request validation errors."""
+    logger.warning("validation_error", errors=exc.errors(), path=str(request.url.path))
+
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={
+            "error_code": "VALIDATION_ERROR",
+            "message": "Request validation failed",
+            "details": {"errors": exc.errors()},
+            "timestamp": datetime.now(UTC).isoformat(),
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """Handle unexpected exceptions."""
+    logger.error(
+        "unhandled_exception",
+        error=str(exc),
+        error_type=type(exc).__name__,
+        path=str(request.url.path),
+    )
+
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "error_code": "INTERNAL_ERROR",
+            "message": "An unexpected error occurred",
+            "details": {} if not settings.debug else {"error": str(exc)},
+            "timestamp": datetime.now(UTC).isoformat(),
+        },
+    )
+
+
+# Request logging middleware
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """Log all HTTP requests."""
+    start_time = datetime.now(UTC)
+
+    # Process request
+    response = await call_next(request)
+
+    # Calculate duration
+    duration_ms = (datetime.now(UTC) - start_time).total_seconds() * 1000
+
+    # Log request
+    logger.info(
+        "http_request",
+        method=request.method,
+        path=str(request.url.path),
+        status_code=response.status_code,
+        duration_ms=round(duration_ms, 2),
+        client_ip=request.client.host if request.client else "unknown",
+    )
+
+    return response
+
+
+# Include API router
+app.include_router(api_router, prefix=settings.api_v1_prefix)
+
+
+# Root endpoint
+@app.get("/")
+async def root() -> dict:
+    """Root endpoint with API information."""
+    return {
+        "name": settings.app_name,
+        "version": settings.app_version,
+        "api_docs": f"{settings.api_v1_prefix}/docs",
+        "health": f"{settings.api_v1_prefix}/system/health",
+        "timestamp": datetime.now(UTC).isoformat(),
+    }
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(
+        "app.main:app",
+        host=settings.api_host,
+        port=settings.api_port,
+        reload=settings.debug,
+        log_level="info",
+    )
