@@ -4,10 +4,8 @@ Unit tests for the NLP module.
 Tests query interpretation, DSL execution, and result composition.
 """
 
-import pytest
-from datetime import datetime, timedelta
 
-from app.ai_engine.nlp import QueryInterpreter, DSLExecutor, ResultComposer
+from app.ai_engine.nlp import DSLExecutor, QueryInterpreter, ResultComposer
 
 
 class TestQueryInterpreter:

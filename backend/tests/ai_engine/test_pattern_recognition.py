@@ -4,13 +4,12 @@ Unit tests for the Pattern Recognition module.
 Tests pattern detection, trajectory prediction, and crime forecasting.
 """
 
-import pytest
 from datetime import datetime, timedelta
 
 from app.ai_engine.pattern_recognition import (
+    MarkovState,
     PatternPredictor,
     TrajectoryPoint,
-    MarkovState,
 )
 
 

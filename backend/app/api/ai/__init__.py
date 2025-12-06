@@ -12,7 +12,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
-from app.ai_engine import AIManager, get_ai_manager
+from app.ai_engine import get_ai_manager
 from app.api.deps import get_current_user
 from app.core.logging import audit_logger, get_logger
 from app.schemas.auth import UserInDB

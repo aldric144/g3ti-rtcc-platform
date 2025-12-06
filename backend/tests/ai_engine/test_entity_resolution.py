@@ -4,16 +4,15 @@ Unit tests for the Entity Resolution module.
 Tests alias resolution, probabilistic matching, and entity merging.
 """
 
-import pytest
 
 from app.ai_engine.entity_resolution import (
     EntityResolver,
+    IncidentLinkageResolver,
     PersonAliasResolver,
     VehicleAliasResolver,
-    IncidentLinkageResolver,
     edit_distance_similarity,
-    phonetic_similarity,
     name_similarity,
+    phonetic_similarity,
     plate_similarity,
 )
 

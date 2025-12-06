@@ -5,18 +5,13 @@ This module provides predictive intelligence capabilities for forecasting
 crime patterns, vehicle movements, and other predictive analytics.
 """
 
-import math
 import uuid
-from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
 
 from app.ai_engine.models import (
-    ConfidenceLevel,
     EntityType,
-    GeoLocation,
-    PredictionResult,
     RiskLevel,
     RiskScore,
 )
