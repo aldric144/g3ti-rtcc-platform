@@ -187,3 +187,155 @@ async def get_realtime_stats(
     Returns current connection counts and event statistics.
     """
     return {"active_connections": ws_manager.get_connection_count(), "status": "operational"}
+
+
+# ============================================================================
+# Phase 4: Case Updates WebSocket
+# ============================================================================
+
+# Store for case subscriptions: case_id -> set of client_ids
+_case_subscriptions: dict[str, set[str]] = {}
+
+
+@router.websocket("/ws/case-updates/{case_id}")
+async def websocket_case_updates(
+    websocket: WebSocket,
+    case_id: str,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for real-time case updates.
+
+    Connect to receive updates for a specific case including:
+    - New entity correlations
+    - New linked incidents
+    - Risk score changes
+    - Timeline updates
+    - Evidence additions
+    - Pattern/anomaly alerts relevant to the case
+
+    Path Parameters:
+    - **case_id**: The case ID to subscribe to
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+
+    Message Types (server -> client):
+    - case_update: General case update
+    - entity_correlation: New entity correlation found
+    - incident_linked: New incident linked to case
+    - risk_updated: Risk score changed
+    - timeline_updated: New timeline event
+    - evidence_added: New evidence added
+    - pattern_alert: Pattern/anomaly relevant to case
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    # Validate token if provided
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("case_websocket_auth_failed", case_id=case_id, error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    # Accept connection
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("case_websocket_connection_rejected", case_id=case_id, error=str(e))
+        return
+
+    # Add to case subscriptions
+    if case_id not in _case_subscriptions:
+        _case_subscriptions[case_id] = set()
+    _case_subscriptions[case_id].add(client_id)
+
+    logger.info("case_websocket_connected", case_id=case_id, client_id=client_id, user_id=user_id)
+
+    # Send connection confirmation
+    await websocket.send_json({
+        "type": "connected",
+        "case_id": case_id,
+        "message": f"Subscribed to updates for case {case_id}",
+    })
+
+    try:
+        # Handle messages
+        while True:
+            data = await websocket.receive_text()
+            # Handle ping/pong for keepalive
+            import json
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("case_websocket_disconnected", case_id=case_id, client_id=client_id)
+    except Exception as e:
+        logger.error("case_websocket_error", case_id=case_id, client_id=client_id, error=str(e))
+    finally:
+        # Remove from case subscriptions
+        if case_id in _case_subscriptions:
+            _case_subscriptions[case_id].discard(client_id)
+            if not _case_subscriptions[case_id]:
+                del _case_subscriptions[case_id]
+        await ws_manager.disconnect(client_id)
+
+
+async def broadcast_case_update(
+    case_id: str,
+    update_type: str,
+    data: dict,
+) -> None:
+    """
+    Broadcast an update to all clients subscribed to a case.
+
+    Args:
+        case_id: The case ID to broadcast to
+        update_type: Type of update (entity_correlation, incident_linked, etc.)
+        data: Update data to send
+    """
+    if case_id not in _case_subscriptions:
+        return
+
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": update_type,
+        "case_id": case_id,
+        "data": data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    for client_id in list(_case_subscriptions[case_id]):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning(
+                "case_broadcast_failed",
+                case_id=case_id,
+                client_id=client_id,
+                error=str(e),
+            )
+
+
+def get_case_subscribers(case_id: str) -> set[str]:
+    """Get the set of client IDs subscribed to a case."""
+    return _case_subscriptions.get(case_id, set()).copy()
+
+
+def get_subscribed_cases() -> list[str]:
+    """Get list of all cases with active subscriptions."""
+    return list(_case_subscriptions.keys())
