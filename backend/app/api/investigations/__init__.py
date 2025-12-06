@@ -34,6 +34,7 @@ router = APIRouter()
 
 # Request/Response Models for Phase 4 Investigations Engine
 
+
 class LinkIncidentsRequest(BaseModel):
     """Request model for incident linking."""
 
@@ -239,7 +240,9 @@ async def link_incidents(
     audit_logger.info(
         "Incident linking requested",
         extra={
-            "user_id": token.get("user_id") if isinstance(token, dict) else getattr(token, "user_id", ""),
+            "user_id": (
+                token.get("user_id") if isinstance(token, dict) else getattr(token, "user_id", "")
+            ),
             "incident_ids": request.incident_ids,
             "action": "link_incidents",
         },
@@ -299,7 +302,9 @@ async def get_entity_profile(
     audit_logger.info(
         "Entity profile requested",
         extra={
-            "user_id": token.get("user_id") if isinstance(token, dict) else getattr(token, "user_id", ""),
+            "user_id": (
+                token.get("user_id") if isinstance(token, dict) else getattr(token, "user_id", "")
+            ),
             "entity_id": entity_id,
             "action": "get_entity_profile",
         },
@@ -368,14 +373,14 @@ async def create_case(
             detail="Either incident_id or suspect_id must be provided",
         )
 
-    logger.info(
-        f"Creating case from incident={request.incident_id}, suspect={request.suspect_id}"
-    )
+    logger.info(f"Creating case from incident={request.incident_id}, suspect={request.suspect_id}")
 
     audit_logger.info(
         "Case creation requested",
         extra={
-            "user_id": token.get("user_id") if isinstance(token, dict) else getattr(token, "user_id", ""),
+            "user_id": (
+                token.get("user_id") if isinstance(token, dict) else getattr(token, "user_id", "")
+            ),
             "incident_id": request.incident_id,
             "suspect_id": request.suspect_id,
             "action": "create_case",
@@ -434,7 +439,9 @@ async def get_case(
     audit_logger.info(
         "Case retrieval requested",
         extra={
-            "user_id": token.get("user_id") if isinstance(token, dict) else getattr(token, "user_id", ""),
+            "user_id": (
+                token.get("user_id") if isinstance(token, dict) else getattr(token, "user_id", "")
+            ),
             "case_id": case_id,
             "action": "get_case",
         },
@@ -525,7 +532,9 @@ async def export_case_pdf(
     audit_logger.info(
         "Case PDF export requested",
         extra={
-            "user_id": token.get("user_id") if isinstance(token, dict) else getattr(token, "user_id", ""),
+            "user_id": (
+                token.get("user_id") if isinstance(token, dict) else getattr(token, "user_id", "")
+            ),
             "case_id": case_id,
             "action": "export_case_pdf",
         },
@@ -544,9 +553,7 @@ async def export_case_pdf(
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
-            headers={
-                "Content-Disposition": f'attachment; filename="case_{case_id}.pdf"'
-            },
+            headers={"Content-Disposition": f'attachment; filename="case_{case_id}.pdf"'},
         )
 
     except Exception as e:
@@ -574,7 +581,9 @@ async def export_case_json(
     audit_logger.info(
         "Case JSON export requested",
         extra={
-            "user_id": token.get("user_id") if isinstance(token, dict) else getattr(token, "user_id", ""),
+            "user_id": (
+                token.get("user_id") if isinstance(token, dict) else getattr(token, "user_id", "")
+            ),
             "case_id": case_id,
             "action": "export_case_json",
         },

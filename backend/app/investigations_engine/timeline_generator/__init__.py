@@ -128,9 +128,7 @@ class TimelineGenerator:
                 MATCH (c:Case {case_id: $case_id})-[:INCLUDES]->(i:Incident)
                 RETURN i.incident_id as incident_id
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"case_id": case_id}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"case_id": case_id})
                 incident_ids = [r["incident_id"] for r in result if r.get("incident_id")]
             except Exception as e:
                 logger.warning(f"Error getting case incidents: {e}")
@@ -149,9 +147,7 @@ class TimelineGenerator:
                 WHERE e:Person OR e:Vehicle
                 RETURN DISTINCT e.entity_id as entity_id
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"case_id": case_id}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"case_id": case_id})
                 entity_ids = [r["entity_id"] for r in result if r.get("entity_id")]
             except Exception as e:
                 logger.warning(f"Error getting case entities: {e}")
@@ -288,9 +284,7 @@ class TimelineGenerator:
                 ORDER BY lpr.timestamp
                 LIMIT 100
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_ids": entity_ids}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_ids": entity_ids})
 
                 for record in result:
                     hit = dict(record["lpr"])
@@ -393,9 +387,7 @@ class TimelineGenerator:
                 ORDER BY bwc.timestamp
                 LIMIT 50
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_ids": entity_ids}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_ids": entity_ids})
 
                 for record in result:
                     bwc = dict(record["bwc"])
@@ -426,9 +418,7 @@ class TimelineGenerator:
 
         return events
 
-    async def _get_entity_interactions(
-        self, entity_ids: list[str]
-    ) -> list[TimelineEvent]:
+    async def _get_entity_interactions(self, entity_ids: list[str]) -> list[TimelineEvent]:
         """Get entity-to-entity interaction events."""
         events = []
 
@@ -445,9 +435,7 @@ class TimelineGenerator:
                 RETURN e1, e2, r, type(r) as rel_type
                 ORDER BY r.timestamp
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_ids": entity_ids}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_ids": entity_ids})
 
                 for record in result:
                     e1 = dict(record["e1"])
@@ -482,9 +470,7 @@ class TimelineGenerator:
 
         return events
 
-    def _sort_and_deduplicate(
-        self, events: list[TimelineEvent]
-    ) -> list[TimelineEvent]:
+    def _sort_and_deduplicate(self, events: list[TimelineEvent]) -> list[TimelineEvent]:
         """Sort events by timestamp and remove duplicates."""
         seen_ids: set[str] = set()
         unique_events = []

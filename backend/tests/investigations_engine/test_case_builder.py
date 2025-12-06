@@ -75,9 +75,9 @@ class TestCaseBuilder:
         """Test building a case from an incident."""
         with patch.object(builder, "_get_incident", new_callable=AsyncMock) as mock_get:
             mock_get.return_value = sample_incident
-            
+
             case = await builder.build(incident_id="INC001")
-            
+
             assert isinstance(case, Case)
             assert case.case_id is not None
             assert case.case_number is not None
@@ -88,9 +88,9 @@ class TestCaseBuilder:
         """Test that case building generates appropriate title."""
         with patch.object(builder, "_get_incident", new_callable=AsyncMock) as mock_get:
             mock_get.return_value = sample_incident
-            
+
             case = await builder.build(incident_id="INC001")
-            
+
             assert case.title is not None
             assert len(case.title) > 0
 
@@ -99,9 +99,9 @@ class TestCaseBuilder:
         """Test that case building generates summary."""
         with patch.object(builder, "_get_incident", new_callable=AsyncMock) as mock_get:
             mock_get.return_value = sample_incident
-            
+
             case = await builder.build(incident_id="INC001")
-            
+
             assert case.summary is not None
             assert len(case.summary) > 0
 
@@ -110,9 +110,9 @@ class TestCaseBuilder:
         """Test that case building collects evidence."""
         with patch.object(builder, "_get_incident", new_callable=AsyncMock) as mock_get:
             mock_get.return_value = sample_incident
-            
+
             case = await builder.build(incident_id="INC001")
-            
+
             assert case.evidence is not None
             assert isinstance(case.evidence, Evidence)
 
@@ -121,9 +121,9 @@ class TestCaseBuilder:
         """Test that case building generates timeline."""
         with patch.object(builder, "_get_incident", new_callable=AsyncMock) as mock_get:
             mock_get.return_value = sample_incident
-            
+
             case = await builder.build(incident_id="INC001")
-            
+
             assert case.timeline is not None
             assert isinstance(case.timeline, list)
 
@@ -132,9 +132,9 @@ class TestCaseBuilder:
         """Test that case building assesses risk."""
         with patch.object(builder, "_get_incident", new_callable=AsyncMock) as mock_get:
             mock_get.return_value = sample_incident
-            
+
             case = await builder.build(incident_id="INC001")
-            
+
             assert case.risk_assessment is not None
             assert isinstance(case.risk_assessment, RiskAssessment)
             assert 0 <= case.risk_assessment.overall_score <= 1
@@ -144,9 +144,9 @@ class TestCaseBuilder:
         """Test that case building generates recommendations."""
         with patch.object(builder, "_get_incident", new_callable=AsyncMock) as mock_get:
             mock_get.return_value = sample_incident
-            
+
             case = await builder.build(incident_id="INC001")
-            
+
             assert case.recommendations is not None
             assert isinstance(case.recommendations, list)
 
@@ -155,16 +155,16 @@ class TestCaseBuilder:
         """Test building a case with custom title."""
         with patch.object(builder, "_get_incident", new_callable=AsyncMock) as mock_get:
             mock_get.return_value = sample_incident
-            
+
             custom_title = "Custom Investigation Title"
             case = await builder.build(incident_id="INC001", title=custom_title)
-            
+
             assert case.title == custom_title
 
     def test_generate_case_number(self, builder):
         """Test case number generation."""
         case_number = builder._generate_case_number()
-        
+
         assert case_number is not None
         assert case_number.startswith("CASE-")
         assert str(datetime.utcnow().year) in case_number
@@ -173,21 +173,21 @@ class TestCaseBuilder:
         """Test priority determination for high-risk case."""
         risk_score = 0.85
         priority = builder._determine_priority(risk_score)
-        
+
         assert priority == "critical"
 
     def test_determine_priority_medium(self, builder):
         """Test priority determination for medium-risk case."""
         risk_score = 0.5
         priority = builder._determine_priority(risk_score)
-        
+
         assert priority in ["high", "medium"]
 
     def test_determine_priority_low(self, builder):
         """Test priority determination for low-risk case."""
         risk_score = 0.2
         priority = builder._determine_priority(risk_score)
-        
+
         assert priority == "low"
 
 
@@ -207,9 +207,9 @@ class TestCaseBuilderRiskAssessment:
             "vehicles": [],
             "linked_incidents": [],
         }
-        
+
         risk = builder._assess_risk(case_data)
-        
+
         assert risk.weapon_risk > 0
 
     def test_assess_risk_with_repeat_offender(self, builder):
@@ -220,9 +220,9 @@ class TestCaseBuilderRiskAssessment:
             "vehicles": [],
             "linked_incidents": [],
         }
-        
+
         risk = builder._assess_risk(case_data)
-        
+
         assert risk.offender_risk > 0
 
     def test_assess_risk_with_multiple_incidents(self, builder):
@@ -233,9 +233,9 @@ class TestCaseBuilderRiskAssessment:
             "vehicles": [],
             "linked_incidents": ["INC001", "INC002", "INC003", "INC004", "INC005"],
         }
-        
+
         risk = builder._assess_risk(case_data)
-        
+
         assert risk.overall_score > 0.3
 
     def test_assess_risk_overall_calculation(self, builder):
@@ -246,9 +246,9 @@ class TestCaseBuilderRiskAssessment:
             "vehicles": [{"stolen": True}],
             "linked_incidents": ["INC001", "INC002"],
         }
-        
+
         risk = builder._assess_risk(case_data)
-        
+
         assert 0 <= risk.overall_score <= 1
         assert risk.factors is not None
         assert len(risk.factors) > 0

@@ -94,9 +94,7 @@ class EvidenceCollector:
 
         return package
 
-    async def gather_rms_reports(
-        self, incident_ids: list[str]
-    ) -> list[EvidenceItem]:
+    async def gather_rms_reports(self, incident_ids: list[str]) -> list[EvidenceItem]:
         """
         Gather RMS reports for incidents.
 
@@ -181,9 +179,7 @@ class EvidenceCollector:
 
         return reports
 
-    async def gather_cad_history(
-        self, incident_ids: list[str]
-    ) -> list[EvidenceItem]:
+    async def gather_cad_history(self, incident_ids: list[str]) -> list[EvidenceItem]:
         """
         Gather CAD history for incidents.
 
@@ -237,9 +233,7 @@ class EvidenceCollector:
 
         return records
 
-    async def gather_shotspotter_audio(
-        self, incident_ids: list[str]
-    ) -> list[EvidenceItem]:
+    async def gather_shotspotter_audio(self, incident_ids: list[str]) -> list[EvidenceItem]:
         """
         Gather ShotSpotter audio metadata for incidents.
 
@@ -295,9 +289,7 @@ class EvidenceCollector:
 
         return audio_items
 
-    async def gather_lpr_hits(
-        self, entity_ids: list[str]
-    ) -> list[EvidenceItem]:
+    async def gather_lpr_hits(self, entity_ids: list[str]) -> list[EvidenceItem]:
         """
         Gather LPR hits for entities (vehicles/persons).
 
@@ -319,9 +311,7 @@ class EvidenceCollector:
                 ORDER BY lpr.timestamp DESC
                 LIMIT 100
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_ids": entity_ids}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_ids": entity_ids})
 
                 for record in result:
                     hit = dict(record["lpr"])
@@ -355,9 +345,7 @@ class EvidenceCollector:
 
         return lpr_items
 
-    async def gather_bwc_metadata(
-        self, entity_ids: list[str]
-    ) -> list[EvidenceItem]:
+    async def gather_bwc_metadata(self, entity_ids: list[str]) -> list[EvidenceItem]:
         """
         Gather BWC metadata for entities.
 
@@ -379,9 +367,7 @@ class EvidenceCollector:
                 ORDER BY bwc.timestamp DESC
                 LIMIT 50
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_ids": entity_ids}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_ids": entity_ids})
 
                 for record in result:
                     bwc = dict(record["bwc"])
@@ -414,9 +400,7 @@ class EvidenceCollector:
 
         return bwc_items
 
-    async def gather_ness_ballistics(
-        self, incident_ids: list[str]
-    ) -> list[EvidenceItem]:
+    async def gather_ness_ballistics(self, incident_ids: list[str]) -> list[EvidenceItem]:
         """
         Gather NESS ballistics data for incidents.
 
@@ -473,9 +457,7 @@ class EvidenceCollector:
 
         return ballistic_items
 
-    async def gather_camera_snapshots(
-        self, entity_ids: list[str]
-    ) -> list[EvidenceItem]:
+    async def gather_camera_snapshots(self, entity_ids: list[str]) -> list[EvidenceItem]:
         """
         Gather camera snapshot references for entities.
 
@@ -497,9 +479,7 @@ class EvidenceCollector:
                 WHERE s.timestamp > datetime() - duration('P7D')
                 RETURN c, e.entity_id as entity_id, collect(s)[0..5] as snapshots
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_ids": entity_ids}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_ids": entity_ids})
 
                 for record in result:
                     camera = dict(record["c"])

@@ -263,11 +263,13 @@ async def websocket_case_updates(
     logger.info("case_websocket_connected", case_id=case_id, client_id=client_id, user_id=user_id)
 
     # Send connection confirmation
-    await websocket.send_json({
-        "type": "connected",
-        "case_id": case_id,
-        "message": f"Subscribed to updates for case {case_id}",
-    })
+    await websocket.send_json(
+        {
+            "type": "connected",
+            "case_id": case_id,
+            "message": f"Subscribed to updates for case {case_id}",
+        }
+    )
 
     try:
         # Handle messages
@@ -275,6 +277,7 @@ async def websocket_case_updates(
             data = await websocket.receive_text()
             # Handle ping/pong for keepalive
             import json
+
             try:
                 message = json.loads(data)
                 if message.get("type") == "ping":

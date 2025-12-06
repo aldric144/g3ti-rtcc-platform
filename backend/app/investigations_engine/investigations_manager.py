@@ -153,9 +153,7 @@ class InvestigationsManager:
 
         return result
 
-    async def _fallback_link_incidents(
-        self, incident_ids: list[str]
-    ) -> LinkageResult:
+    async def _fallback_link_incidents(self, incident_ids: list[str]) -> LinkageResult:
         """Fallback incident linking when linker is not available."""
         linked_incidents = []
         linkages = []
@@ -163,10 +161,12 @@ class InvestigationsManager:
         explanations = []
 
         for incident_id in incident_ids:
-            linked_incidents.append({
-                "incident_id": incident_id,
-                "status": "analyzed",
-            })
+            linked_incidents.append(
+                {
+                    "incident_id": incident_id,
+                    "status": "analyzed",
+                }
+            )
             confidence_scores[incident_id] = 0.5
             explanations.append(f"Incident {incident_id} analyzed for linkages")
 

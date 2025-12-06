@@ -115,42 +115,50 @@ class EntityCorrelator:
                     start_node = dict(record["start"])
                     start_id = start_node.get("entity_id") or start_node.get("id")
                     if start_id not in seen_nodes:
-                        nodes.append({
-                            "id": start_id,
-                            "type": start_node.get("entity_type") or "unknown",
-                            "label": self._extract_name(start_node),
-                            "data": start_node,
-                        })
+                        nodes.append(
+                            {
+                                "id": start_id,
+                                "type": start_node.get("entity_type") or "unknown",
+                                "label": self._extract_name(start_node),
+                                "data": start_node,
+                            }
+                        )
                         seen_nodes.add(start_id)
 
                     related_node = dict(record["related"])
                     related_id = related_node.get("entity_id") or related_node.get("id")
                     if related_id not in seen_nodes:
-                        nodes.append({
-                            "id": related_id,
-                            "type": related_node.get("entity_type") or "unknown",
-                            "label": self._extract_name(related_node),
-                            "data": related_node,
-                        })
+                        nodes.append(
+                            {
+                                "id": related_id,
+                                "type": related_node.get("entity_type") or "unknown",
+                                "label": self._extract_name(related_node),
+                                "data": related_node,
+                            }
+                        )
                         seen_nodes.add(related_id)
 
                     for rel in record["rels"]:
-                        edges.append({
-                            "source": start_id,
-                            "target": related_id,
-                            "type": type(rel).__name__,
-                        })
+                        edges.append(
+                            {
+                                "source": start_id,
+                                "target": related_id,
+                                "type": type(rel).__name__,
+                            }
+                        )
 
             except Exception as e:
                 logger.warning(f"Error expanding graph: {e}")
 
         if not nodes:
-            nodes.append({
-                "id": entity_id,
-                "type": "unknown",
-                "label": f"Entity {entity_id}",
-                "data": {},
-            })
+            nodes.append(
+                {
+                    "id": entity_id,
+                    "type": "unknown",
+                    "label": f"Entity {entity_id}",
+                    "data": {},
+                }
+            )
 
         return {
             "nodes": nodes,
@@ -167,12 +175,12 @@ class EntityCorrelator:
                 WHERE e.entity_id = $entity_id OR e.id = $entity_id
                 RETURN e, labels(e) as labels
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_id": entity_id}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_id": entity_id})
                 if result:
                     entity = dict(result[0]["e"])
-                    entity["entity_type"] = result[0]["labels"][0] if result[0]["labels"] else "unknown"
+                    entity["entity_type"] = (
+                        result[0]["labels"][0] if result[0]["labels"] else "unknown"
+                    )
                     return entity
             except Exception as e:
                 logger.warning(f"Error fetching entity: {e}")
@@ -192,19 +200,20 @@ class EntityCorrelator:
                 ORDER BY i.timestamp DESC
                 LIMIT 20
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_id": entity_id}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_id": entity_id})
                 for record in result:
                     incident = dict(record["i"])
-                    incidents.append({
-                        "incident_id": incident.get("incident_id") or incident.get("id"),
-                        "incident_type": incident.get("incident_type") or incident.get("type"),
-                        "timestamp": incident.get("timestamp"),
-                        "location": incident.get("location"),
-                        "summary": incident.get("summary") or incident.get("narrative", "")[:200],
-                        "role": "involved",
-                    })
+                    incidents.append(
+                        {
+                            "incident_id": incident.get("incident_id") or incident.get("id"),
+                            "incident_type": incident.get("incident_type") or incident.get("type"),
+                            "timestamp": incident.get("timestamp"),
+                            "location": incident.get("location"),
+                            "summary": incident.get("summary")
+                            or incident.get("narrative", "")[:200],
+                            "role": "involved",
+                        }
+                    )
             except Exception as e:
                 logger.warning(f"Error getting prior incidents: {e}")
 
@@ -222,22 +231,22 @@ class EntityCorrelator:
                 RETURN a, r.start_date as start_date, r.end_date as end_date
                 ORDER BY r.start_date DESC
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_id": entity_id}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_id": entity_id})
                 for record in result:
                     address = dict(record["a"])
-                    addresses.append({
-                        "address_id": address.get("address_id") or address.get("id"),
-                        "street": address.get("street") or address.get("address"),
-                        "city": address.get("city"),
-                        "state": address.get("state"),
-                        "zip": address.get("zip_code") or address.get("zip"),
-                        "start_date": record.get("start_date"),
-                        "end_date": record.get("end_date"),
-                        "latitude": address.get("latitude"),
-                        "longitude": address.get("longitude"),
-                    })
+                    addresses.append(
+                        {
+                            "address_id": address.get("address_id") or address.get("id"),
+                            "street": address.get("street") or address.get("address"),
+                            "city": address.get("city"),
+                            "state": address.get("state"),
+                            "zip": address.get("zip_code") or address.get("zip"),
+                            "start_date": record.get("start_date"),
+                            "end_date": record.get("end_date"),
+                            "latitude": address.get("latitude"),
+                            "longitude": address.get("longitude"),
+                        }
+                    )
             except Exception as e:
                 logger.warning(f"Error getting address history: {e}")
 
@@ -254,21 +263,22 @@ class EntityCorrelator:
                 WHERE e.entity_id = $entity_id OR e.id = $entity_id
                 RETURN v, type(r) as relationship_type
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_id": entity_id}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_id": entity_id})
                 for record in result:
                     vehicle = dict(record["v"])
-                    vehicles.append({
-                        "vehicle_id": vehicle.get("vehicle_id") or vehicle.get("id"),
-                        "plate_number": vehicle.get("plate_number") or vehicle.get("license_plate"),
-                        "make": vehicle.get("make"),
-                        "model": vehicle.get("model"),
-                        "year": vehicle.get("year"),
-                        "color": vehicle.get("color"),
-                        "vin": vehicle.get("vin"),
-                        "relationship": record.get("relationship_type"),
-                    })
+                    vehicles.append(
+                        {
+                            "vehicle_id": vehicle.get("vehicle_id") or vehicle.get("id"),
+                            "plate_number": vehicle.get("plate_number")
+                            or vehicle.get("license_plate"),
+                            "make": vehicle.get("make"),
+                            "model": vehicle.get("model"),
+                            "year": vehicle.get("year"),
+                            "color": vehicle.get("color"),
+                            "vin": vehicle.get("vin"),
+                            "relationship": record.get("relationship_type"),
+                        }
+                    )
             except Exception as e:
                 logger.warning(f"Error getting vehicle connections: {e}")
 
@@ -286,22 +296,22 @@ class EntityCorrelator:
                 OPTIONAL MATCH (w)-[:HAS_BALLISTIC]-(b:BallisticEvidence)
                 RETURN w, collect(b) as ballistics
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_id": entity_id}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_id": entity_id})
                 for record in result:
                     weapon = dict(record["w"])
                     ballistics = [dict(b) for b in record["ballistics"] if b]
-                    weapons.append({
-                        "weapon_id": weapon.get("weapon_id") or weapon.get("id"),
-                        "weapon_type": weapon.get("weapon_type") or weapon.get("type"),
-                        "caliber": weapon.get("caliber"),
-                        "make": weapon.get("make"),
-                        "model": weapon.get("model"),
-                        "serial_number": weapon.get("serial_number"),
-                        "ballistic_matches": len(ballistics),
-                        "ballistics": ballistics[:5],
-                    })
+                    weapons.append(
+                        {
+                            "weapon_id": weapon.get("weapon_id") or weapon.get("id"),
+                            "weapon_type": weapon.get("weapon_type") or weapon.get("type"),
+                            "caliber": weapon.get("caliber"),
+                            "make": weapon.get("make"),
+                            "model": weapon.get("model"),
+                            "serial_number": weapon.get("serial_number"),
+                            "ballistic_matches": len(ballistics),
+                            "ballistics": ballistics[:5],
+                        }
+                    )
             except Exception as e:
                 logger.warning(f"Error getting weapon matches: {e}")
 
@@ -320,21 +330,21 @@ class EntityCorrelator:
                 ORDER BY lpr.timestamp DESC
                 LIMIT 50
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_id": entity_id}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_id": entity_id})
                 for record in result:
                     hit = dict(record["lpr"])
-                    lpr_hits.append({
-                        "hit_id": hit.get("hit_id") or hit.get("id"),
-                        "plate_number": record.get("plate"),
-                        "timestamp": hit.get("timestamp"),
-                        "location": hit.get("location"),
-                        "latitude": hit.get("latitude"),
-                        "longitude": hit.get("longitude"),
-                        "camera_id": hit.get("camera_id"),
-                        "alert_type": hit.get("alert_type"),
-                    })
+                    lpr_hits.append(
+                        {
+                            "hit_id": hit.get("hit_id") or hit.get("id"),
+                            "plate_number": record.get("plate"),
+                            "timestamp": hit.get("timestamp"),
+                            "location": hit.get("location"),
+                            "latitude": hit.get("latitude"),
+                            "longitude": hit.get("longitude"),
+                            "camera_id": hit.get("camera_id"),
+                            "alert_type": hit.get("alert_type"),
+                        }
+                    )
             except Exception as e:
                 logger.warning(f"Error getting LPR activity: {e}")
 
@@ -353,20 +363,20 @@ class EntityCorrelator:
                 ORDER BY bwc.timestamp DESC
                 LIMIT 20
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_id": entity_id}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_id": entity_id})
                 for record in result:
                     bwc = dict(record["bwc"])
-                    interactions.append({
-                        "recording_id": bwc.get("recording_id") or bwc.get("id"),
-                        "timestamp": bwc.get("timestamp"),
-                        "duration": bwc.get("duration"),
-                        "officer_id": bwc.get("officer_id"),
-                        "incident_id": bwc.get("incident_id"),
-                        "location": bwc.get("location"),
-                        "tags": bwc.get("tags", []),
-                    })
+                    interactions.append(
+                        {
+                            "recording_id": bwc.get("recording_id") or bwc.get("id"),
+                            "timestamp": bwc.get("timestamp"),
+                            "duration": bwc.get("duration"),
+                            "officer_id": bwc.get("officer_id"),
+                            "incident_id": bwc.get("incident_id"),
+                            "location": bwc.get("location"),
+                            "tags": bwc.get("tags", []),
+                        }
+                    )
             except Exception as e:
                 logger.warning(f"Error getting BWC interactions: {e}")
 
@@ -388,27 +398,25 @@ class EntityCorrelator:
                 ORDER BY incident_count DESC
                 LIMIT 20
                 """
-                result = await self._neo4j_manager.execute_query(
-                    query, {"entity_id": entity_id}
-                )
+                result = await self._neo4j_manager.execute_query(query, {"entity_id": entity_id})
                 for record in result:
                     associate = dict(record["a"])
-                    associates.append({
-                        "entity_id": associate.get("entity_id") or associate.get("id"),
-                        "name": self._extract_name(associate),
-                        "relationship": record.get("relationship"),
-                        "incident_count": record.get("incident_count", 0),
-                        "dob": associate.get("dob") or associate.get("date_of_birth"),
-                        "last_known_address": associate.get("address"),
-                    })
+                    associates.append(
+                        {
+                            "entity_id": associate.get("entity_id") or associate.get("id"),
+                            "name": self._extract_name(associate),
+                            "relationship": record.get("relationship"),
+                            "incident_count": record.get("incident_count", 0),
+                            "dob": associate.get("dob") or associate.get("date_of_birth"),
+                            "last_known_address": associate.get("address"),
+                        }
+                    )
             except Exception as e:
                 logger.warning(f"Error getting known associates: {e}")
 
         return associates
 
-    async def _calculate_risk_score(
-        self, entity_id: str, entity_data: dict[str, Any]
-    ) -> float:
+    async def _calculate_risk_score(self, entity_id: str, entity_data: dict[str, Any]) -> float:
         """Calculate risk score for the entity."""
         risk_score = 0.0
         factors = []

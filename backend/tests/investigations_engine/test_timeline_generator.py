@@ -76,7 +76,7 @@ class TestTimelineGenerator:
             lpr_events=[sample_events[2]],
             bwc_events=[sample_events[3]],
         )
-        
+
         assert isinstance(timeline, list)
         assert len(timeline) == 4
 
@@ -88,7 +88,7 @@ class TestTimelineGenerator:
             description="Test event",
             source="CAD",
         )
-        
+
         assert isinstance(event, TimelineEvent)
         assert event.event_type == "CAD"
         assert event.source == "CAD"
@@ -104,12 +104,12 @@ class TestTimelineGenerator:
             )
             for e in sample_events
         ]
-        
+
         # Shuffle events
         shuffled = [events[2], events[0], events[3], events[1]]
-        
+
         sorted_events = generator._sort_and_deduplicate(shuffled)
-        
+
         # Verify chronological order
         for i in range(len(sorted_events) - 1):
             assert sorted_events[i].timestamp <= sorted_events[i + 1].timestamp
@@ -161,9 +161,9 @@ class TestTimelineGenerator:
                 source="CAD",
             ),
         ]
-        
+
         deduplicated = generator._sort_and_deduplicate(events)
-        
+
         # Should remove duplicate
         assert len(deduplicated) == 1
 
@@ -183,7 +183,7 @@ class TestTimelineGeneratorIntegration:
     async def test_generate_with_neo4j(self, generator_with_mocks):
         """Test timeline generation with Neo4j integration."""
         generator_with_mocks.neo4j_manager.execute_query = AsyncMock(return_value=[])
-        
+
         timeline = await generator_with_mocks.generate(case_id="CASE001")
         assert isinstance(timeline, list)
 
@@ -193,7 +193,7 @@ class TestTimelineGeneratorIntegration:
         generator_with_mocks.neo4j_manager.execute_query = AsyncMock(
             side_effect=Exception("Neo4j connection failed")
         )
-        
+
         # Should not raise, should return empty list
         timeline = await generator_with_mocks.generate(case_id="CASE001")
         assert isinstance(timeline, list)

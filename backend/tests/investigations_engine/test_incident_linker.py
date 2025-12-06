@@ -182,7 +182,7 @@ class TestIncidentLinkerIntegration:
     async def test_link_incidents_with_neo4j(self, linker_with_mocks):
         """Test incident linking with Neo4j integration."""
         linker_with_mocks.neo4j_manager.execute_query = AsyncMock(return_value=[])
-        
+
         result = await linker_with_mocks.link_incidents(["INC001", "INC002"])
         assert isinstance(result, IncidentLinkResult)
 
@@ -192,7 +192,7 @@ class TestIncidentLinkerIntegration:
         linker_with_mocks.neo4j_manager.execute_query = AsyncMock(
             side_effect=Exception("Neo4j connection failed")
         )
-        
+
         # Should not raise, should return empty result
         result = await linker_with_mocks.link_incidents(["INC001"])
         assert isinstance(result, IncidentLinkResult)

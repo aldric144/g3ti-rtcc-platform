@@ -90,7 +90,9 @@ class CaseBuilder:
         weapons = await self._get_weapons(incident_id)
 
         incident_ids = [incident_id] if incident_id else []
-        incident_ids.extend([inc.get("incident_id") for inc in linked_incidents if inc.get("incident_id")])
+        incident_ids.extend(
+            [inc.get("incident_id") for inc in linked_incidents if inc.get("incident_id")]
+        )
 
         entity_ids = [s.entity_id for s in suspects]
         entity_ids.extend([v.entity_id for v in vehicles])
@@ -162,9 +164,7 @@ class CaseBuilder:
 
         return case
 
-    async def _get_linked_incidents(
-        self, incident_id: str | None
-    ) -> list[dict[str, Any]]:
+    async def _get_linked_incidents(self, incident_id: str | None) -> list[dict[str, Any]]:
         """Get incidents linked to the primary incident."""
         if not incident_id:
             return []
@@ -328,16 +328,18 @@ class CaseBuilder:
 
                     for record in result:
                         address = dict(record["a"])
-                        addresses.append({
-                            "address_id": address.get("address_id") or address.get("id"),
-                            "street": address.get("street") or address.get("address"),
-                            "city": address.get("city"),
-                            "state": address.get("state"),
-                            "zip": address.get("zip_code"),
-                            "latitude": address.get("latitude"),
-                            "longitude": address.get("longitude"),
-                            "type": "incident_location",
-                        })
+                        addresses.append(
+                            {
+                                "address_id": address.get("address_id") or address.get("id"),
+                                "street": address.get("street") or address.get("address"),
+                                "city": address.get("city"),
+                                "state": address.get("state"),
+                                "zip": address.get("zip_code"),
+                                "latitude": address.get("latitude"),
+                                "longitude": address.get("longitude"),
+                                "type": "incident_location",
+                            }
+                        )
 
                 if suspect_id:
                     query = """
@@ -354,16 +356,18 @@ class CaseBuilder:
                         address_id = address.get("address_id") or address.get("id")
 
                         if not any(a.get("address_id") == address_id for a in addresses):
-                            addresses.append({
-                                "address_id": address_id,
-                                "street": address.get("street") or address.get("address"),
-                                "city": address.get("city"),
-                                "state": address.get("state"),
-                                "zip": address.get("zip_code"),
-                                "latitude": address.get("latitude"),
-                                "longitude": address.get("longitude"),
-                                "type": "suspect_address",
-                            })
+                            addresses.append(
+                                {
+                                    "address_id": address_id,
+                                    "street": address.get("street") or address.get("address"),
+                                    "city": address.get("city"),
+                                    "state": address.get("state"),
+                                    "zip": address.get("zip_code"),
+                                    "latitude": address.get("latitude"),
+                                    "longitude": address.get("longitude"),
+                                    "type": "suspect_address",
+                                }
+                            )
 
             except Exception as e:
                 logger.warning(f"Error getting addresses: {e}")
@@ -388,15 +392,17 @@ class CaseBuilder:
                 for record in result:
                     weapon = dict(record["w"])
                     ballistics = [dict(b) for b in record["ballistics"] if b]
-                    weapons.append({
-                        "weapon_id": weapon.get("weapon_id") or weapon.get("id"),
-                        "weapon_type": weapon.get("weapon_type") or weapon.get("type"),
-                        "caliber": weapon.get("caliber"),
-                        "make": weapon.get("make"),
-                        "model": weapon.get("model"),
-                        "serial_number": weapon.get("serial_number"),
-                        "ballistic_matches": len(ballistics),
-                    })
+                    weapons.append(
+                        {
+                            "weapon_id": weapon.get("weapon_id") or weapon.get("id"),
+                            "weapon_type": weapon.get("weapon_type") or weapon.get("type"),
+                            "caliber": weapon.get("caliber"),
+                            "make": weapon.get("make"),
+                            "model": weapon.get("model"),
+                            "serial_number": weapon.get("serial_number"),
+                            "ballistic_matches": len(ballistics),
+                        }
+                    )
 
             except Exception as e:
                 logger.warning(f"Error getting weapons: {e}")
@@ -450,40 +456,48 @@ class CaseBuilder:
 
         suspect_risk = sum(s.risk_score for s in suspects) / max(len(suspects), 1)
         if suspect_risk > 0:
-            factors.append({
-                "factor": "suspect_risk",
-                "score": suspect_risk,
-                "description": f"Average suspect risk score: {suspect_risk:.2f}",
-            })
+            factors.append(
+                {
+                    "factor": "suspect_risk",
+                    "score": suspect_risk,
+                    "description": f"Average suspect risk score: {suspect_risk:.2f}",
+                }
+            )
             overall_score += suspect_risk * 0.4
 
         incident_count = len(linked_incidents)
         if incident_count > 1:
             incident_factor = min(1.0, incident_count * 0.1)
-            factors.append({
-                "factor": "linked_incidents",
-                "score": incident_factor,
-                "description": f"{incident_count} linked incidents",
-            })
+            factors.append(
+                {
+                    "factor": "linked_incidents",
+                    "score": incident_factor,
+                    "description": f"{incident_count} linked incidents",
+                }
+            )
             overall_score += incident_factor * 0.3
 
         vehicle_count = len(vehicles)
         if vehicle_count > 0:
             vehicle_factor = min(1.0, vehicle_count * 0.15)
-            factors.append({
-                "factor": "vehicle_involvement",
-                "score": vehicle_factor,
-                "description": f"{vehicle_count} vehicles involved",
-            })
+            factors.append(
+                {
+                    "factor": "vehicle_involvement",
+                    "score": vehicle_factor,
+                    "description": f"{vehicle_count} vehicles involved",
+                }
+            )
             overall_score += vehicle_factor * 0.2
 
         high_risk_suspects = [s for s in suspects if s.risk_score > 0.7]
         if high_risk_suspects:
-            factors.append({
-                "factor": "high_risk_suspects",
-                "score": 0.8,
-                "description": f"{len(high_risk_suspects)} high-risk suspects identified",
-            })
+            factors.append(
+                {
+                    "factor": "high_risk_suspects",
+                    "score": 0.8,
+                    "description": f"{len(high_risk_suspects)} high-risk suspects identified",
+                }
+            )
             overall_score += 0.1
 
         overall_score = min(1.0, overall_score)

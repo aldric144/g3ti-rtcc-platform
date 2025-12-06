@@ -133,16 +133,20 @@ class ReportGenerator:
             ["Updated:", case.updated_at.strftime("%Y-%m-%d %H:%M:%S")],
         ]
         case_table = Table(case_info, colWidths=[1.5 * inch, 4.5 * inch])
-        case_table.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (0, -1), colors.lightgrey),
-            ("TEXTCOLOR", (0, 0), (-1, -1), colors.black),
-            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-            ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, -1), 10),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-            ("TOPPADDING", (0, 0), (-1, -1), 6),
-            ("GRID", (0, 0), (-1, -1), 1, colors.black),
-        ]))
+        case_table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (0, -1), colors.lightgrey),
+                    ("TEXTCOLOR", (0, 0), (-1, -1), colors.black),
+                    ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                    ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+                    ("FONTSIZE", (0, 0), (-1, -1), 10),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                    ("TOPPADDING", (0, 0), (-1, -1), 6),
+                    ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                ]
+            )
+        )
         story.append(case_table)
         story.append(Spacer(1, 20))
 
@@ -157,34 +161,37 @@ class ReportGenerator:
                 ["Threat Level:", case.risk_assessment.threat_level.upper()],
             ]
             risk_table = Table(risk_info, colWidths=[1.5 * inch, 4.5 * inch])
-            risk_table.setStyle(TableStyle([
-                ("BACKGROUND", (0, 0), (0, -1), colors.lightgrey),
-                ("GRID", (0, 0), (-1, -1), 1, colors.black),
-                ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, -1), 10),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-                ("TOPPADDING", (0, 0), (-1, -1), 4),
-            ]))
+            risk_table.setStyle(
+                TableStyle(
+                    [
+                        ("BACKGROUND", (0, 0), (0, -1), colors.lightgrey),
+                        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                        ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+                        ("FONTSIZE", (0, 0), (-1, -1), 10),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                        ("TOPPADDING", (0, 0), (-1, -1), 4),
+                    ]
+                )
+            )
             story.append(risk_table)
             story.append(Spacer(1, 12))
 
         if case.suspects:
             story.append(Paragraph("SUSPECTS", heading_style))
             for i, suspect in enumerate(case.suspects, 1):
-                story.append(Paragraph(
-                    f"{i}. {suspect.name} (ID: {suspect.entity_id})",
-                    normal_style
-                ))
+                story.append(
+                    Paragraph(f"{i}. {suspect.name} (ID: {suspect.entity_id})", normal_style)
+                )
                 if suspect.prior_incidents:
-                    story.append(Paragraph(
-                        f"   Prior Incidents: {len(suspect.prior_incidents)}",
-                        normal_style
-                    ))
+                    story.append(
+                        Paragraph(
+                            f"   Prior Incidents: {len(suspect.prior_incidents)}", normal_style
+                        )
+                    )
                 if suspect.risk_score > 0:
-                    story.append(Paragraph(
-                        f"   Risk Score: {suspect.risk_score:.2f}",
-                        normal_style
-                    ))
+                    story.append(
+                        Paragraph(f"   Risk Score: {suspect.risk_score:.2f}", normal_style)
+                    )
             story.append(Spacer(1, 12))
 
         if case.vehicles:
@@ -192,33 +199,38 @@ class ReportGenerator:
             for i, vehicle in enumerate(case.vehicles, 1):
                 metadata = vehicle.metadata or {}
                 desc = f"{metadata.get('year', '')} {metadata.get('make', '')} {metadata.get('model', '')}".strip()
-                story.append(Paragraph(
-                    f"{i}. {vehicle.name} - {desc or 'Unknown'}",
-                    normal_style
-                ))
+                story.append(Paragraph(f"{i}. {vehicle.name} - {desc or 'Unknown'}", normal_style))
             story.append(Spacer(1, 12))
 
         if case.linked_incidents:
             story.append(Paragraph("LINKED INCIDENTS", heading_style))
             incident_data = [["Incident ID", "Type", "Date", "Location"]]
             for inc in case.linked_incidents[:10]:
-                incident_data.append([
-                    str(inc.get("incident_id", "Unknown"))[:20],
-                    str(inc.get("incident_type", "Unknown"))[:15],
-                    str(inc.get("timestamp", "Unknown"))[:19],
-                    str(inc.get("location", "Unknown"))[:30],
-                ])
-            incident_table = Table(incident_data, colWidths=[1.2 * inch, 1.2 * inch, 1.5 * inch, 2.1 * inch])
-            incident_table.setStyle(TableStyle([
-                ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, -1), 8),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-                ("TOPPADDING", (0, 0), (-1, -1), 4),
-                ("GRID", (0, 0), (-1, -1), 1, colors.black),
-            ]))
+                incident_data.append(
+                    [
+                        str(inc.get("incident_id", "Unknown"))[:20],
+                        str(inc.get("incident_type", "Unknown"))[:15],
+                        str(inc.get("timestamp", "Unknown"))[:19],
+                        str(inc.get("location", "Unknown"))[:30],
+                    ]
+                )
+            incident_table = Table(
+                incident_data, colWidths=[1.2 * inch, 1.2 * inch, 1.5 * inch, 2.1 * inch]
+            )
+            incident_table.setStyle(
+                TableStyle(
+                    [
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+                        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                        ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                        ("FONTSIZE", (0, 0), (-1, -1), 8),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                        ("TOPPADDING", (0, 0), (-1, -1), 4),
+                        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                    ]
+                )
+            )
             story.append(incident_table)
             story.append(Spacer(1, 12))
 
@@ -227,22 +239,28 @@ class ReportGenerator:
             story.append(Paragraph("TIMELINE", heading_style))
             timeline_data = [["Time", "Event", "Source"]]
             for event in case.timeline[:20]:
-                timeline_data.append([
-                    event.timestamp.strftime("%Y-%m-%d %H:%M"),
-                    event.description[:50],
-                    event.source,
-                ])
+                timeline_data.append(
+                    [
+                        event.timestamp.strftime("%Y-%m-%d %H:%M"),
+                        event.description[:50],
+                        event.source,
+                    ]
+                )
             timeline_table = Table(timeline_data, colWidths=[1.5 * inch, 3.5 * inch, 1 * inch])
-            timeline_table.setStyle(TableStyle([
-                ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, -1), 8),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-                ("TOPPADDING", (0, 0), (-1, -1), 4),
-                ("GRID", (0, 0), (-1, -1), 1, colors.black),
-            ]))
+            timeline_table.setStyle(
+                TableStyle(
+                    [
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+                        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                        ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                        ("FONTSIZE", (0, 0), (-1, -1), 8),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                        ("TOPPADDING", (0, 0), (-1, -1), 4),
+                        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                    ]
+                )
+            )
             story.append(timeline_table)
             story.append(Spacer(1, 12))
 
@@ -258,27 +276,27 @@ class ReportGenerator:
                 ["Total Items:", str(case.evidence.total_items)],
             ]
             evidence_table = Table(evidence_info, colWidths=[1.5 * inch, 1 * inch])
-            evidence_table.setStyle(TableStyle([
-                ("BACKGROUND", (0, 0), (0, -1), colors.lightgrey),
-                ("GRID", (0, 0), (-1, -1), 1, colors.black),
-                ("FONTSIZE", (0, 0), (-1, -1), 10),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-                ("TOPPADDING", (0, 0), (-1, -1), 4),
-            ]))
+            evidence_table.setStyle(
+                TableStyle(
+                    [
+                        ("BACKGROUND", (0, 0), (0, -1), colors.lightgrey),
+                        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                        ("FONTSIZE", (0, 0), (-1, -1), 10),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                        ("TOPPADDING", (0, 0), (-1, -1), 4),
+                    ]
+                )
+            )
             story.append(evidence_table)
             story.append(Spacer(1, 12))
 
         if case.leads:
             story.append(Paragraph("INVESTIGATIVE LEADS", heading_style))
             for i, lead in enumerate(case.leads, 1):
-                story.append(Paragraph(
-                    f"{i}. [{lead.priority.value.upper()}] {lead.title}",
-                    normal_style
-                ))
-                story.append(Paragraph(
-                    f"   {lead.description}",
-                    normal_style
-                ))
+                story.append(
+                    Paragraph(f"{i}. [{lead.priority.value.upper()}] {lead.title}", normal_style)
+                )
+                story.append(Paragraph(f"   {lead.description}", normal_style))
             story.append(Spacer(1, 12))
 
         if case.recommendations:
@@ -288,14 +306,18 @@ class ReportGenerator:
             story.append(Spacer(1, 12))
 
         story.append(Spacer(1, 30))
-        story.append(Paragraph(
-            f"Report generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}",
-            ParagraphStyle("Footer", parent=normal_style, fontSize=8, textColor=colors.grey)
-        ))
-        story.append(Paragraph(
-            "CONFIDENTIAL - LAW ENFORCEMENT SENSITIVE",
-            ParagraphStyle("Footer", parent=normal_style, fontSize=8, textColor=colors.red)
-        ))
+        story.append(
+            Paragraph(
+                f"Report generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}",
+                ParagraphStyle("Footer", parent=normal_style, fontSize=8, textColor=colors.grey),
+            )
+        )
+        story.append(
+            Paragraph(
+                "CONFIDENTIAL - LAW ENFORCEMENT SENSITIVE",
+                ParagraphStyle("Footer", parent=normal_style, fontSize=8, textColor=colors.red),
+            )
+        )
 
         doc.build(story)
         pdf_bytes = buffer.getvalue()

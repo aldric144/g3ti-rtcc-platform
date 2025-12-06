@@ -135,9 +135,7 @@ class IncidentLinker:
                 f"{linkage.explanation}"
             )
 
-        logger.info(
-            f"Found {len(all_linkages)} linkages across {len(linked_incidents)} incidents"
-        )
+        logger.info(f"Found {len(all_linkages)} linkages across {len(linked_incidents)} incidents")
 
         return LinkageResult(
             linked_incidents=[
@@ -177,9 +175,7 @@ class IncidentLinker:
         if not incidents and self._es_client:
             try:
                 query = {
-                    "query": {
-                        "terms": {"incident_id": incident_ids}
-                    },
+                    "query": {"terms": {"incident_id": incident_ids}},
                     "size": len(incident_ids),
                 }
                 result = await self._es_client.search(index="incidents", body=query)
@@ -190,14 +186,16 @@ class IncidentLinker:
 
         if not incidents:
             for incident_id in incident_ids:
-                incidents.append({
-                    "incident_id": incident_id,
-                    "id": incident_id,
-                    "incident_type": "unknown",
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "location": {},
-                    "summary": f"Incident {incident_id}",
-                })
+                incidents.append(
+                    {
+                        "incident_id": incident_id,
+                        "id": incident_id,
+                        "incident_type": "unknown",
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "location": {},
+                        "summary": f"Incident {incident_id}",
+                    }
+                )
 
         return incidents
 
@@ -221,9 +219,7 @@ class IncidentLinker:
             if other_id == incident_id:
                 continue
 
-            other_time = self._parse_timestamp(
-                other.get("timestamp") or other.get("occurred_at")
-            )
+            other_time = self._parse_timestamp(other.get("timestamp") or other.get("occurred_at"))
             if not other_time:
                 continue
 
@@ -293,9 +289,7 @@ class IncidentLinker:
 
         return linkages
 
-    async def _find_entity_overlap_links(
-        self, incident: dict[str, Any]
-    ) -> list[IncidentLinkage]:
+    async def _find_entity_overlap_links(self, incident: dict[str, Any]) -> list[IncidentLinkage]:
         """Find incidents linked by shared entities (persons, vehicles, addresses)."""
         linkages = []
         incident_id = incident.get("incident_id") or incident.get("id")
@@ -313,9 +307,7 @@ class IncidentLinker:
             ORDER BY shared_count DESC
             LIMIT 20
             """
-            result = await self._neo4j_manager.execute_query(
-                query, {"incident_id": incident_id}
-            )
+            result = await self._neo4j_manager.execute_query(query, {"incident_id": incident_id})
 
             for record in result:
                 other_id = record["other_id"]
@@ -370,9 +362,7 @@ class IncidentLinker:
                                 }
                             }
                         ],
-                        "must_not": [
-                            {"term": {"incident_id": incident_id}}
-                        ],
+                        "must_not": [{"term": {"incident_id": incident_id}}],
                     }
                 },
                 "size": 10,
@@ -403,9 +393,7 @@ class IncidentLinker:
 
         return linkages
 
-    async def _find_ballistic_links(
-        self, incident: dict[str, Any]
-    ) -> list[IncidentLinkage]:
+    async def _find_ballistic_links(self, incident: dict[str, Any]) -> list[IncidentLinkage]:
         """Find incidents linked by ballistic evidence matches."""
         linkages = []
         incident_id = incident.get("incident_id") or incident.get("id")
@@ -425,9 +413,7 @@ class IncidentLinker:
             RETURN other.incident_id as other_id, match_strength,
                    b.caliber as caliber, b.weapon_type as weapon_type
             """
-            result = await self._neo4j_manager.execute_query(
-                query, {"incident_id": incident_id}
-            )
+            result = await self._neo4j_manager.execute_query(query, {"incident_id": incident_id})
 
             for record in result:
                 other_id = record["other_id"]
@@ -477,9 +463,7 @@ class IncidentLinker:
                    occurrence_count
             ORDER BY occurrence_count DESC
             """
-            result = await self._neo4j_manager.execute_query(
-                query, {"incident_id": incident_id}
-            )
+            result = await self._neo4j_manager.execute_query(query, {"incident_id": incident_id})
 
             for record in result:
                 other_id = record["other_id"]
@@ -509,9 +493,7 @@ class IncidentLinker:
 
         return linkages
 
-    async def _find_mo_similarity_links(
-        self, incident: dict[str, Any]
-    ) -> list[IncidentLinkage]:
+    async def _find_mo_similarity_links(self, incident: dict[str, Any]) -> list[IncidentLinkage]:
         """Find incidents linked by similar modus operandi."""
         linkages = []
         incident_id = incident.get("incident_id") or incident.get("id")
@@ -529,13 +511,25 @@ class IncidentLinker:
                             "must": [
                                 {"term": {"incident_type": incident_type}},
                             ],
-                            "must_not": [
-                                {"term": {"incident_id": incident_id}}
-                            ],
+                            "must_not": [{"term": {"incident_id": incident_id}}],
                             "should": [
-                                {"match": {"mo_factors.entry_method": mo_factors.get("entry_method", "")}},
-                                {"match": {"mo_factors.weapon_used": mo_factors.get("weapon_used", "")}},
-                                {"match": {"mo_factors.target_type": mo_factors.get("target_type", "")}},
+                                {
+                                    "match": {
+                                        "mo_factors.entry_method": mo_factors.get(
+                                            "entry_method", ""
+                                        )
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        "mo_factors.weapon_used": mo_factors.get("weapon_used", "")
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        "mo_factors.target_type": mo_factors.get("target_type", "")
+                                    }
+                                },
                                 {"range": {"timestamp": {"gte": "now-30d"}}},
                             ],
                             "minimum_should_match": 1,
@@ -569,9 +563,7 @@ class IncidentLinker:
 
         return linkages
 
-    def _deduplicate_linkages(
-        self, linkages: list[IncidentLinkage]
-    ) -> list[IncidentLinkage]:
+    def _deduplicate_linkages(self, linkages: list[IncidentLinkage]) -> list[IncidentLinkage]:
         """Remove duplicate linkages, keeping highest confidence."""
         seen: dict[tuple[str, str, str], IncidentLinkage] = {}
 
@@ -630,9 +622,7 @@ class IncidentLinker:
 
         return None
 
-    def _haversine_distance(
-        self, lat1: float, lon1: float, lat2: float, lon2: float
-    ) -> float:
+    def _haversine_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         """Calculate distance between two points using Haversine formula."""
         R = 6371
 
