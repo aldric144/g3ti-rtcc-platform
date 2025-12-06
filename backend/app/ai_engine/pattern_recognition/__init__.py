@@ -69,9 +69,7 @@ class PatternPredictor(BasePredictor):
         self._model_loaded = True
         logger.info("pattern_predictor_models_loaded")
 
-    async def predict(
-        self, input_data: dict[str, Any], context: PipelineContext
-    ) -> dict[str, Any]:
+    async def predict(self, input_data: dict[str, Any], context: PipelineContext) -> dict[str, Any]:
         """
         Make predictions based on input data.
 
@@ -181,16 +179,10 @@ class PatternPredictor(BasePredictor):
         recent_points = sorted_history[-5:]
 
         if len(recent_points) >= 2:
-            lat_velocity = (
-                recent_points[-1].latitude - recent_points[-2].latitude
-            )
-            lon_velocity = (
-                recent_points[-1].longitude - recent_points[-2].longitude
-            )
+            lat_velocity = recent_points[-1].latitude - recent_points[-2].latitude
+            lon_velocity = recent_points[-1].longitude - recent_points[-2].longitude
 
-            time_diff = (
-                recent_points[-1].timestamp - recent_points[-2].timestamp
-            ).total_seconds()
+            time_diff = (recent_points[-1].timestamp - recent_points[-2].timestamp).total_seconds()
 
             if time_diff > 0:
                 prediction_time = timedelta(hours=1)
@@ -261,16 +253,16 @@ class PatternPredictor(BasePredictor):
 
                 risk_score = base_risk * distance_factor * time_factor
 
-                heat_map.append({
-                    "latitude": cell_lat,
-                    "longitude": cell_lon,
-                    "risk_score": min(1.0, risk_score),
-                    "risk_level": (
-                        "high" if risk_score > 0.7 else
-                        "medium" if risk_score > 0.4 else
-                        "low"
-                    ),
-                })
+                heat_map.append(
+                    {
+                        "latitude": cell_lat,
+                        "longitude": cell_lon,
+                        "risk_score": min(1.0, risk_score),
+                        "risk_level": (
+                            "high" if risk_score > 0.7 else "medium" if risk_score > 0.4 else "low"
+                        ),
+                    }
+                )
 
         return {
             "prediction_id": str(uuid.uuid4()),
@@ -295,10 +287,9 @@ class PatternPredictor(BasePredictor):
         if not historical_events:
             base_probability = 0.1
         else:
-            recent_count = len([
-                e for e in historical_events
-                if self._is_recent(e.get("timestamp"), days=30)
-            ])
+            recent_count = len(
+                [e for e in historical_events if self._is_recent(e.get("timestamp"), days=30)]
+            )
             base_probability = min(0.9, 0.1 + (recent_count * 0.1))
 
         current_hour = datetime.utcnow().hour
@@ -315,18 +306,17 @@ class PatternPredictor(BasePredictor):
             prediction_type="gunfire_recurrence",
             description="Gunfire recurrence probability at location",
             confidence=(
-                ConfidenceLevel.HIGH if len(historical_events) > 10 else
-                ConfidenceLevel.MEDIUM if len(historical_events) > 3 else
-                ConfidenceLevel.LOW
+                ConfidenceLevel.HIGH
+                if len(historical_events) > 10
+                else ConfidenceLevel.MEDIUM if len(historical_events) > 3 else ConfidenceLevel.LOW
             ),
             probability=final_probability,
             predicted_location=GeoLocation(latitude=lat, longitude=lon) if lat and lon else None,
             factors={
                 "historical_events": len(historical_events),
-                "recent_events_30d": len([
-                    e for e in historical_events
-                    if self._is_recent(e.get("timestamp"), days=30)
-                ]),
+                "recent_events_30d": len(
+                    [e for e in historical_events if self._is_recent(e.get("timestamp"), days=30)]
+                ),
                 "time_multiplier": time_multiplier,
             },
             recommendations=[
@@ -371,7 +361,9 @@ class PatternPredictor(BasePredictor):
                 if ct:
                     type_counts[ct] += 1
 
-            most_common_type = max(type_counts.items(), key=lambda x: x[1])[0] if type_counts else "unknown"
+            most_common_type = (
+                max(type_counts.items(), key=lambda x: x[1])[0] if type_counts else "unknown"
+            )
 
             prediction = PredictionResult(
                 prediction_id=str(uuid.uuid4()),
@@ -430,11 +422,7 @@ class PatternPredictor(BasePredictor):
 
         person_incidents: dict[str, list[dict[str, Any]]] = defaultdict(list)
         for item in data:
-            person_id = (
-                item.get("person_id") or
-                item.get("suspect_id") or
-                item.get("offender_id")
-            )
+            person_id = item.get("person_id") or item.get("suspect_id") or item.get("offender_id")
             if person_id and item.get("incident_type"):
                 person_incidents[person_id].append(item)
 
@@ -531,9 +519,9 @@ class PatternPredictor(BasePredictor):
                         frequency=len(sightings),
                         metadata={
                             "sighting_count": len(sightings),
-                            "unique_locations": len(set(
-                                (l.latitude, l.longitude) for l in locations
-                            )),
+                            "unique_locations": len(
+                                set((l.latitude, l.longitude) for l in locations)
+                            ),
                         },
                     )
                     patterns.append(pattern)
@@ -582,7 +570,15 @@ class PatternPredictor(BasePredictor):
 
         if daily_counts:
             peak_day = max(daily_counts.items(), key=lambda x: len(x[1]))
-            day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            day_names = [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+            ]
             if len(peak_day[1]) >= 5:
                 pattern = PatternResult(
                     pattern_id=str(uuid.uuid4()),
@@ -609,10 +605,7 @@ class PatternPredictor(BasePredictor):
         """Find geographic clustering patterns."""
         patterns = []
 
-        events_with_location = [
-            d for d in data
-            if d.get("latitude") and d.get("longitude")
-        ]
+        events_with_location = [d for d in data if d.get("latitude") and d.get("longitude")]
 
         if len(events_with_location) < 5:
             return patterns
@@ -639,10 +632,9 @@ class PatternPredictor(BasePredictor):
                     metadata={
                         "event_count": len(events),
                         "grid_key": grid_key,
-                        "event_types": list(set(
-                            e.get("event_type") or e.get("type") or "unknown"
-                            for e in events
-                        )),
+                        "event_types": list(
+                            set(e.get("event_type") or e.get("type") or "unknown" for e in events)
+                        ),
                     },
                 )
                 patterns.append(pattern)
@@ -725,10 +717,7 @@ async def get_patterns(
     patterns = await predictor.recognize_patterns(data, context)
 
     if pattern_type:
-        patterns = [
-            p for p in patterns
-            if p.pattern_type.value == pattern_type
-        ]
+        patterns = [p for p in patterns if p.pattern_type.value == pattern_type]
 
     return [p.to_dict() for p in patterns]
 

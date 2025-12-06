@@ -122,9 +122,7 @@ class QueryInterpreter:
             ]
 
         for time_key, (pattern, _) in self.TIME_PATTERNS.items():
-            self._compiled_patterns[f"time_{time_key}"] = [
-                re.compile(pattern, re.IGNORECASE)
-            ]
+            self._compiled_patterns[f"time_{time_key}"] = [re.compile(pattern, re.IGNORECASE)]
 
         for query_type, patterns in self.QUERY_TYPE_PATTERNS.items():
             self._compiled_patterns[f"query_{query_type}"] = [
@@ -207,9 +205,7 @@ class QueryInterpreter:
                 }
             )
 
-        name_match = re.search(
-            r"\bnamed?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b", query
-        )
+        name_match = re.search(r"\bnamed?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b", query)
         if name_match:
             entities.append(
                 {
@@ -374,16 +370,12 @@ class DSLExecutor:
         self._neo4j_manager = None
         self._es_client = None
 
-    async def initialize(
-        self, neo4j_manager: Any, es_client: Any
-    ) -> None:
+    async def initialize(self, neo4j_manager: Any, es_client: Any) -> None:
         """Initialize with database connections."""
         self._neo4j_manager = neo4j_manager
         self._es_client = es_client
 
-    async def execute(
-        self, dsl_query: DSLQuery, context: PipelineContext
-    ) -> dict[str, Any]:
+    async def execute(self, dsl_query: DSLQuery, context: PipelineContext) -> dict[str, Any]:
         """
         Execute a DSL query.
 
@@ -447,9 +439,7 @@ class DSLExecutor:
                 entity_type = entity_spec.get("type", "")
                 filters = entity_spec.get("filters", {})
 
-                cypher_query = self._build_cypher_query(
-                    entity_type, filters, dsl_query
-                )
+                cypher_query = self._build_cypher_query(entity_type, filters, dsl_query)
 
                 if cypher_query:
                     query_results = await self._neo4j_manager.execute_query(
@@ -617,9 +607,7 @@ class DSLExecutorStage(PipelineStage[DSLQuery, dict[str, Any]]):
         super().__init__("dsl_executor")
         self._executor = executor
 
-    async def execute(
-        self, input_data: DSLQuery, context: PipelineContext
-    ) -> dict[str, Any]:
+    async def execute(self, input_data: DSLQuery, context: PipelineContext) -> dict[str, Any]:
         """Execute DSL query."""
         return await self._executor.execute(input_data, context)
 
@@ -675,9 +663,7 @@ class ResultComposer:
             "metadata": raw_results.get("metadata", {}),
         }
 
-    def _deduplicate_entities(
-        self, entities: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    def _deduplicate_entities(self, entities: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Remove duplicate entities."""
         seen_ids: set[str] = set()
         unique_entities = []
@@ -712,9 +698,7 @@ class ResultComposer:
                 etype = e.get("entity_type", e.get("type", "unknown"))
                 entity_types[etype] = entity_types.get(etype, 0) + 1
 
-            type_summary = ", ".join(
-                f"{count} {etype}(s)" for etype, count in entity_types.items()
-            )
+            type_summary = ", ".join(f"{count} {etype}(s)" for etype, count in entity_types.items())
             parts.append(f"Found {entity_count} entities: {type_summary}")
 
         if incident_count > 0:
@@ -757,9 +741,7 @@ class ResultComposer:
             )
 
         if len(incidents) > 20:
-            recommendations.append(
-                "High incident volume - consider narrowing search parameters"
-            )
+            recommendations.append("High incident volume - consider narrowing search parameters")
 
         if not entities and not incidents:
             recommendations.append(

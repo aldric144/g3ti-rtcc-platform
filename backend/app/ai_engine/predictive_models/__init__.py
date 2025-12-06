@@ -133,25 +133,22 @@ class RiskScoringEngine:
         criminal_history = entity_data.get("criminal_history", [])
         if criminal_history:
             severity_sum = sum(
-                self._get_crime_severity(c.get("crime_type", ""))
-                for c in criminal_history
+                self._get_crime_severity(c.get("crime_type", "")) for c in criminal_history
             )
             factors["criminal_history"] = min(1.0, severity_sum / 10)
         else:
             factors["criminal_history"] = 0.0
 
         recent_incidents = entity_data.get("recent_incidents", [])
-        recent_count = len([
-            i for i in recent_incidents
-            if self._is_recent(i.get("timestamp"), days=90)
-        ])
+        recent_count = len(
+            [i for i in recent_incidents if self._is_recent(i.get("timestamp"), days=90)]
+        )
         factors["recent_activity"] = min(1.0, recent_count / 5)
 
         associations = entity_data.get("associations", [])
-        high_risk_associations = len([
-            a for a in associations
-            if a.get("risk_level") in ["high", "critical"]
-        ])
+        high_risk_associations = len(
+            [a for a in associations if a.get("risk_level") in ["high", "critical"]]
+        )
         factors["association_count"] = min(1.0, high_risk_associations / 3)
 
         incident_count = entity_data.get("incident_count", 0)
@@ -166,10 +163,7 @@ class RiskScoringEngine:
         weapon_incidents = entity_data.get("weapon_incidents", 0)
         factors["weapon_involvement"] = min(1.0, weapon_incidents / 3)
 
-        score = sum(
-            factors.get(factor, 0) * weight
-            for factor, weight in self.RISK_WEIGHTS.items()
-        )
+        score = sum(factors.get(factor, 0) * weight for factor, weight in self.RISK_WEIGHTS.items())
 
         level = self._get_risk_level(score)
 
@@ -231,8 +225,7 @@ class RiskScoringEngine:
         factors["sighting_frequency"] = min(1.0, sighting_count / 20)
 
         score = sum(
-            factors.get(factor, 0) * weight
-            for factor, weight in self.VEHICLE_RISK_WEIGHTS.items()
+            factors.get(factor, 0) * weight for factor, weight in self.VEHICLE_RISK_WEIGHTS.items()
         )
 
         level = self._get_risk_level(score)
@@ -264,17 +257,15 @@ class RiskScoringEngine:
         incidents = entity_data.get("incidents", [])
         if incidents:
             avg_severity = sum(
-                self._get_crime_severity(i.get("crime_type", ""))
-                for i in incidents
+                self._get_crime_severity(i.get("crime_type", "")) for i in incidents
             ) / len(incidents)
             factors["crime_severity"] = avg_severity
         else:
             factors["crime_severity"] = 0.0
 
-        recent_incidents = len([
-            i for i in incidents
-            if self._is_recent(i.get("timestamp"), days=30)
-        ])
+        recent_incidents = len(
+            [i for i in incidents if self._is_recent(i.get("timestamp"), days=30)]
+        )
         factors["recent_activity"] = min(1.0, recent_incidents / 5)
 
         known_offenders = entity_data.get("known_offenders", 0)
@@ -284,8 +275,7 @@ class RiskScoringEngine:
         factors["call_frequency"] = min(1.0, call_count / 10)
 
         score = sum(
-            factors.get(factor, 0) * weight
-            for factor, weight in self.ADDRESS_RISK_WEIGHTS.items()
+            factors.get(factor, 0) * weight for factor, weight in self.ADDRESS_RISK_WEIGHTS.items()
         )
 
         level = self._get_risk_level(score)
@@ -324,10 +314,10 @@ class RiskScoringEngine:
         factors["owner_risk"] = owner_risk
 
         score = (
-            factors.get("ballistic_history", 0) * 0.35 +
-            factors.get("incident_involvement", 0) * 0.30 +
-            factors.get("stolen_status", 0) * 0.20 +
-            factors.get("owner_risk", 0) * 0.15
+            factors.get("ballistic_history", 0) * 0.35
+            + factors.get("incident_involvement", 0) * 0.30
+            + factors.get("stolen_status", 0) * 0.20
+            + factors.get("owner_risk", 0) * 0.15
         )
 
         level = self._get_risk_level(score)
@@ -360,10 +350,7 @@ class RiskScoringEngine:
         association_count = entity_data.get("association_count", 0)
         factors["associations"] = min(1.0, association_count / 5)
 
-        score = (
-            factors.get("incident_involvement", 0) * 0.6 +
-            factors.get("associations", 0) * 0.4
-        )
+        score = factors.get("incident_involvement", 0) * 0.6 + factors.get("associations", 0) * 0.4
 
         level = self._get_risk_level(score)
 
@@ -404,9 +391,7 @@ class RiskScoringEngine:
             except ValueError:
                 continue
 
-            risk_score = await self.calculate_risk_score(
-                entity_id, entity_type, entity, context
-            )
+            risk_score = await self.calculate_risk_score(entity_id, entity_type, entity, context)
             results[entity_id] = risk_score
 
         return results
@@ -541,9 +526,7 @@ class CrimePredictor(BasePredictor):
         self._model_loaded = True
         logger.info("crime_predictor_model_loaded")
 
-    async def predict(
-        self, input_data: dict[str, Any], context: PipelineContext
-    ) -> dict[str, Any]:
+    async def predict(self, input_data: dict[str, Any], context: PipelineContext) -> dict[str, Any]:
         """Make crime prediction."""
         prediction_type = input_data.get("type", "hotspot")
 
@@ -575,13 +558,15 @@ class CrimePredictor(BasePredictor):
 
             risk = 0.3 + (0.1 * abs(i - 2))
 
-            hotspots.append({
-                "latitude": center_lat + offset_lat,
-                "longitude": center_lon + offset_lon,
-                "risk_score": risk,
-                "predicted_incidents": int(risk * 10),
-                "primary_crime_type": ["theft", "assault", "burglary"][i % 3],
-            })
+            hotspots.append(
+                {
+                    "latitude": center_lat + offset_lat,
+                    "longitude": center_lon + offset_lon,
+                    "risk_score": risk,
+                    "predicted_incidents": int(risk * 10),
+                    "primary_crime_type": ["theft", "assault", "burglary"][i % 3],
+                }
+            )
 
         return {
             "prediction_id": str(uuid.uuid4()),
@@ -611,14 +596,16 @@ class CrimePredictor(BasePredictor):
             else:
                 expected_incidents = 5
 
-            predictions.append({
-                "timestamp": pred_time.isoformat(),
-                "expected_incidents": expected_incidents,
-                "confidence_interval": [
-                    max(0, expected_incidents - 3),
-                    expected_incidents + 3,
-                ],
-            })
+            predictions.append(
+                {
+                    "timestamp": pred_time.isoformat(),
+                    "expected_incidents": expected_incidents,
+                    "confidence_interval": [
+                        max(0, expected_incidents - 3),
+                        expected_incidents + 3,
+                    ],
+                }
+            )
 
         return {
             "prediction_id": str(uuid.uuid4()),
@@ -649,10 +636,7 @@ async def calculate_entity_risk_scores(
     engine = RiskScoringEngine()
     scores = await engine.batch_calculate_risk_scores(entities, context)
 
-    return {
-        entity_id: score.to_dict()
-        for entity_id, score in scores.items()
-    }
+    return {entity_id: score.to_dict() for entity_id, score in scores.items()}
 
 
 __all__ = [

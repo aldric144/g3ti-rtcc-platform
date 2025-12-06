@@ -99,9 +99,18 @@ class TestPatternPredictor:
             {
                 "offender_id": "offender_1",
                 "incidents": [
-                    {"location": {"lat": 40.7128, "lng": -74.0060}, "timestamp": "2024-01-01T10:00:00Z"},
-                    {"location": {"lat": 40.7200, "lng": -74.0100}, "timestamp": "2024-01-02T10:00:00Z"},
-                    {"location": {"lat": 40.7128, "lng": -74.0060}, "timestamp": "2024-01-03T10:00:00Z"},
+                    {
+                        "location": {"lat": 40.7128, "lng": -74.0060},
+                        "timestamp": "2024-01-01T10:00:00Z",
+                    },
+                    {
+                        "location": {"lat": 40.7200, "lng": -74.0100},
+                        "timestamp": "2024-01-02T10:00:00Z",
+                    },
+                    {
+                        "location": {"lat": 40.7128, "lng": -74.0060},
+                        "timestamp": "2024-01-03T10:00:00Z",
+                    },
                 ],
             },
         ]
@@ -112,9 +121,24 @@ class TestPatternPredictor:
     def test_predict_vehicle_trajectory(self):
         """Test vehicle trajectory prediction."""
         trajectory_data = [
-            {"plate": "ABC123", "lat": 40.7128, "lng": -74.0060, "timestamp": "2024-01-01T10:00:00Z"},
-            {"plate": "ABC123", "lat": 40.7200, "lng": -74.0100, "timestamp": "2024-01-01T10:30:00Z"},
-            {"plate": "ABC123", "lat": 40.7300, "lng": -74.0200, "timestamp": "2024-01-01T11:00:00Z"},
+            {
+                "plate": "ABC123",
+                "lat": 40.7128,
+                "lng": -74.0060,
+                "timestamp": "2024-01-01T10:00:00Z",
+            },
+            {
+                "plate": "ABC123",
+                "lat": 40.7200,
+                "lng": -74.0100,
+                "timestamp": "2024-01-01T10:30:00Z",
+            },
+            {
+                "plate": "ABC123",
+                "lat": 40.7300,
+                "lng": -74.0200,
+                "timestamp": "2024-01-01T11:00:00Z",
+            },
         ]
 
         prediction = self.predictor.predict_vehicle_trajectory(trajectory_data)

@@ -278,9 +278,7 @@ class PredictionResult:
             "predicted_location": (
                 self.predicted_location.to_dict() if self.predicted_location else None
             ),
-            "predicted_time": (
-                self.predicted_time.isoformat() if self.predicted_time else None
-            ),
+            "predicted_time": (self.predicted_time.isoformat() if self.predicted_time else None),
             "factors": self.factors,
             "recommendations": self.recommendations,
         }

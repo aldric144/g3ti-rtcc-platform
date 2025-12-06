@@ -65,7 +65,9 @@ class TestQueryInterpreter:
 
     def test_interpret_complex_query(self):
         """Test interpretation of complex multi-entity queries."""
-        query = "Find connections between vehicles spotted near gunfire and repeat offenders in Zone 3"
+        query = (
+            "Find connections between vehicles spotted near gunfire and repeat offenders in Zone 3"
+        )
         result = self.interpreter.interpret(query)
 
         assert result is not None

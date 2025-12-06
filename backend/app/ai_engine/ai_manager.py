@@ -181,19 +181,23 @@ class AIManager:
                 query_id=composed_result["query_id"],
                 original_query=query,
                 summary=composed_result["summary"],
-                entities=[
-                    EntityMatch(**e) if isinstance(e, dict) else e
-                    for e in composed_result.get("entities", [])
-                ]
-                if composed_result.get("entities")
-                else [],
+                entities=(
+                    [
+                        EntityMatch(**e) if isinstance(e, dict) else e
+                        for e in composed_result.get("entities", [])
+                    ]
+                    if composed_result.get("entities")
+                    else []
+                ),
                 incidents=composed_result.get("incidents", []),
-                relationships=[
-                    Relationship(**r) if isinstance(r, dict) else r
-                    for r in composed_result.get("relationships", [])
-                ]
-                if composed_result.get("relationships")
-                else [],
+                relationships=(
+                    [
+                        Relationship(**r) if isinstance(r, dict) else r
+                        for r in composed_result.get("relationships", [])
+                    ]
+                    if composed_result.get("relationships")
+                    else []
+                ),
                 risk_scores={
                     k: RiskScore(**v) if isinstance(v, dict) else v
                     for k, v in composed_result.get("risk_scores", {}).items()
@@ -286,9 +290,13 @@ class AIManager:
                         event_id=str(uuid.uuid4()),
                         event_type="anomaly_detected",
                         title=f"Anomaly Detected: {anomaly.anomaly_type.value if hasattr(anomaly.anomaly_type, 'value') else anomaly.anomaly_type}",
-                        description=anomaly.description if hasattr(anomaly, "description") else str(anomaly),
+                        description=(
+                            anomaly.description if hasattr(anomaly, "description") else str(anomaly)
+                        ),
                         severity="high" if anomaly.severity > 0.8 else "medium",
-                        entity_ids=anomaly.related_entities if hasattr(anomaly, "related_entities") else [],
+                        entity_ids=(
+                            anomaly.related_entities if hasattr(anomaly, "related_entities") else []
+                        ),
                         location=anomaly.location if hasattr(anomaly, "location") else None,
                     )
                 )
@@ -345,10 +353,7 @@ class AIManager:
                 "geographic": "geographic_cluster",
             }
             target_type = type_map.get(pattern_type, pattern_type)
-            patterns = [
-                p for p in patterns
-                if p.pattern_type.value == target_type
-            ]
+            patterns = [p for p in patterns if p.pattern_type.value == target_type]
 
         audit_logger.log_system_event(
             event_type="pattern_recognition_completed",
@@ -426,9 +431,7 @@ class AIManager:
             entity_count=len(entities),
         )
 
-        scores = await self._risk_scoring_engine.batch_calculate_risk_scores(
-            entities, context
-        )
+        scores = await self._risk_scoring_engine.batch_calculate_risk_scores(entities, context)
 
         if self._neo4j_manager:
             await self._risk_scoring_engine.update_neo4j_risk_scores(scores, context)
@@ -453,8 +456,7 @@ class AIManager:
                 "user_id": user_id,
                 "entity_count": len(entities),
                 "high_risk_count": sum(
-                    1 for s in scores.values()
-                    if s.level.value in ["critical", "high"]
+                    1 for s in scores.values() if s.level.value in ["critical", "high"]
                 ),
             },
         )
@@ -531,9 +533,7 @@ class AIManager:
             request_id = str(uuid.uuid4())
             context = PipelineContext(request_id=request_id)
 
-            scores = await self._risk_scoring_engine.batch_calculate_risk_scores(
-                [event], context
-            )
+            scores = await self._risk_scoring_engine.batch_calculate_risk_scores([event], context)
 
             for entity_id, score in scores.items():
                 if score.level.value in ["critical", "high"]:

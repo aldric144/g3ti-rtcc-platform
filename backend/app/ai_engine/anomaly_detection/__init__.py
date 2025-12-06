@@ -170,9 +170,7 @@ class AnomalyDetector(BaseDetector):
                 if timestamp:
                     if isinstance(timestamp, str):
                         try:
-                            timestamp = datetime.fromisoformat(
-                                timestamp.replace("Z", "+00:00")
-                            )
+                            timestamp = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
                         except ValueError:
                             continue
                     hour_key = timestamp.strftime("%Y-%m-%d-%H")
@@ -190,8 +188,7 @@ class AnomalyDetector(BaseDetector):
         anomalies = []
 
         vehicle_events = [
-            d for d in data
-            if d.get("source") == "flock" or d.get("event_type") == "lpr_read"
+            d for d in data if d.get("source") == "flock" or d.get("event_type") == "lpr_read"
         ]
 
         if not vehicle_events:
@@ -225,8 +222,7 @@ class AnomalyDetector(BaseDetector):
                     continue
 
                 distance = self._haversine_distance(
-                    float(prev_lat), float(prev_lon),
-                    float(curr_lat), float(curr_lon)
+                    float(prev_lat), float(prev_lon), float(curr_lat), float(curr_lon)
                 )
 
                 prev_time = prev.get("timestamp") or prev.get("created_at")
@@ -273,8 +269,7 @@ class AnomalyDetector(BaseDetector):
         anomalies = []
 
         gunfire_events = [
-            d for d in data
-            if d.get("source") == "shotspotter" or d.get("event_type") == "gunfire"
+            d for d in data if d.get("source") == "shotspotter" or d.get("event_type") == "gunfire"
         ]
 
         if not gunfire_events:
@@ -329,17 +324,13 @@ class AnomalyDetector(BaseDetector):
         anomalies = []
 
         person_events = [
-            d for d in data
-            if d.get("entity_type") == "person" or d.get("type") == "person"
+            d for d in data if d.get("entity_type") == "person" or d.get("type") == "person"
         ]
 
         if len(person_events) < self.MIN_CLUSTER_POINTS:
             return anomalies
 
-        points_with_coords = [
-            p for p in person_events
-            if p.get("latitude") and p.get("longitude")
-        ]
+        points_with_coords = [p for p in person_events if p.get("latitude") and p.get("longitude")]
 
         if len(points_with_coords) < self.MIN_CLUSTER_POINTS:
             return anomalies
@@ -362,8 +353,7 @@ class AnomalyDetector(BaseDetector):
                         longitude=cluster.center_lon,
                     ),
                     related_entities=[
-                        e.get("id") or e.get("entity_id") or ""
-                        for e in cluster.events[:10]
+                        e.get("id") or e.get("entity_id") or "" for e in cluster.events[:10]
                     ],
                     metrics={
                         "cluster_size": cluster.point_count,
@@ -382,10 +372,7 @@ class AnomalyDetector(BaseDetector):
         """Detect timeline deviations in event patterns."""
         anomalies = []
 
-        events_with_time = [
-            d for d in data
-            if d.get("timestamp") or d.get("created_at")
-        ]
+        events_with_time = [d for d in data if d.get("timestamp") or d.get("created_at")]
 
         if not events_with_time:
             return anomalies
@@ -404,10 +391,30 @@ class AnomalyDetector(BaseDetector):
         baseline_key = "hourly_event_distribution"
         if baseline_key not in self._baselines:
             expected_distribution = {
-                0: 3, 1: 2, 2: 2, 3: 2, 4: 2, 5: 3,
-                6: 5, 7: 7, 8: 10, 9: 12, 10: 12, 11: 12,
-                12: 12, 13: 12, 14: 12, 15: 13, 16: 14, 17: 15,
-                18: 14, 19: 13, 20: 12, 21: 10, 22: 8, 23: 5,
+                0: 3,
+                1: 2,
+                2: 2,
+                3: 2,
+                4: 2,
+                5: 3,
+                6: 5,
+                7: 7,
+                8: 10,
+                9: 12,
+                10: 12,
+                11: 12,
+                12: 12,
+                13: 12,
+                14: 12,
+                15: 13,
+                16: 14,
+                17: 15,
+                18: 14,
+                19: 13,
+                20: 12,
+                21: 10,
+                22: 8,
+                23: 5,
             }
             self._baselines[baseline_key] = BaselineMetrics(
                 metric_name=baseline_key,
@@ -442,8 +449,7 @@ class AnomalyDetector(BaseDetector):
         anomalies = []
 
         incidents = [
-            d for d in data
-            if d.get("event_type") == "incident" or d.get("type") == "incident"
+            d for d in data if d.get("event_type") == "incident" or d.get("type") == "incident"
         ]
 
         if not incidents:
@@ -452,10 +458,10 @@ class AnomalyDetector(BaseDetector):
         type_counts: dict[str, int] = defaultdict(int)
         for incident in incidents:
             incident_type = (
-                incident.get("incident_type") or
-                incident.get("crime_type") or
-                incident.get("category") or
-                "unknown"
+                incident.get("incident_type")
+                or incident.get("crime_type")
+                or incident.get("category")
+                or "unknown"
             )
             type_counts[incident_type] += 1
 
@@ -506,10 +512,7 @@ class AnomalyDetector(BaseDetector):
         """Detect anomalies in repeat caller patterns."""
         anomalies = []
 
-        calls = [
-            d for d in data
-            if d.get("event_type") == "cad_call" or d.get("source") == "cad"
-        ]
+        calls = [d for d in data if d.get("event_type") == "cad_call" or d.get("source") == "cad"]
 
         if not calls:
             return anomalies
@@ -517,9 +520,7 @@ class AnomalyDetector(BaseDetector):
         caller_counts: dict[str, list[dict[str, Any]]] = defaultdict(list)
         for call in calls:
             caller_id = (
-                call.get("caller_id") or
-                call.get("caller_phone") or
-                call.get("reporting_party")
+                call.get("caller_id") or call.get("caller_phone") or call.get("reporting_party")
             )
             if caller_id:
                 caller_counts[caller_id].append(call)
@@ -566,9 +567,7 @@ class AnomalyDetector(BaseDetector):
 
         return anomalies
 
-    def _haversine_distance(
-        self, lat1: float, lon1: float, lat2: float, lon2: float
-    ) -> float:
+    def _haversine_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         """Calculate distance between two points in kilometers."""
         R = 6371
 
@@ -578,8 +577,8 @@ class AnomalyDetector(BaseDetector):
         delta_lon = math.radians(lon2 - lon1)
 
         a = (
-            math.sin(delta_lat / 2) ** 2 +
-            math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon / 2) ** 2
+            math.sin(delta_lat / 2) ** 2
+            + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon / 2) ** 2
         )
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
@@ -623,10 +622,14 @@ class AnomalyDetector(BaseDetector):
                         center_lat = sum(lats) / len(lats)
                         center_lon = sum(lons) / len(lons)
 
-                        max_dist = max(
-                            self._haversine_distance(center_lat, center_lon, lat, lon)
-                            for lat, lon in zip(lats, lons, strict=True)
-                        ) if lats else 0
+                        max_dist = (
+                            max(
+                                self._haversine_distance(center_lat, center_lon, lat, lon)
+                                for lat, lon in zip(lats, lons, strict=True)
+                            )
+                            if lats
+                            else 0
+                        )
 
                         cluster = SpatialCluster(
                             cluster_id=str(uuid.uuid4()),
@@ -684,9 +687,7 @@ class AnomalyDetector(BaseDetector):
                 new_neighbors = self._get_neighbors(points, neighbor_idx, epsilon_km)
 
                 if len(new_neighbors) >= min_points:
-                    neighbors.extend(
-                        n for n in new_neighbors if n not in neighbors
-                    )
+                    neighbors.extend(n for n in new_neighbors if n not in neighbors)
 
             if neighbor_idx not in cluster:
                 cluster.append(neighbor_idx)
