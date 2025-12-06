@@ -11,14 +11,14 @@ Tests cover:
 - M.O. similarity analysis
 """
 
-import pytest
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from app.investigations_engine.incident_linker import IncidentLinker
 from app.investigations_engine.models import (
     IncidentLinkResult,
-    LinkedIncident,
 )
 
 

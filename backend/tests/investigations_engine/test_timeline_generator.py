@@ -9,12 +9,13 @@ Tests cover:
 - Multi-source timeline generation
 """
 
-import pytest
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 
-from app.investigations_engine.timeline_generator import TimelineGenerator
+import pytest
+
 from app.investigations_engine.models import TimelineEvent
+from app.investigations_engine.timeline_generator import TimelineGenerator
 
 
 class TestTimelineGenerator:
