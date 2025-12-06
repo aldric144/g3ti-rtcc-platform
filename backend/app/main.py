@@ -18,6 +18,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.ai_engine import get_ai_manager
 from app.api import api_router
 from app.core.config import settings
 from app.core.exceptions import (
@@ -80,6 +81,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     ws_manager = get_websocket_manager()
     await ws_manager.start()
     logger.info("websocket_manager_started")
+
+    # Initialize AI Engine
+    try:
+        ai_manager = get_ai_manager()
+        await ai_manager.initialize()
+        logger.info("ai_engine_initialized")
+    except Exception as e:
+        logger.warning("ai_engine_init_failed", error=str(e))
 
     # Log startup complete
     audit_logger.log_system_event(
