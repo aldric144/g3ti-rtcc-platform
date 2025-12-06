@@ -51,6 +51,15 @@ class EventType(str, Enum):
     INTEGRATION_DATA = "integration_data"
     INTEGRATION_ERROR = "integration_error"
 
+    # AI Intelligence events
+    AI_ANOMALY_DETECTED = "ai_anomaly_detected"
+    AI_PATTERN_SHIFT = "ai_pattern_shift"
+    AI_HIGH_RISK_ENTITY = "ai_high_risk_entity"
+    AI_RELATIONSHIP_DISCOVERED = "ai_relationship_discovered"
+    AI_PREDICTIVE_ALERT = "ai_predictive_alert"
+    AI_ENTITY_RESOLVED = "ai_entity_resolved"
+    AI_QUERY_RESULT = "ai_query_result"
+
 
 class EventPriority(str, Enum):
     """Event priority levels."""
@@ -75,6 +84,7 @@ class EventSource(str, Enum):
     CAD = "cad"
     MANUAL = "manual"
     SYSTEM = "system"
+    AI_ENGINE = "ai_engine"
 
 
 class EventBase(RTCCBaseModel):
