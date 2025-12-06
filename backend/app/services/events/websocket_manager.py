@@ -418,6 +418,255 @@ class WebSocketManager:
         """Get the number of connections for a specific user."""
         return len(self._user_connections.get(user_id, set()))
 
+    async def broadcast_ai_insight(
+        self,
+        insight_type: str,
+        payload: dict[str, Any],
+        priority: EventPriority = EventPriority.MEDIUM,
+        related_entities: list[str] | None = None,
+        location: dict[str, float] | None = None,
+    ) -> int:
+        """
+        Broadcast an AI insight event to subscribed clients.
+
+        This method is specifically designed for AI engine events including:
+        - anomaly_detected
+        - pattern_shift
+        - high_risk_entity_updated
+        - relationship_discovered
+        - predictive_alert
+
+        Args:
+            insight_type: Type of AI insight (anomaly_detected, pattern_shift, etc.)
+            payload: Insight data payload
+            priority: Event priority level
+            related_entities: List of related entity IDs
+            location: Geographic location if applicable
+
+        Returns:
+            int: Number of clients that received the insight
+        """
+        # Map insight type to event type
+        event_type_map = {
+            "anomaly_detected": EventType.AI_ANOMALY_DETECTED,
+            "pattern_shift": EventType.AI_PATTERN_SHIFT,
+            "high_risk_entity_updated": EventType.AI_HIGH_RISK_ENTITY,
+            "relationship_discovered": EventType.AI_RELATIONSHIP_DISCOVERED,
+            "predictive_alert": EventType.AI_PREDICTIVE_ALERT,
+            "entity_resolved": EventType.AI_ENTITY_RESOLVED,
+            "query_result": EventType.AI_QUERY_RESULT,
+        }
+
+        event_type = event_type_map.get(insight_type, EventType.AI_ANOMALY_DETECTED)
+
+        message = WebSocketMessage(
+            type=WebSocketMessageType.EVENT,
+            payload={
+                "event_type": event_type.value,
+                "source": EventSource.AI_ENGINE.value,
+                "priority": priority.value,
+                "insight_type": insight_type,
+                "data": payload,
+                "related_entities": related_entities or [],
+                "location": location,
+                "timestamp": datetime.now(UTC).isoformat(),
+            },
+            message_id=str(uuid.uuid4()),
+        )
+
+        sent_count = 0
+        for connection in list(self._connections.values()):
+            # Check if client is subscribed to AI events
+            if connection.matches_event(
+                event_type, EventSource.AI_ENGINE, priority, location, ["ai", "intelligence"]
+            ):
+                try:
+                    await self._send_message(connection, message)
+                    sent_count += 1
+                except Exception as e:
+                    logger.warning(
+                        "ai_insight_send_error", client_id=connection.client_id, error=str(e)
+                    )
+
+        logger.debug(
+            "ai_insight_broadcast",
+            insight_type=insight_type,
+            event_type=event_type.value,
+            recipients=sent_count,
+        )
+
+        return sent_count
+
+    async def broadcast_ai_anomaly(
+        self,
+        anomaly_id: str,
+        anomaly_type: str,
+        severity: str,
+        description: str,
+        confidence: float,
+        entities: list[str] | None = None,
+        location: dict[str, float] | None = None,
+    ) -> int:
+        """
+        Broadcast an anomaly detection event.
+
+        Args:
+            anomaly_id: Unique anomaly identifier
+            anomaly_type: Type of anomaly detected
+            severity: Severity level (critical, high, medium, low)
+            description: Human-readable description
+            confidence: Detection confidence (0-1)
+            entities: Related entity IDs
+            location: Geographic location
+
+        Returns:
+            int: Number of clients notified
+        """
+        priority_map = {
+            "critical": EventPriority.CRITICAL,
+            "high": EventPriority.HIGH,
+            "medium": EventPriority.MEDIUM,
+            "low": EventPriority.LOW,
+        }
+
+        return await self.broadcast_ai_insight(
+            insight_type="anomaly_detected",
+            payload={
+                "anomaly_id": anomaly_id,
+                "anomaly_type": anomaly_type,
+                "severity": severity,
+                "description": description,
+                "confidence": confidence,
+                "detected_at": datetime.now(UTC).isoformat(),
+            },
+            priority=priority_map.get(severity.lower(), EventPriority.MEDIUM),
+            related_entities=entities,
+            location=location,
+        )
+
+    async def broadcast_ai_pattern(
+        self,
+        pattern_id: str,
+        pattern_type: str,
+        description: str,
+        strength: float,
+        entities: list[str] | None = None,
+        locations: list[dict[str, float]] | None = None,
+    ) -> int:
+        """
+        Broadcast a pattern shift event.
+
+        Args:
+            pattern_id: Unique pattern identifier
+            pattern_type: Type of pattern detected
+            description: Human-readable description
+            strength: Pattern strength (0-1)
+            entities: Related entity IDs
+            locations: Geographic locations involved
+
+        Returns:
+            int: Number of clients notified
+        """
+        return await self.broadcast_ai_insight(
+            insight_type="pattern_shift",
+            payload={
+                "pattern_id": pattern_id,
+                "pattern_type": pattern_type,
+                "description": description,
+                "strength": strength,
+                "locations": locations or [],
+                "detected_at": datetime.now(UTC).isoformat(),
+            },
+            priority=EventPriority.MEDIUM if strength < 0.7 else EventPriority.HIGH,
+            related_entities=entities,
+            location=locations[0] if locations else None,
+        )
+
+    async def broadcast_ai_risk_update(
+        self,
+        entity_id: str,
+        entity_type: str,
+        risk_score: float,
+        risk_level: str,
+        factors: list[dict[str, Any]] | None = None,
+    ) -> int:
+        """
+        Broadcast a high-risk entity update event.
+
+        Args:
+            entity_id: Entity identifier
+            entity_type: Type of entity (person, vehicle, address, weapon)
+            risk_score: Calculated risk score (0-100)
+            risk_level: Risk level (critical, high, medium, low, minimal)
+            factors: Contributing risk factors
+
+        Returns:
+            int: Number of clients notified
+        """
+        priority_map = {
+            "critical": EventPriority.CRITICAL,
+            "high": EventPriority.HIGH,
+            "medium": EventPriority.MEDIUM,
+            "low": EventPriority.LOW,
+            "minimal": EventPriority.INFO,
+        }
+
+        return await self.broadcast_ai_insight(
+            insight_type="high_risk_entity_updated",
+            payload={
+                "entity_id": entity_id,
+                "entity_type": entity_type,
+                "risk_score": risk_score,
+                "risk_level": risk_level,
+                "factors": factors or [],
+                "updated_at": datetime.now(UTC).isoformat(),
+            },
+            priority=priority_map.get(risk_level.lower(), EventPriority.MEDIUM),
+            related_entities=[entity_id],
+        )
+
+    async def broadcast_ai_prediction(
+        self,
+        prediction_id: str,
+        prediction_type: str,
+        description: str,
+        probability: float,
+        time_horizon: str,
+        entities: list[str] | None = None,
+        location: dict[str, float] | None = None,
+    ) -> int:
+        """
+        Broadcast a predictive alert event.
+
+        Args:
+            prediction_id: Unique prediction identifier
+            prediction_type: Type of prediction
+            description: Human-readable description
+            probability: Prediction probability (0-1)
+            time_horizon: Time horizon for prediction
+            entities: Related entity IDs
+            location: Predicted location
+
+        Returns:
+            int: Number of clients notified
+        """
+        priority = EventPriority.HIGH if probability >= 0.7 else EventPriority.MEDIUM
+
+        return await self.broadcast_ai_insight(
+            insight_type="predictive_alert",
+            payload={
+                "prediction_id": prediction_id,
+                "prediction_type": prediction_type,
+                "description": description,
+                "probability": probability,
+                "time_horizon": time_horizon,
+                "predicted_at": datetime.now(UTC).isoformat(),
+            },
+            priority=priority,
+            related_entities=entities,
+            location=location,
+        )
+
     async def _send_message(self, connection: ClientConnection, message: WebSocketMessage) -> None:
         """Send a message to a client."""
         if connection.websocket.client_state != WebSocketState.CONNECTED:

@@ -7,10 +7,12 @@ This module contains all API endpoint routers organized by domain:
 - investigations: Investigation management
 - realtime: WebSocket and real-time events
 - system: Health checks and system status
+- ai: AI Intelligence Engine endpoints
 """
 
 from fastapi import APIRouter
 
+from app.api.ai import router as ai_router
 from app.api.auth import router as auth_router
 from app.api.entities import router as entities_router
 from app.api.investigations import router as investigations_router
@@ -26,5 +28,6 @@ api_router.include_router(entities_router, prefix="/entities", tags=["Entities"]
 api_router.include_router(investigations_router, prefix="/investigations", tags=["Investigations"])
 api_router.include_router(realtime_router, prefix="/realtime", tags=["Real-time"])
 api_router.include_router(system_router, prefix="/system", tags=["System"])
+api_router.include_router(ai_router, tags=["AI Intelligence"])
 
 __all__ = ["api_router"]
