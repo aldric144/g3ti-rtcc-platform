@@ -543,7 +543,7 @@ class CrimePredictor(BasePredictor):
         """Predict crime hotspots."""
         center_lat = input_data.get("latitude", 0)
         center_lon = input_data.get("longitude", 0)
-        radius_km = input_data.get("radius_km", 5)
+        _radius_km = input_data.get("radius_km", 5)  # noqa: F841 - reserved for future use
 
         hotspots: list[dict[str, Any]] = []
 

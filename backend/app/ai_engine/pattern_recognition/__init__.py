@@ -520,7 +520,7 @@ class PatternPredictor(BasePredictor):
                         metadata={
                             "sighting_count": len(sightings),
                             "unique_locations": len(
-                                set((l.latitude, l.longitude) for l in locations)
+                                {(loc.latitude, loc.longitude) for loc in locations}
                             ),
                         },
                     )
@@ -633,7 +633,7 @@ class PatternPredictor(BasePredictor):
                         "event_count": len(events),
                         "grid_key": grid_key,
                         "event_types": list(
-                            set(e.get("event_type") or e.get("type") or "unknown" for e in events)
+                            {e.get("event_type") or e.get("type") or "unknown" for e in events}
                         ),
                     },
                 )
