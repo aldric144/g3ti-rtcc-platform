@@ -27,7 +27,10 @@ interface AnomalyFeedProps {
   anomalies: Anomaly[];
 }
 
-const severityConfig: Record<string, { icon: typeof AlertTriangle; color: string; bgColor: string }> = {
+const severityConfig: Record<
+  string,
+  { icon: typeof AlertTriangle; color: string; bgColor: string }
+> = {
   critical: {
     icon: AlertTriangle,
     color: 'text-red-600 dark:text-red-400',
@@ -68,7 +71,7 @@ function AnomalyCard({ anomaly }: { anomaly: Anomaly }) {
     <div className={`rounded-lg p-3 ${config.bgColor}`}>
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3">
-          <Icon className={`h-5 w-5 mt-0.5 ${config.color}`} />
+          <Icon className={`mt-0.5 h-5 w-5 ${config.color}`} />
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <span className={`text-sm font-medium ${config.color}`}>
@@ -78,9 +81,7 @@ function AnomalyCard({ anomaly }: { anomaly: Anomaly }) {
                 {(anomaly.confidence * 100).toFixed(0)}% confidence
               </span>
             </div>
-            <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
-              {anomaly.description}
-            </p>
+            <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">{anomaly.description}</p>
             <div className="mt-2 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
@@ -109,7 +110,7 @@ function AnomalyCard({ anomaly }: { anomaly: Anomaly }) {
 
       {expanded && anomaly.entities.length > 0 && (
         <div className="mt-3 border-t border-gray-200 pt-3 dark:border-gray-700">
-          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+          <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
             Related Entities
           </p>
           <div className="flex flex-wrap gap-1">
@@ -165,14 +166,14 @@ export function AnomalyFeed({ anomalies }: AnomalyFeedProps) {
         ))}
       </div>
 
-      <div className="space-y-3 max-h-[400px] overflow-y-auto">
+      <div className="max-h-[400px] space-y-3 overflow-y-auto">
         {filteredAnomalies.map((anomaly) => (
           <AnomalyCard key={anomaly.id} anomaly={anomaly} />
         ))}
       </div>
 
       {filteredAnomalies.length === 0 && (
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400 py-4">
+        <p className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
           No anomalies match the selected filter
         </p>
       )}

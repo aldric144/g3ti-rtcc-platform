@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { User, Car, MapPin, AlertTriangle, Loader2, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import {
+  User,
+  Car,
+  MapPin,
+  AlertTriangle,
+  Loader2,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+} from 'lucide-react';
 
 interface GraphNode {
   id: string;
@@ -32,16 +41,16 @@ interface EntityGraphProps {
 
 /**
  * Entity Graph component for visualizing entity relationships.
- * 
+ *
  * Uses a simple canvas-based visualization for entity relationships.
  * Shows persons, vehicles, addresses, incidents, and their connections.
  */
-export function EntityGraph({ 
-  entityId: initialEntityId, 
+export function EntityGraph({
+  entityId: initialEntityId,
   graphData: initialGraphData,
   onNodeClick,
   depth = 2,
-  maxNodes = 50
+  maxNodes = 50,
 }: EntityGraphProps) {
   const [entityId, setEntityId] = useState(initialEntityId || '');
   const [graphData, setGraphData] = useState<GraphData | null>(initialGraphData || null);
@@ -84,10 +93,13 @@ export function EntityGraph({
     }
   };
 
-  const handleNodeClick = useCallback((node: GraphNode) => {
-    setSelectedNode(node);
-    onNodeClick?.(node);
-  }, [onNodeClick]);
+  const handleNodeClick = useCallback(
+    (node: GraphNode) => {
+      setSelectedNode(node);
+      onNodeClick?.(node);
+    },
+    [onNodeClick]
+  );
 
   const getNodeColor = (type: string) => {
     switch (type.toLowerCase()) {
@@ -127,7 +139,7 @@ export function EntityGraph({
     const centerX = 300;
     const centerY = 200;
     const radius = 150;
-    
+
     return nodes.map((node, index) => {
       if (index === 0) {
         return { ...node, x: centerX, y: centerY };
@@ -143,30 +155,30 @@ export function EntityGraph({
 
   return (
     <div className="card">
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           Entity Relationship Graph
         </h3>
-        
+
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+            onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}
+            className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
             title="Zoom out"
           >
             <ZoomOut className="h-4 w-4" />
           </button>
           <span className="text-sm text-gray-500">{(zoom * 100).toFixed(0)}%</span>
           <button
-            onClick={() => setZoom(z => Math.min(2, z + 0.1))}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+            onClick={() => setZoom((z) => Math.min(2, z + 0.1))}
+            className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
             title="Zoom in"
           >
             <ZoomIn className="h-4 w-4" />
           </button>
           <button
             onClick={() => setZoom(1)}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+            className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
             title="Reset zoom"
           >
             <Maximize2 className="h-4 w-4" />
@@ -176,13 +188,13 @@ export function EntityGraph({
 
       {/* Search input */}
       {!initialGraphData && (
-        <div className="flex gap-2 mb-4">
+        <div className="mb-4 flex gap-2">
           <input
             type="text"
             value={entityId}
             onChange={(e) => setEntityId(e.target.value)}
             placeholder="Enter entity ID to visualize"
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
             onKeyDown={(e) => e.key === 'Enter' && loadGraph()}
           />
           <button
@@ -190,22 +202,16 @@ export function EntityGraph({
             disabled={isLoading}
             className="btn-primary flex items-center gap-2 disabled:opacity-50"
           >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              'Load Graph'
-            )}
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Load Graph'}
           </button>
         </div>
       )}
 
-      {error && (
-        <p className="mb-4 text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
+      {error && <p className="mb-4 text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       {/* Graph visualization */}
-      <div 
-        className="relative bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden"
+      <div
+        className="relative overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-900"
         style={{ height: '400px' }}
       >
         {isLoading ? (
@@ -222,11 +228,11 @@ export function EntityGraph({
             {/* Edges */}
             {graphData.edges.map((edge, index) => {
               const positions = calculateNodePositions(graphData.nodes);
-              const sourceNode = positions.find(n => n.id === edge.source);
-              const targetNode = positions.find(n => n.id === edge.target);
-              
+              const sourceNode = positions.find((n) => n.id === edge.source);
+              const targetNode = positions.find((n) => n.id === edge.target);
+
               if (!sourceNode || !targetNode) return null;
-              
+
               return (
                 <g key={`edge-${index}`}>
                   <line
@@ -279,16 +285,18 @@ export function EntityGraph({
           </svg>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-gray-500 dark:text-gray-400">
-            {initialGraphData ? 'No graph data available' : 'Enter an entity ID to visualize relationships'}
+            {initialGraphData
+              ? 'No graph data available'
+              : 'Enter an entity ID to visualize relationships'}
           </div>
         )}
       </div>
 
       {/* Legend */}
       <div className="mt-4 flex flex-wrap gap-3">
-        {['Person', 'Vehicle', 'Address', 'Incident', 'Weapon', 'Camera'].map(type => (
+        {['Person', 'Vehicle', 'Address', 'Incident', 'Weapon', 'Camera'].map((type) => (
           <div key={type} className="flex items-center gap-1">
-            <div className={`w-3 h-3 rounded-full ${getNodeColor(type)}`} />
+            <div className={`h-3 w-3 rounded-full ${getNodeColor(type)}`} />
             <span className="text-xs text-gray-600 dark:text-gray-400">{type}</span>
           </div>
         ))}
@@ -296,8 +304,8 @@ export function EntityGraph({
 
       {/* Selected node details */}
       {selectedNode && (
-        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+        <div className="mt-4 rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
+          <h4 className="mb-2 font-medium text-gray-900 dark:text-white">
             Selected: {selectedNode.label}
           </h4>
           <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -306,10 +314,14 @@ export function EntityGraph({
             {selectedNode.properties && Object.keys(selectedNode.properties).length > 0 && (
               <div className="mt-2">
                 <p className="font-medium">Properties:</p>
-                <ul className="list-disc list-inside">
-                  {Object.entries(selectedNode.properties).slice(0, 5).map(([key, value]) => (
-                    <li key={key}>{key}: {String(value)}</li>
-                  ))}
+                <ul className="list-inside list-disc">
+                  {Object.entries(selectedNode.properties)
+                    .slice(0, 5)
+                    .map(([key, value]) => (
+                      <li key={key}>
+                        {key}: {String(value)}
+                      </li>
+                    ))}
                 </ul>
               </div>
             )}

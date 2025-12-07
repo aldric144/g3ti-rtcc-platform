@@ -1,14 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  
+
   // Environment variables exposed to the browser
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1',
-    NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/api/v1/realtime/ws/events',
+    NEXT_PUBLIC_WS_URL:
+      process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/api/v1/realtime/ws/events',
     NEXT_PUBLIC_MAPBOX_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '',
   },
-  
+
   // Image optimization
   images: {
     remotePatterns: [
@@ -18,7 +19,7 @@ const nextConfig = {
       },
     ],
   },
-  
+
   // Webpack configuration for mapbox-gl
   webpack: (config) => {
     config.resolve.fallback = {
@@ -27,7 +28,7 @@ const nextConfig = {
     };
     return config;
   },
-  
+
   // Headers for security
   async headers() {
     return [

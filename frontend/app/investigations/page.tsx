@@ -31,7 +31,7 @@ interface CaseData {
 
 /**
  * Investigations Dashboard - Phase 4
- * 
+ *
  * Provides comprehensive investigation management:
  * - Case search and management
  * - Auto case building from incidents/suspects
@@ -58,9 +58,11 @@ export default function InvestigationsPage() {
   const handleSearch = async (searchQuery: string) => {
     setQuery(searchQuery);
     setIsSearching(true);
-    
+
     try {
-      const response = await fetch(`/api/investigations/search?q=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(
+        `/api/investigations/search?q=${encodeURIComponent(searchQuery)}`
+      );
       if (response.ok) {
         const data = await response.json();
         setResults(data.results || []);
@@ -110,23 +112,27 @@ export default function InvestigationsPage() {
             <p className="text-sm text-gray-600 dark:text-gray-400">Open Cases</p>
           </div>
         </div>
-        
+
         <div className="card flex items-center gap-4">
           <div className="rounded-lg bg-orange-100 p-3">
             <Clock className="h-6 w-6 text-orange-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.pendingReview}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {stats.pendingReview}
+            </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">Pending Review</p>
           </div>
         </div>
-        
+
         <div className="card flex items-center gap-4">
           <div className="rounded-lg bg-green-100 p-3">
             <User className="h-6 w-6 text-green-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.assignedToYou}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {stats.assignedToYou}
+            </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">Assigned to You</p>
           </div>
         </div>
@@ -151,12 +157,13 @@ export default function InvestigationsPage() {
               onClick={() => !tab.disabled && setActiveTab(tab.id as TabType)}
               disabled={tab.disabled}
               className={`
-                flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors
-                ${activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors
+                ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                 }
-                ${tab.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                ${tab.disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
               `}
             >
               <tab.icon className="h-4 w-4" />
@@ -181,7 +188,7 @@ export default function InvestigationsPage() {
                     placeholder="Search persons, vehicles, incidents, addresses..."
                   />
                 </div>
-                
+
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className={`btn-outline flex items-center gap-2 ${showFilters ? 'bg-gray-100' : ''}`}
@@ -198,42 +205,61 @@ export default function InvestigationsPage() {
               )}
             </div>
 
-            <SearchResults
-              results={results}
-              isLoading={isSearching}
-              query={query}
-            />
+            <SearchResults results={results} isLoading={isSearching} query={query} />
           </div>
         )}
 
         {/* Build Case Tab */}
         {activeTab === 'build' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <CaseBuilder onCaseCreated={handleCaseCreated} />
-            
+
             <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
                 Recent Cases
               </h3>
               <div className="space-y-3">
                 {[
-                  { id: 'CASE-2025-00123', title: 'Armed Robbery Investigation', status: 'active', priority: 'high' },
-                  { id: 'CASE-2025-00122', title: 'Vehicle Theft Ring', status: 'active', priority: 'medium' },
-                  { id: 'CASE-2025-00121', title: 'Shooting Incident Analysis', status: 'review', priority: 'high' },
+                  {
+                    id: 'CASE-2025-00123',
+                    title: 'Armed Robbery Investigation',
+                    status: 'active',
+                    priority: 'high',
+                  },
+                  {
+                    id: 'CASE-2025-00122',
+                    title: 'Vehicle Theft Ring',
+                    status: 'active',
+                    priority: 'medium',
+                  },
+                  {
+                    id: 'CASE-2025-00121',
+                    title: 'Shooting Incident Analysis',
+                    status: 'review',
+                    priority: 'high',
+                  },
                 ].map((caseItem) => (
                   <div
                     key={caseItem.id}
-                    className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    className="cursor-pointer rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-900 dark:text-white">{caseItem.id}</span>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        caseItem.priority === 'high' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600'
-                      }`}>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {caseItem.id}
+                      </span>
+                      <span
+                        className={`rounded px-2 py-1 text-xs font-medium ${
+                          caseItem.priority === 'high'
+                            ? 'bg-red-100 text-red-600'
+                            : 'bg-yellow-100 text-yellow-600'
+                        }`}
+                      >
                         {caseItem.priority}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{caseItem.title}</p>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                      {caseItem.title}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -243,16 +269,14 @@ export default function InvestigationsPage() {
 
         {/* Link Incidents Tab */}
         {activeTab === 'link' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <IncidentLinker />
             <EntityGraph />
           </div>
         )}
 
         {/* Entity Lookup Tab */}
-        {activeTab === 'entity' && (
-          <EntityProfile />
-        )}
+        {activeTab === 'entity' && <EntityProfile />}
 
         {/* Current Case Tab */}
         {activeTab === 'case' && currentCase && (
@@ -264,16 +288,18 @@ export default function InvestigationsPage() {
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                     {currentCase.case_number}
                   </h2>
-                  <p className="text-gray-600 dark:text-gray-400 mt-1">
-                    {currentCase.summary}
-                  </p>
+                  <p className="mt-1 text-gray-600 dark:text-gray-400">{currentCase.summary}</p>
                 </div>
                 {currentCase.risk_assessment && (
-                  <div className={`px-4 py-2 rounded-lg ${
-                    currentCase.risk_assessment.overall_score >= 0.7 ? 'bg-red-100 text-red-700' :
-                    currentCase.risk_assessment.overall_score >= 0.4 ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-green-100 text-green-700'
-                  }`}>
+                  <div
+                    className={`rounded-lg px-4 py-2 ${
+                      currentCase.risk_assessment.overall_score >= 0.7
+                        ? 'bg-red-100 text-red-700'
+                        : currentCase.risk_assessment.overall_score >= 0.4
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : 'bg-green-100 text-green-700'
+                    }`}
+                  >
                     <div className="text-2xl font-bold">
                       {(currentCase.risk_assessment.overall_score * 100).toFixed(0)}%
                     </div>
@@ -283,7 +309,7 @@ export default function InvestigationsPage() {
               </div>
 
               {/* Case stats */}
-              <div className="grid grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="mt-4 grid grid-cols-4 gap-4 border-t border-gray-200 pt-4 dark:border-gray-700">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">
                     {currentCase.linked_incidents.length}
@@ -312,39 +338,43 @@ export default function InvestigationsPage() {
             </div>
 
             {/* Case content grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <Timeline events={currentCase.timeline} />
               <EvidenceViewer evidence={currentCase.evidence} />
             </div>
 
             {/* Suspects and Vehicles */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
                   Suspects ({currentCase.suspects.length})
                 </h3>
                 <div className="space-y-2">
                   {currentCase.suspects.map((suspect, index) => (
-                    <div key={index} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div key={index} className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-gray-900 dark:text-white">
                           {suspect.name || `Suspect ${index + 1}`}
                         </span>
                         {suspect.risk_score && (
-                          <span className={`px-2 py-1 rounded text-xs ${
-                            suspect.risk_score >= 0.7 ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600'
-                          }`}>
+                          <span
+                            className={`rounded px-2 py-1 text-xs ${
+                              suspect.risk_score >= 0.7
+                                ? 'bg-red-100 text-red-600'
+                                : 'bg-yellow-100 text-yellow-600'
+                            }`}
+                          >
                             {(suspect.risk_score * 100).toFixed(0)}% risk
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                         {suspect.description || 'No description available'}
                       </p>
                     </div>
                   ))}
                   {currentCase.suspects.length === 0 && (
-                    <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                    <p className="py-4 text-center text-gray-500 dark:text-gray-400">
                       No suspects identified
                     </p>
                   )}
@@ -352,25 +382,25 @@ export default function InvestigationsPage() {
               </div>
 
               <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
                   Vehicles ({currentCase.vehicles.length})
                 </h3>
                 <div className="space-y-2">
                   {currentCase.vehicles.map((vehicle, index) => (
-                    <div key={index} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div key={index} className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-gray-900 dark:text-white">
                           {vehicle.plate_number || `Vehicle ${index + 1}`}
                         </span>
                         <span className="text-xs text-gray-500">{vehicle.state}</span>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                         {vehicle.year} {vehicle.make} {vehicle.model} - {vehicle.color}
                       </p>
                     </div>
                   ))}
                   {currentCase.vehicles.length === 0 && (
-                    <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                    <p className="py-4 text-center text-gray-500 dark:text-gray-400">
                       No vehicles identified
                     </p>
                   )}
@@ -381,13 +411,16 @@ export default function InvestigationsPage() {
             {/* Recommendations */}
             {currentCase.recommendations && currentCase.recommendations.length > 0 && (
               <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
                   Investigative Recommendations
                 </h3>
                 <ul className="space-y-2">
                   {currentCase.recommendations.map((rec, index) => (
-                    <li key={index} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
-                      <span className="text-blue-500 mt-1">-</span>
+                    <li
+                      key={index}
+                      className="flex items-start gap-2 text-gray-700 dark:text-gray-300"
+                    >
+                      <span className="mt-1 text-blue-500">-</span>
                       {rec}
                     </li>
                   ))}

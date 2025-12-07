@@ -10,7 +10,7 @@ interface CaseExportProps {
 
 /**
  * Case Export component for exporting case reports.
- * 
+ *
  * Supports:
  * - PDF export with full case summary
  * - JSON export for data integration
@@ -86,12 +86,12 @@ export function CaseExport({ caseId, caseNumber }: CaseExportProps) {
 
   return (
     <div className="card">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+      <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
         <Download className="h-5 w-5" />
         Export Case Report
       </h3>
 
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+      <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
         Export the complete case file including summary, evidence, timeline, and recommendations.
       </p>
 
@@ -100,17 +100,17 @@ export function CaseExport({ caseId, caseNumber }: CaseExportProps) {
         <button
           onClick={exportPdf}
           disabled={isExportingPdf || isExportingJson}
-          className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-4 transition-colors hover:border-red-400 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:hover:bg-red-900/20"
         >
           {isExportingPdf ? (
-            <Loader2 className="h-8 w-8 animate-spin text-red-500 mb-2" />
+            <Loader2 className="mb-2 h-8 w-8 animate-spin text-red-500" />
           ) : (
-            <FileText className="h-8 w-8 text-red-500 mb-2" />
+            <FileText className="mb-2 h-8 w-8 text-red-500" />
           )}
           <span className="font-medium text-gray-900 dark:text-white">
             {isExportingPdf ? 'Generating...' : 'Export PDF'}
           </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <span className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Full formatted report
           </span>
         </button>
@@ -119,17 +119,17 @@ export function CaseExport({ caseId, caseNumber }: CaseExportProps) {
         <button
           onClick={exportJson}
           disabled={isExportingPdf || isExportingJson}
-          className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-4 transition-colors hover:border-blue-400 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:hover:bg-blue-900/20"
         >
           {isExportingJson ? (
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-2" />
+            <Loader2 className="mb-2 h-8 w-8 animate-spin text-blue-500" />
           ) : (
-            <FileJson className="h-8 w-8 text-blue-500 mb-2" />
+            <FileJson className="mb-2 h-8 w-8 text-blue-500" />
           )}
           <span className="font-medium text-gray-900 dark:text-white">
             {isExportingJson ? 'Generating...' : 'Export JSON'}
           </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <span className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Machine-readable data
           </span>
         </button>
@@ -137,27 +137,27 @@ export function CaseExport({ caseId, caseNumber }: CaseExportProps) {
 
       {/* Status messages */}
       {error && (
-        <div className="mt-4 flex items-center gap-2 text-red-600 dark:text-red-400 text-sm">
+        <div className="mt-4 flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
           <AlertCircle className="h-4 w-4" />
           {error}
         </div>
       )}
 
       {success && (
-        <div className="mt-4 flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
+        <div className="mt-4 flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
           <CheckCircle className="h-4 w-4" />
           {success}
         </div>
       )}
 
       {/* Export info */}
-      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+      <div className="mt-4 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
         <p className="text-xs text-gray-600 dark:text-gray-400">
-          <strong>PDF Export includes:</strong> Case summary, risk assessment, suspects, vehicles, 
+          <strong>PDF Export includes:</strong> Case summary, risk assessment, suspects, vehicles,
           linked incidents, timeline, evidence list, investigative leads, and recommendations.
         </p>
-        <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-          <strong>JSON Export includes:</strong> All case data in structured format for integration 
+        <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+          <strong>JSON Export includes:</strong> All case data in structured format for integration
           with external systems or further analysis.
         </p>
       </div>

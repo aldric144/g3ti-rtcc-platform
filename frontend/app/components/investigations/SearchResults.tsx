@@ -69,12 +69,8 @@ export function SearchResults({ results, isLoading, query }: SearchResultsProps)
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <FileText className="mx-auto h-12 w-12 text-gray-300" />
-            <p className="mt-4 text-gray-500">
-              No results found for "{query}"
-            </p>
-            <p className="mt-2 text-sm text-gray-400">
-              Try adjusting your search terms or filters
-            </p>
+            <p className="mt-4 text-gray-500">No results found for "{query}"</p>
+            <p className="mt-2 text-sm text-gray-400">Try adjusting your search terms or filters</p>
           </div>
         </div>
       </div>
@@ -96,17 +92,15 @@ export function SearchResults({ results, isLoading, query }: SearchResultsProps)
           return (
             <div
               key={result.id}
-              className="flex items-start gap-4 rounded-lg border p-4 hover:bg-gray-50 cursor-pointer dark:border-gray-700 dark:hover:bg-gray-700"
+              className="flex cursor-pointer items-start gap-4 rounded-lg border p-4 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
             >
               <div className={`rounded-lg p-2 ${typeColors[result.type]}`}>
                 <Icon className="h-5 w-5" />
               </div>
 
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-900 dark:text-white">
-                  {result.title}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-medium text-gray-900 dark:text-white">{result.title}</h3>
+                <p className="truncate text-sm text-gray-600 dark:text-gray-400">
                   {result.description}
                 </p>
                 {result.timestamp && (

@@ -1,7 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText, Volume2, Camera, Car, Shield, Radio, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
+import {
+  FileText,
+  Volume2,
+  Camera,
+  Car,
+  Shield,
+  Radio,
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+} from 'lucide-react';
 
 interface Evidence {
   reports: any[];
@@ -20,7 +30,7 @@ interface EvidenceViewerProps {
 
 /**
  * Evidence Viewer component for displaying collected evidence.
- * 
+ *
  * Displays evidence from:
  * - RMS reports
  * - CAD history
@@ -98,31 +108,30 @@ export function EvidenceViewer({ evidence, onEvidenceClick }: EvidenceViewerProp
 
   return (
     <div className="card">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Evidence Collection
-        </h3>
-        <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm text-gray-600 dark:text-gray-400">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Evidence Collection</h3>
+        <span className="rounded bg-gray-100 px-2 py-1 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-400">
           {totalItems} items
         </span>
       </div>
 
       <div className="space-y-2">
         {sections.map((section) => (
-          <div key={section.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <div
+            key={section.id}
+            className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+          >
             {/* Section header */}
             <button
               onClick={() => toggleSection(section.id)}
-              className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="flex w-full items-center justify-between bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
             >
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${section.bgColor}`}>
+                <div className={`rounded-lg p-2 ${section.bgColor}`}>
                   <section.icon className={`h-4 w-4 ${section.color}`} />
                 </div>
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {section.title}
-                </span>
-                <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded text-xs text-gray-600 dark:text-gray-300">
+                <span className="font-medium text-gray-900 dark:text-white">{section.title}</span>
+                <span className="rounded bg-gray-200 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-600 dark:text-gray-300">
                   {section.items.length}
                 </span>
               </div>
@@ -135,12 +144,12 @@ export function EvidenceViewer({ evidence, onEvidenceClick }: EvidenceViewerProp
 
             {/* Section content */}
             {expandedSections.has(section.id) && section.items.length > 0 && (
-              <div className="p-3 space-y-2 max-h-64 overflow-y-auto">
+              <div className="max-h-64 space-y-2 overflow-y-auto p-3">
                 {section.items.map((item, index) => (
                   <div
                     key={index}
                     onClick={() => onEvidenceClick?.(item, section.id)}
-                    className="p-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded cursor-pointer hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
+                    className="cursor-pointer rounded border border-gray-100 bg-white p-2 transition-colors hover:border-blue-300 dark:border-gray-700 dark:bg-gray-900 dark:hover:border-blue-600"
                   >
                     {renderEvidenceItem(item, section.id)}
                   </div>
@@ -149,7 +158,7 @@ export function EvidenceViewer({ evidence, onEvidenceClick }: EvidenceViewerProp
             )}
 
             {expandedSections.has(section.id) && section.items.length === 0 && (
-              <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">
+              <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                 No {section.title.toLowerCase()} available
               </div>
             )}
@@ -159,8 +168,8 @@ export function EvidenceViewer({ evidence, onEvidenceClick }: EvidenceViewerProp
 
       {/* Attachments section */}
       {evidence.attachments && evidence.attachments.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+        <div className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
+          <h4 className="mb-2 font-medium text-gray-900 dark:text-white">
             Attachments ({evidence.attachments.length})
           </h4>
           <div className="grid grid-cols-2 gap-2">
@@ -170,10 +179,10 @@ export function EvidenceViewer({ evidence, onEvidenceClick }: EvidenceViewerProp
                 href={attachment.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 rounded bg-gray-50 p-2 transition-colors hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
               >
                 <FileText className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1">
+                <span className="flex-1 truncate text-sm text-gray-700 dark:text-gray-300">
                   {attachment.name || `Attachment ${index + 1}`}
                 </span>
                 <ExternalLink className="h-3 w-3 text-gray-400" />
@@ -192,17 +201,15 @@ function renderEvidenceItem(item: any, type: string) {
       return (
         <div>
           <div className="flex items-center justify-between">
-            <span className="font-medium text-sm text-gray-900 dark:text-white">
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
               {item.report_number || item.id}
             </span>
             <span className="text-xs text-gray-500">{item.report_type}</span>
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 truncate">
+          <p className="mt-1 truncate text-xs text-gray-600 dark:text-gray-400">
             {item.summary || item.narrative?.substring(0, 100)}
           </p>
-          {item.date && (
-            <p className="text-xs text-gray-400 mt-1">{item.date}</p>
-          )}
+          {item.date && <p className="mt-1 text-xs text-gray-400">{item.date}</p>}
         </div>
       );
 
@@ -210,17 +217,15 @@ function renderEvidenceItem(item: any, type: string) {
       return (
         <div>
           <div className="flex items-center justify-between">
-            <span className="font-medium text-sm text-gray-900 dark:text-white">
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
               {item.alert_id || item.id}
             </span>
             <span className="text-xs text-gray-500">{item.rounds_detected} rounds</span>
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
             {item.location?.address || `${item.latitude}, ${item.longitude}`}
           </p>
-          {item.timestamp && (
-            <p className="text-xs text-gray-400 mt-1">{item.timestamp}</p>
-          )}
+          {item.timestamp && <p className="mt-1 text-xs text-gray-400">{item.timestamp}</p>}
         </div>
       );
 
@@ -228,20 +233,20 @@ function renderEvidenceItem(item: any, type: string) {
       return (
         <div>
           <div className="flex items-center justify-between">
-            <span className="font-medium text-sm text-gray-900 dark:text-white">
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
               {item.caliber} - {item.weapon_type}
             </span>
             {item.match_confidence && (
-              <span className="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded">
+              <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-600">
                 {(item.match_confidence * 100).toFixed(0)}% match
               </span>
             )}
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
             {item.make} {item.model}
           </p>
           {item.linked_incidents && (
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="mt-1 text-xs text-gray-400">
               {item.linked_incidents.length} linked incidents
             </p>
           )}
@@ -252,17 +257,15 @@ function renderEvidenceItem(item: any, type: string) {
       return (
         <div>
           <div className="flex items-center justify-between">
-            <span className="font-medium text-sm text-gray-900 dark:text-white">
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
               {item.plate_number}
             </span>
             <span className="text-xs text-gray-500">{item.state}</span>
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
             {item.location?.address || item.camera_location}
           </p>
-          {item.timestamp && (
-            <p className="text-xs text-gray-400 mt-1">{item.timestamp}</p>
-          )}
+          {item.timestamp && <p className="mt-1 text-xs text-gray-400">{item.timestamp}</p>}
         </div>
       );
 
@@ -270,17 +273,15 @@ function renderEvidenceItem(item: any, type: string) {
       return (
         <div>
           <div className="flex items-center justify-between">
-            <span className="font-medium text-sm text-gray-900 dark:text-white">
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
               {item.recording_id || item.id}
             </span>
             <span className="text-xs text-gray-500">{item.duration}</span>
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
             Officer: {item.officer_name || item.officer_id}
           </p>
-          {item.timestamp && (
-            <p className="text-xs text-gray-400 mt-1">{item.timestamp}</p>
-          )}
+          {item.timestamp && <p className="mt-1 text-xs text-gray-400">{item.timestamp}</p>}
         </div>
       );
 
@@ -288,14 +289,16 @@ function renderEvidenceItem(item: any, type: string) {
       return (
         <div>
           <div className="flex items-center justify-between">
-            <span className="font-medium text-sm text-gray-900 dark:text-white">
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
               {item.camera_name || item.camera_id}
             </span>
-            <span className={`text-xs px-2 py-0.5 rounded ${item.status === 'online' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}>
+            <span
+              className={`rounded px-2 py-0.5 text-xs ${item.status === 'online' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}
+            >
               {item.status}
             </span>
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
             {item.location?.address || `${item.latitude}, ${item.longitude}`}
           </p>
         </div>

@@ -49,34 +49,28 @@ export function SystemStatus() {
   return (
     <div className="card">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          System Status
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">System Status</h2>
         <button
           onClick={handleRefresh}
           disabled={isRefreshing}
           className="rounded-lg p-1 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
         >
-          <RefreshCw
-            className={clsx('h-4 w-4', isRefreshing && 'animate-spin')}
-          />
+          <RefreshCw className={clsx('h-4 w-4', isRefreshing && 'animate-spin')} />
         </button>
       </div>
 
       {/* Overall status */}
       <div className="mb-4 rounded-lg bg-gray-50 p-3 dark:bg-gray-700">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            Overall Health
-          </span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">Overall Health</span>
           <span
             className={clsx(
               'text-sm font-medium',
               healthyCount === totalCount
                 ? 'text-green-600'
                 : healthyCount >= totalCount - 1
-                ? 'text-yellow-600'
-                : 'text-red-600'
+                  ? 'text-yellow-600'
+                  : 'text-red-600'
             )}
           >
             {healthyCount}/{totalCount} Operational
@@ -89,8 +83,8 @@ export function SystemStatus() {
               healthyCount === totalCount
                 ? 'bg-green-500'
                 : healthyCount >= totalCount - 1
-                ? 'bg-yellow-500'
-                : 'bg-red-500'
+                  ? 'bg-yellow-500'
+                  : 'bg-red-500'
             )}
             style={{ width: `${(healthyCount / totalCount) * 100}%` }}
           />
@@ -100,15 +94,10 @@ export function SystemStatus() {
       {/* Component list */}
       <div className="space-y-2">
         {components.map((component) => (
-          <div
-            key={component.name}
-            className="flex items-center justify-between py-1"
-          >
+          <div key={component.name} className="flex items-center justify-between py-1">
             <div className="flex items-center gap-2">
               {getStatusIcon(component.status)}
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                {component.name}
-              </span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{component.name}</span>
             </div>
             {component.message && (
               <span className="text-xs text-gray-500">{component.message}</span>

@@ -9,7 +9,7 @@ import { EventPanel } from '@/app/components/map/EventPanel';
 
 /**
  * Full-screen map page for geospatial intelligence.
- * 
+ *
  * Features:
  * - Interactive Mapbox map
  * - Real-time event markers
@@ -23,14 +23,12 @@ export default function MapPage() {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
 
   return (
-    <div className="relative h-[calc(100vh-8rem)] rounded-lg overflow-hidden">
+    <div className="relative h-[calc(100vh-8rem)] overflow-hidden rounded-lg">
       {/* Map container */}
-      <MapContainer
-        onEventSelect={setSelectedEvent}
-      />
+      <MapContainer onEventSelect={setSelectedEvent} />
 
       {/* Map controls overlay */}
-      <div className="absolute top-4 left-4 z-10 space-y-2">
+      <div className="absolute left-4 top-4 z-10 space-y-2">
         <button
           onClick={() => setShowLayers(!showLayers)}
           className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 shadow-lg hover:bg-gray-50"
@@ -38,7 +36,7 @@ export default function MapPage() {
           <Layers className="h-4 w-4" />
           <span className="text-sm font-medium">Layers</span>
         </button>
-        
+
         <button
           onClick={() => setShowFilters(!showFilters)}
           className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 shadow-lg hover:bg-gray-50"
@@ -49,7 +47,7 @@ export default function MapPage() {
       </div>
 
       {/* Zoom controls */}
-      <div className="absolute top-4 right-4 z-10 flex flex-col gap-1">
+      <div className="absolute right-4 top-4 z-10 flex flex-col gap-1">
         <button className="rounded-lg bg-white p-2 shadow-lg hover:bg-gray-50">
           <ZoomIn className="h-4 w-4" />
         </button>
@@ -63,7 +61,7 @@ export default function MapPage() {
 
       {/* Layer controls panel */}
       {showLayers && (
-        <div className="absolute top-16 left-4 z-10 w-64">
+        <div className="absolute left-4 top-16 z-10 w-64">
           <MapControls onClose={() => setShowLayers(false)} />
         </div>
       )}
@@ -75,11 +73,8 @@ export default function MapPage() {
 
       {/* Event detail panel */}
       {selectedEvent && (
-        <div className="absolute top-4 right-16 z-10 w-80">
-          <EventPanel
-            eventId={selectedEvent}
-            onClose={() => setSelectedEvent(null)}
-          />
+        <div className="absolute right-16 top-4 z-10 w-80">
+          <EventPanel eventId={selectedEvent} onClose={() => setSelectedEvent(null)} />
         </div>
       )}
     </div>
