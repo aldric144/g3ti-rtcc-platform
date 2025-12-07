@@ -154,7 +154,7 @@ class BaseIntegration(ABC, Generic[T]):
                 await self._client.aclose()
                 self._client = None
 
-            raise IntegrationConnectionError(self.name, str(e))
+            raise IntegrationConnectionError(self.name, str(e)) from e
 
     async def disconnect(self) -> None:
         """Close connection to the external system."""
@@ -218,13 +218,13 @@ class BaseIntegration(ABC, Generic[T]):
             self._error_count += 1
 
             if e.response.status_code == 401:
-                raise IntegrationAuthenticationError(self.name)
+                raise IntegrationAuthenticationError(self.name) from e
 
-            raise IntegrationError(self.name, f"HTTP {e.response.status_code}: {e.response.text}")
+            raise IntegrationError(self.name, f"HTTP {e.response.status_code}: {e.response.text}") from e
 
         except httpx.RequestError as e:
             self._error_count += 1
-            raise IntegrationConnectionError(self.name, str(e))
+            raise IntegrationConnectionError(self.name, str(e)) from e
 
     async def get(self, endpoint: str, **kwargs: Any) -> dict[str, Any]:
         """Make a GET request."""

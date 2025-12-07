@@ -63,7 +63,7 @@ async def create_entity(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=e.message,
-        )
+        ) from e
 
 
 @router.get("/{entity_type}/{entity_id}")
@@ -85,11 +85,11 @@ async def get_entity(
         label = entity_type.capitalize()
         entity = await graph_service.get_node(label=label, entity_id=entity_id, user_id=token.sub)
         return entity
-    except EntityNotFoundError:
+    except EntityNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"{entity_type} not found",
-        )
+        ) from e
 
 
 @router.put("/{entity_type}/{entity_id}")
@@ -115,11 +115,11 @@ async def update_entity(
             label=label, entity_id=entity_id, properties=properties, user_id=token.sub
         )
         return entity
-    except EntityNotFoundError:
+    except EntityNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"{entity_type} not found",
-        )
+        ) from e
 
 
 @router.delete("/{entity_type}/{entity_id}")
@@ -141,11 +141,11 @@ async def delete_entity(
         label = entity_type.capitalize()
         await graph_service.delete_node(label=label, entity_id=entity_id, user_id=token.sub)
         return {"message": f"{entity_type} deleted successfully"}
-    except EntityNotFoundError:
+    except EntityNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"{entity_type} not found",
-        )
+        ) from e
 
 
 @router.get("/{entity_type}/{entity_id}/relationships")
@@ -184,7 +184,7 @@ async def get_entity_relationships(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error retrieving relationships",
-        )
+        ) from e
 
 
 @router.get("/{entity_type}/{entity_id}/network")
@@ -217,7 +217,7 @@ async def get_entity_network(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error retrieving network",
-        )
+        ) from e
 
 
 # Association (relationship) endpoints
@@ -261,12 +261,12 @@ async def create_association(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=e.message,
-        )
+        ) from e
     except EntityNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=e.message,
-        )
+        ) from e
 
 
 @router.delete("/associations")
