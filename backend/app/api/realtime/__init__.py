@@ -342,3 +342,403 @@ def get_case_subscribers(case_id: str) -> set[str]:
 def get_subscribed_cases() -> list[str]:
     """Get list of all cases with active subscriptions."""
     return list(_case_subscriptions.keys())
+
+
+# ============================================================================
+# Phase 5: Tactical Analytics WebSocket Channels
+# ============================================================================
+
+# Store for tactical subscriptions
+_tactical_alert_subscriptions: set[str] = set()
+_tactical_zone_subscriptions: dict[str, set[str]] = {}  # zone_id -> client_ids
+_tactical_prediction_subscriptions: set[str] = set()
+
+
+@router.websocket("/ws/tactical/alerts")
+async def websocket_tactical_alerts(
+    websocket: WebSocket,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for real-time tactical alerts.
+
+    Connect to receive tactical alerts including:
+    - zone_risk_update: Zone risk score changed
+    - new_hotspot: New hotspot detected
+    - patrol_route_update: Patrol route recommendation updated
+    - tactical_alert: General tactical alert
+    - anomaly_relevant_to_zone: AI anomaly detected in zone
+    - predicted_cluster: New predicted activity cluster
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    # Validate token if provided
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("tactical_alerts_websocket_auth_failed", error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    # Accept connection
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("tactical_alerts_websocket_connection_rejected", error=str(e))
+        return
+
+    # Add to tactical alert subscriptions
+    _tactical_alert_subscriptions.add(client_id)
+
+    logger.info("tactical_alerts_websocket_connected", client_id=client_id, user_id=user_id)
+
+    # Send connection confirmation
+    await websocket.send_json(
+        {
+            "type": "connected",
+            "channel": "tactical_alerts",
+            "message": "Subscribed to tactical alerts",
+        }
+    )
+
+    try:
+        # Handle messages
+        while True:
+            data = await websocket.receive_text()
+            import json
+
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("tactical_alerts_websocket_disconnected", client_id=client_id)
+    except Exception as e:
+        logger.error("tactical_alerts_websocket_error", client_id=client_id, error=str(e))
+    finally:
+        _tactical_alert_subscriptions.discard(client_id)
+        await ws_manager.disconnect(client_id)
+
+
+@router.websocket("/ws/tactical/zones")
+async def websocket_tactical_zones(
+    websocket: WebSocket,
+    zone_id: str | None = Query(default=None),
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for real-time zone updates.
+
+    Connect to receive updates for tactical zones including:
+    - zone_risk_update: Zone risk score changed
+    - zone_activity_update: Zone activity level changed
+    - zone_status_change: Zone status changed (hot/warm/cool/cold)
+    - zone_incident: New incident in zone
+
+    Query Parameters:
+    - **zone_id**: Optional specific zone to subscribe to (all zones if not specified)
+    - **token**: JWT access token for authentication
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    # Validate token if provided
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("tactical_zones_websocket_auth_failed", error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    # Accept connection
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("tactical_zones_websocket_connection_rejected", error=str(e))
+        return
+
+    # Add to zone subscriptions
+    subscription_key = zone_id or "__all__"
+    if subscription_key not in _tactical_zone_subscriptions:
+        _tactical_zone_subscriptions[subscription_key] = set()
+    _tactical_zone_subscriptions[subscription_key].add(client_id)
+
+    logger.info(
+        "tactical_zones_websocket_connected",
+        client_id=client_id,
+        user_id=user_id,
+        zone_id=zone_id,
+    )
+
+    # Send connection confirmation
+    await websocket.send_json(
+        {
+            "type": "connected",
+            "channel": "tactical_zones",
+            "zone_id": zone_id,
+            "message": f"Subscribed to zone updates{f' for {zone_id}' if zone_id else ''}",
+        }
+    )
+
+    try:
+        # Handle messages
+        while True:
+            data = await websocket.receive_text()
+            import json
+
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("tactical_zones_websocket_disconnected", client_id=client_id)
+    except Exception as e:
+        logger.error("tactical_zones_websocket_error", client_id=client_id, error=str(e))
+    finally:
+        if subscription_key in _tactical_zone_subscriptions:
+            _tactical_zone_subscriptions[subscription_key].discard(client_id)
+            if not _tactical_zone_subscriptions[subscription_key]:
+                del _tactical_zone_subscriptions[subscription_key]
+        await ws_manager.disconnect(client_id)
+
+
+@router.websocket("/ws/tactical/predictions")
+async def websocket_tactical_predictions(
+    websocket: WebSocket,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for real-time prediction updates.
+
+    Connect to receive prediction updates including:
+    - prediction_update: New prediction generated
+    - hotspot_prediction: New hotspot predicted
+    - forecast_update: Forecast model updated
+    - risk_forecast: Risk forecast changed
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    # Validate token if provided
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("tactical_predictions_websocket_auth_failed", error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    # Accept connection
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("tactical_predictions_websocket_connection_rejected", error=str(e))
+        return
+
+    # Add to prediction subscriptions
+    _tactical_prediction_subscriptions.add(client_id)
+
+    logger.info("tactical_predictions_websocket_connected", client_id=client_id, user_id=user_id)
+
+    # Send connection confirmation
+    await websocket.send_json(
+        {
+            "type": "connected",
+            "channel": "tactical_predictions",
+            "message": "Subscribed to prediction updates",
+        }
+    )
+
+    try:
+        # Handle messages
+        while True:
+            data = await websocket.receive_text()
+            import json
+
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("tactical_predictions_websocket_disconnected", client_id=client_id)
+    except Exception as e:
+        logger.error("tactical_predictions_websocket_error", client_id=client_id, error=str(e))
+    finally:
+        _tactical_prediction_subscriptions.discard(client_id)
+        await ws_manager.disconnect(client_id)
+
+
+# ============================================================================
+# Tactical Broadcast Functions
+# ============================================================================
+
+
+async def broadcast_tactical_alert(
+    alert_type: str,
+    data: dict,
+    severity: str = "medium",
+) -> None:
+    """
+    Broadcast a tactical alert to all subscribed clients.
+
+    Args:
+        alert_type: Type of alert (zone_risk_update, new_hotspot, etc.)
+        data: Alert data to send
+        severity: Alert severity (low, medium, high, critical)
+    """
+    if not _tactical_alert_subscriptions:
+        return
+
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": alert_type,
+        "severity": severity,
+        "data": data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    for client_id in list(_tactical_alert_subscriptions):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning(
+                "tactical_alert_broadcast_failed",
+                client_id=client_id,
+                error=str(e),
+            )
+
+
+async def broadcast_zone_update(
+    zone_id: str,
+    update_type: str,
+    data: dict,
+) -> None:
+    """
+    Broadcast a zone update to subscribed clients.
+
+    Args:
+        zone_id: The zone ID to broadcast for
+        update_type: Type of update
+        data: Update data to send
+    """
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": update_type,
+        "zone_id": zone_id,
+        "data": data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    # Broadcast to zone-specific subscribers
+    if zone_id in _tactical_zone_subscriptions:
+        for client_id in list(_tactical_zone_subscriptions[zone_id]):
+            try:
+                await ws_manager.send_to_client(client_id, message)
+            except Exception as e:
+                logger.warning(
+                    "zone_update_broadcast_failed",
+                    zone_id=zone_id,
+                    client_id=client_id,
+                    error=str(e),
+                )
+
+    # Broadcast to all-zones subscribers
+    if "__all__" in _tactical_zone_subscriptions:
+        for client_id in list(_tactical_zone_subscriptions["__all__"]):
+            try:
+                await ws_manager.send_to_client(client_id, message)
+            except Exception as e:
+                logger.warning(
+                    "zone_update_broadcast_failed",
+                    zone_id=zone_id,
+                    client_id=client_id,
+                    error=str(e),
+                )
+
+
+async def broadcast_prediction_update(
+    prediction_type: str,
+    data: dict,
+) -> None:
+    """
+    Broadcast a prediction update to subscribed clients.
+
+    Args:
+        prediction_type: Type of prediction update
+        data: Prediction data to send
+    """
+    if not _tactical_prediction_subscriptions:
+        return
+
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": prediction_type,
+        "data": data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    for client_id in list(_tactical_prediction_subscriptions):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning(
+                "prediction_update_broadcast_failed",
+                client_id=client_id,
+                error=str(e),
+            )
+
+
+def get_tactical_alert_subscribers() -> set[str]:
+    """Get the set of client IDs subscribed to tactical alerts."""
+    return _tactical_alert_subscriptions.copy()
+
+
+def get_tactical_zone_subscribers(zone_id: str | None = None) -> set[str]:
+    """Get the set of client IDs subscribed to zone updates."""
+    if zone_id:
+        return _tactical_zone_subscriptions.get(zone_id, set()).copy()
+    return _tactical_zone_subscriptions.get("__all__", set()).copy()
+
+
+def get_tactical_prediction_subscribers() -> set[str]:
+    """Get the set of client IDs subscribed to prediction updates."""
+    return _tactical_prediction_subscriptions.copy()
