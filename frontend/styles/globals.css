@@ -52,7 +52,9 @@
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: 'rlig' 1, 'calt' 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
   }
 
   /* Custom scrollbar */
@@ -66,7 +68,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-muted-foreground/30;
+    @apply bg-muted-foreground/30 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
@@ -78,12 +80,12 @@
 @layer components {
   /* Card component */
   .card {
-    @apply rounded-lg border bg-card p-4 shadow-sm;
+    @apply bg-card rounded-lg border p-4 shadow-sm;
   }
 
   /* Button variants */
   .btn {
-    @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+    @apply focus-visible:ring-ring inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-primary {
@@ -99,7 +101,7 @@
   }
 
   .btn-outline {
-    @apply btn border border-input bg-background hover:bg-accent hover:text-accent-foreground;
+    @apply btn border-input bg-background hover:bg-accent hover:text-accent-foreground border;
   }
 
   .btn-ghost {
@@ -108,7 +110,7 @@
 
   /* Input styles */
   .input {
-    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
+    @apply border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   /* Badge styles */
@@ -193,7 +195,7 @@
 }
 
 .mapboxgl-popup-content {
-  @apply rounded-lg bg-card p-3 shadow-lg;
+  @apply bg-card rounded-lg p-3 shadow-lg;
 }
 
 .mapboxgl-popup-close-button {

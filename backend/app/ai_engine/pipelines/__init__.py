@@ -151,9 +151,7 @@ class BaseResolver(ABC):
         pass
 
     @abstractmethod
-    async def calculate_similarity(
-        self, entity1: dict[str, Any], entity2: dict[str, Any]
-    ) -> float:
+    async def calculate_similarity(self, entity1: dict[str, Any], entity2: dict[str, Any]) -> float:
         """
         Calculate similarity between two entities.
 
@@ -185,9 +183,7 @@ class BasePredictor(ABC):
         pass
 
     @abstractmethod
-    async def predict(
-        self, input_data: dict[str, Any], context: PipelineContext
-    ) -> dict[str, Any]:
+    async def predict(self, input_data: dict[str, Any], context: PipelineContext) -> dict[str, Any]:
         """
         Make a prediction based on input data.
 
@@ -261,9 +257,7 @@ class QueryPipeline(BasePipeline[str, dict[str, Any]]):
         self._initialized = True
         logger.info("query_pipeline_initialized")
 
-    async def process(
-        self, input_data: str, context: PipelineContext
-    ) -> dict[str, Any]:
+    async def process(self, input_data: str, context: PipelineContext) -> dict[str, Any]:
         """Process a natural language query."""
         return await self.run_stages(input_data, context)
 
@@ -285,9 +279,7 @@ class AnalysisPipeline(BasePipeline[dict[str, Any], dict[str, Any]]):
         self._initialized = True
         logger.info("analysis_pipeline_initialized")
 
-    async def process(
-        self, input_data: dict[str, Any], context: PipelineContext
-    ) -> dict[str, Any]:
+    async def process(self, input_data: dict[str, Any], context: PipelineContext) -> dict[str, Any]:
         """Process analysis request."""
         return await self.run_stages(input_data, context)
 

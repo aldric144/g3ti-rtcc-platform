@@ -29,18 +29,14 @@ export function MapControls({ onClose }: MapControlsProps) {
 
   const toggleLayer = (id: string) => {
     setLayers((prev) =>
-      prev.map((layer) =>
-        layer.id === id ? { ...layer, enabled: !layer.enabled } : layer
-      )
+      prev.map((layer) => (layer.id === id ? { ...layer, enabled: !layer.enabled } : layer))
     );
   };
 
   return (
     <div className="rounded-lg bg-white shadow-lg dark:bg-gray-800">
       <div className="flex items-center justify-between border-b p-3 dark:border-gray-700">
-        <h3 className="font-semibold text-gray-900 dark:text-white">
-          Map Layers
-        </h3>
+        <h3 className="font-semibold text-gray-900 dark:text-white">Map Layers</h3>
         <button
           onClick={onClose}
           className="rounded p-1 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -49,7 +45,7 @@ export function MapControls({ onClose }: MapControlsProps) {
         </button>
       </div>
 
-      <div className="p-3 space-y-2">
+      <div className="space-y-2 p-3">
         {layers.map((layer) => (
           <button
             key={layer.id}
@@ -57,13 +53,8 @@ export function MapControls({ onClose }: MapControlsProps) {
             className="flex w-full items-center justify-between rounded-lg px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             <div className="flex items-center gap-3">
-              <div
-                className="h-3 w-3 rounded-full"
-                style={{ backgroundColor: layer.color }}
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                {layer.name}
-              </span>
+              <div className="h-3 w-3 rounded-full" style={{ backgroundColor: layer.color }} />
+              <span className="text-sm text-gray-700 dark:text-gray-300">{layer.name}</span>
             </div>
             {layer.enabled ? (
               <Eye className="h-4 w-4 text-gray-500" />

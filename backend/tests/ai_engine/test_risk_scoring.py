@@ -4,13 +4,12 @@ Unit tests for the Risk Scoring module.
 Tests risk score calculation, factor weighting, and entity scoring.
 """
 
-import pytest
 from datetime import datetime, timedelta
 
 from app.ai_engine.predictive_models import (
-    RiskScoringEngine,
-    RiskFactor,
     CrimePredictor,
+    RiskFactor,
+    RiskScoringEngine,
 )
 
 

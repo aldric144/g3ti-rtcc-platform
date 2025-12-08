@@ -120,9 +120,7 @@ class AuthService:
 
         # Check if account is locked
         if user.locked_until and datetime.now(UTC) < user.locked_until:
-            remaining_minutes = int(
-                (user.locked_until - datetime.now(UTC)).total_seconds() / 60
-            )
+            remaining_minutes = int((user.locked_until - datetime.now(UTC)).total_seconds() / 60)
             audit_logger.log_authentication(
                 user_id=user.id,
                 username=username,

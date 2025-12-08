@@ -22,7 +22,7 @@ export function SearchFilters() {
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       {/* Entity types */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
           Entity Types
         </label>
         <div className="space-y-2">
@@ -39,9 +39,7 @@ export function SearchFilters() {
                 }
                 className="rounded border-gray-300 text-rtcc-accent focus:ring-rtcc-accent"
               />
-              <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">
-                {type}s
-              </span>
+              <span className="text-sm capitalize text-gray-600 dark:text-gray-400">{type}s</span>
             </label>
           ))}
         </div>
@@ -49,25 +47,21 @@ export function SearchFilters() {
 
       {/* Date range */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
           Date Range
         </label>
         <div className="space-y-2">
           <input
             type="date"
             value={dateRange.from}
-            onChange={(e) =>
-              setDateRange((prev) => ({ ...prev, from: e.target.value }))
-            }
+            onChange={(e) => setDateRange((prev) => ({ ...prev, from: e.target.value }))}
             className="input"
             placeholder="From"
           />
           <input
             type="date"
             value={dateRange.to}
-            onChange={(e) =>
-              setDateRange((prev) => ({ ...prev, to: e.target.value }))
-            }
+            onChange={(e) => setDateRange((prev) => ({ ...prev, to: e.target.value }))}
             className="input"
             placeholder="To"
           />
@@ -76,7 +70,7 @@ export function SearchFilters() {
 
       {/* Quick filters */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
           Quick Filters
         </label>
         <div className="flex flex-wrap gap-2">

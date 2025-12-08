@@ -43,7 +43,7 @@ def parse_datetime(value: str | datetime | None) -> datetime | None:
             return value.replace(tzinfo=UTC)
         return value.astimezone(UTC)
 
-    if isinstance(value, (int, float)):
+    if isinstance(value, int | float):
         return datetime.fromtimestamp(value, tz=UTC)
 
     # Try parsing as ISO format

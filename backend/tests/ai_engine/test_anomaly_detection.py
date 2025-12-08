@@ -5,7 +5,6 @@ Tests anomaly detection algorithms including Z-score analysis,
 DBSCAN clustering, and various anomaly types.
 """
 
-import pytest
 from datetime import datetime, timedelta
 
 from app.ai_engine.anomaly_detection import (

@@ -281,9 +281,7 @@ class EntityResolver(BaseResolver):
 
         return resolved_entities
 
-    async def calculate_similarity(
-        self, entity1: dict[str, Any], entity2: dict[str, Any]
-    ) -> float:
+    async def calculate_similarity(self, entity1: dict[str, Any], entity2: dict[str, Any]) -> float:
         """
         Calculate similarity between two entities.
 
@@ -468,9 +466,7 @@ class EntityResolver(BaseResolver):
 
         return weighted_score
 
-    def _calculate_address_similarity(
-        self, addr1: dict[str, Any], addr2: dict[str, Any]
-    ) -> float:
+    def _calculate_address_similarity(self, addr1: dict[str, Any], addr2: dict[str, Any]) -> float:
         """Calculate similarity between two address entities."""
         scores = []
         weights = []
@@ -588,16 +584,15 @@ class PersonAliasResolver(BaseResolver):
     ) -> list[dict[str, Any]]:
         """Resolve person aliases."""
         persons = [
-            e for e in entities
+            e
+            for e in entities
             if (e.get("entity_type") or e.get("type")) in ["person", EntityType.PERSON.value]
         ]
 
         resolver = EntityResolver()
         return await resolver.resolve(persons, context)
 
-    async def calculate_similarity(
-        self, entity1: dict[str, Any], entity2: dict[str, Any]
-    ) -> float:
+    async def calculate_similarity(self, entity1: dict[str, Any], entity2: dict[str, Any]) -> float:
         """Calculate similarity between two persons."""
         resolver = EntityResolver()
         return resolver._calculate_person_similarity(entity1, entity2)
@@ -615,16 +610,15 @@ class VehicleAliasResolver(BaseResolver):
     ) -> list[dict[str, Any]]:
         """Resolve vehicle aliases."""
         vehicles = [
-            e for e in entities
+            e
+            for e in entities
             if (e.get("entity_type") or e.get("type")) in ["vehicle", EntityType.VEHICLE.value]
         ]
 
         resolver = EntityResolver()
         return await resolver.resolve(vehicles, context)
 
-    async def calculate_similarity(
-        self, entity1: dict[str, Any], entity2: dict[str, Any]
-    ) -> float:
+    async def calculate_similarity(self, entity1: dict[str, Any], entity2: dict[str, Any]) -> float:
         """Calculate similarity between two vehicles."""
         resolver = EntityResolver()
         return resolver._calculate_vehicle_similarity(entity1, entity2)
@@ -642,16 +636,15 @@ class IncidentLinkageResolver(BaseResolver):
     ) -> list[dict[str, Any]]:
         """Resolve incident linkages."""
         incidents = [
-            e for e in entities
+            e
+            for e in entities
             if (e.get("entity_type") or e.get("type")) in ["incident", EntityType.INCIDENT.value]
         ]
 
         resolver = EntityResolver()
         return await resolver.resolve(incidents, context)
 
-    async def calculate_similarity(
-        self, entity1: dict[str, Any], entity2: dict[str, Any]
-    ) -> float:
+    async def calculate_similarity(self, entity1: dict[str, Any], entity2: dict[str, Any]) -> float:
         """Calculate similarity between two incidents."""
         resolver = EntityResolver()
         return resolver._calculate_incident_similarity(entity1, entity2)

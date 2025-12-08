@@ -80,13 +80,13 @@ class Neo4jManager:
 
         except AuthError as e:
             logger.error("neo4j_auth_error", error=str(e))
-            raise Neo4jConnectionError(f"Neo4j authentication failed: {e}")
+            raise Neo4jConnectionError(f"Neo4j authentication failed: {e}") from e
         except ServiceUnavailable as e:
             logger.error("neo4j_unavailable", error=str(e))
-            raise Neo4jConnectionError(f"Neo4j service unavailable: {e}")
+            raise Neo4jConnectionError(f"Neo4j service unavailable: {e}") from e
         except Exception as e:
             logger.error("neo4j_connection_error", error=str(e))
-            raise Neo4jConnectionError(f"Failed to connect to Neo4j: {e}")
+            raise Neo4jConnectionError(f"Failed to connect to Neo4j: {e}") from e
 
     async def close(self) -> None:
         """Close the Neo4j driver connection."""

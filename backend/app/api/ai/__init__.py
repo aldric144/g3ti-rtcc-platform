@@ -12,7 +12,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
-from app.ai_engine import AIManager, get_ai_manager
+from app.ai_engine import get_ai_manager
 from app.api.deps import get_current_user
 from app.core.logging import audit_logger, get_logger
 from app.schemas.auth import UserInDB
@@ -196,8 +196,13 @@ async def process_ai_query(
             summary=result.summary,
             entities=[e.to_dict() if hasattr(e, "to_dict") else e for e in result.entities],
             incidents=result.incidents,
-            relationships=[r.to_dict() if hasattr(r, "to_dict") else r for r in result.relationships],
-            risk_scores={k: v.to_dict() if hasattr(v, "to_dict") else v for k, v in result.risk_scores.items()},
+            relationships=[
+                r.to_dict() if hasattr(r, "to_dict") else r for r in result.relationships
+            ],
+            risk_scores={
+                k: v.to_dict() if hasattr(v, "to_dict") else v
+                for k, v in result.risk_scores.items()
+            },
             anomalies=[a.to_dict() if hasattr(a, "to_dict") else a for a in result.anomalies],
             patterns=[p.to_dict() if hasattr(p, "to_dict") else p for p in result.patterns],
             predictions=[p.to_dict() if hasattr(p, "to_dict") else p for p in result.predictions],
@@ -255,10 +260,7 @@ async def get_anomalies(
             user_id=current_user.id,
         )
 
-        anomaly_dicts = [
-            a.to_dict() if hasattr(a, "to_dict") else a
-            for a in anomalies
-        ]
+        anomaly_dicts = [a.to_dict() if hasattr(a, "to_dict") else a for a in anomalies]
 
         return AnomalyResponse(
             anomalies=anomaly_dicts,
@@ -321,10 +323,7 @@ async def get_patterns(
             user_id=current_user.id,
         )
 
-        pattern_dicts = [
-            p.to_dict() if hasattr(p, "to_dict") else p
-            for p in patterns
-        ]
+        pattern_dicts = [p.to_dict() if hasattr(p, "to_dict") else p for p in patterns]
 
         return PatternResponse(
             patterns=pattern_dicts,
@@ -376,9 +375,7 @@ async def get_prediction(
             user_id=current_user.id,
         )
 
-        prediction_dict = (
-            prediction.to_dict() if hasattr(prediction, "to_dict") else prediction
-        )
+        prediction_dict = prediction.to_dict() if hasattr(prediction, "to_dict") else prediction
 
         return PredictionResponse(
             prediction=prediction_dict,
@@ -429,13 +426,11 @@ async def calculate_risk_scores(
             user_id=current_user.id,
         )
 
-        score_dicts = {
-            k: v.to_dict() if hasattr(v, "to_dict") else v
-            for k, v in scores.items()
-        }
+        score_dicts = {k: v.to_dict() if hasattr(v, "to_dict") else v for k, v in scores.items()}
 
         high_risk_count = sum(
-            1 for v in scores.values()
+            1
+            for v in scores.values()
             if hasattr(v, "level") and v.level.value in ["critical", "high"]
         )
 
@@ -487,13 +482,14 @@ async def resolve_entities(
             user_id=current_user.id,
         )
 
-        resolved_dicts = [
-            e.to_dict() if hasattr(e, "to_dict") else e
-            for e in resolved
-        ]
+        resolved_dicts = [e.to_dict() if hasattr(e, "to_dict") else e for e in resolved]
 
         merge_candidates_count = sum(
-            len(e.get("merge_candidates", []) if isinstance(e, dict) else getattr(e, "merge_candidates", []))
+            len(
+                e.get("merge_candidates", [])
+                if isinstance(e, dict)
+                else getattr(e, "merge_candidates", [])
+            )
             for e in resolved
         )
 

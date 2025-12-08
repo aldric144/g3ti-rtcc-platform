@@ -17,13 +17,8 @@ export function MapLegend() {
       <div className="flex items-center gap-4">
         {items.map((item) => (
           <div key={item.label} className="flex items-center gap-1.5">
-            <div
-              className="h-2.5 w-2.5 rounded-full"
-              style={{ backgroundColor: item.color }}
-            />
-            <span className="text-xs text-gray-600 dark:text-gray-400">
-              {item.label}
-            </span>
+            <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+            <span className="text-xs text-gray-600 dark:text-gray-400">{item.label}</span>
           </div>
         ))}
       </div>

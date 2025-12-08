@@ -128,9 +128,8 @@ class SearchService:
 
         for index_name in indices:
             try:
-                search_fields = self.SEARCH_FIELDS.get(
-                    index_name, ["*"]  # Search all fields if not specified
-                )
+                # Get search fields for this index (reserved for future field-specific search)
+                _search_fields = self.SEARCH_FIELDS.get(index_name, ["*"])  # noqa: F841
 
                 result = await es.search(
                     index_name=index_name,
