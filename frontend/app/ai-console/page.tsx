@@ -187,12 +187,12 @@ export default function AIConsolePage() {
 
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${wsProtocol}//${window.location.host}/api/v1/realtime/ai-events`;
-    
+
     let ws: WebSocket | null = null;
-    
+
     try {
       ws = new WebSocket(wsUrl);
-      
+
       ws.onopen = () => {
         setWsConnected(true);
         console.log('AI Events WebSocket connected');
@@ -254,9 +254,7 @@ export default function AIConsolePage() {
               }`}
             >
               <span
-                className={`h-2 w-2 rounded-full ${
-                  wsConnected ? 'bg-green-500' : 'bg-red-500'
-                }`}
+                className={`h-2 w-2 rounded-full ${wsConnected ? 'bg-green-500' : 'bg-red-500'}`}
               />
               {wsConnected ? 'Live' : 'Disconnected'}
             </span>
@@ -279,22 +277,19 @@ export default function AIConsolePage() {
         {queryResult && (
           <div className="mb-6 rounded-lg bg-white p-4 shadow dark:bg-gray-800">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Query Results
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Query Results</h2>
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <span>Confidence: {(queryResult.confidence * 100).toFixed(1)}%</span>
                 <span>Time: {queryResult.processing_time_ms.toFixed(0)}ms</span>
               </div>
             </div>
-            <p className="mb-4 text-gray-700 dark:text-gray-300">
-              {queryResult.summary}
-            </p>
-            
+            <p className="mb-4 text-gray-700 dark:text-gray-300">{queryResult.summary}</p>
+
             {queryResult.entities.length > 0 && (
               <div className="mb-4">
                 <h3 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Entity Graph ({queryResult.entities.length} entities, {queryResult.relationships.length} relationships)
+                  Entity Graph ({queryResult.entities.length} entities,{' '}
+                  {queryResult.relationships.length} relationships)
                 </h3>
                 <EntityGraph
                   entities={queryResult.entities}
@@ -306,7 +301,7 @@ export default function AIConsolePage() {
         )}
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -358,13 +353,9 @@ export default function AIConsolePage() {
             <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
               <div className="mb-4 flex items-center gap-2">
                 <Shield className="h-5 w-5 text-red-500" />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Risk Scores
-                </h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Risk Scores</h2>
               </div>
-              <RiskDashboard
-                riskScores={queryResult?.risk_scores || {}}
-              />
+              <RiskDashboard riskScores={queryResult?.risk_scores || {}} />
             </div>
 
             <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">

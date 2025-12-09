@@ -12,6 +12,7 @@ Tests cover:
 from unittest.mock import MagicMock
 
 import pytest
+from pydantic import ValidationError
 
 from app.db.neo4j_manager import Neo4jManager
 from app.schemas.entities import (
@@ -39,7 +40,7 @@ class TestEntityCreation:
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
         # Create the node
-        result = manager.create_node(EntityType.PERSON, sample_person_data)
+        _result = manager.create_node(EntityType.PERSON, sample_person_data)
 
         # Verify the query was called
         mock_session.run.assert_called_once()
@@ -59,7 +60,7 @@ class TestEntityCreation:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        result = manager.create_node(EntityType.VEHICLE, sample_vehicle_data)
+        _result = manager.create_node(EntityType.VEHICLE, sample_vehicle_data)
 
         mock_session.run.assert_called_once()
 
@@ -74,7 +75,7 @@ class TestEntityCreation:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        result = manager.create_node(EntityType.INCIDENT, sample_incident_data)
+        _result = manager.create_node(EntityType.INCIDENT, sample_incident_data)
 
         mock_session.run.assert_called_once()
 
@@ -89,7 +90,7 @@ class TestEntityCreation:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        result = manager.create_node(EntityType.PERSON, sample_person_data)
+        _result = manager.create_node(EntityType.PERSON, sample_person_data)
 
         # Verify ID was included in the query parameters
         call_args = mock_session.run.call_args
@@ -110,7 +111,7 @@ class TestRelationshipCreation:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        result = manager.create_relationship(
+        _result = manager.create_relationship(
             source_id="person-001",
             source_type=EntityType.PERSON,
             target_id="vehicle-001",
@@ -133,7 +134,7 @@ class TestRelationshipCreation:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        result = manager.create_relationship(
+        _result = manager.create_relationship(
             source_id="person-001",
             source_type=EntityType.PERSON,
             target_id="incident-001",
@@ -154,7 +155,7 @@ class TestRelationshipCreation:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        result = manager.create_relationship(
+        _result = manager.create_relationship(
             source_id="person-001",
             source_type=EntityType.PERSON,
             target_id="person-002",
@@ -187,7 +188,7 @@ class TestPropertySearch:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        results = manager.search_by_property(
+        _results = manager.search_by_property(
             entity_type=EntityType.PERSON,
             property_name="first_name",
             property_value="John",
@@ -215,7 +216,7 @@ class TestPropertySearch:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        results = manager.search_by_property(
+        _results = manager.search_by_property(
             entity_type=EntityType.VEHICLE,
             property_name="plate_number",
             property_value="ABC-1234",
@@ -234,7 +235,7 @@ class TestPropertySearch:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        results = manager.search_by_property(
+        _results = manager.search_by_property(
             entity_type=EntityType.PERSON,
             property_name="first_name",
             property_value="NonexistentName",
@@ -266,7 +267,7 @@ class TestNetworkTraversal:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        results = manager.find_relationships(
+        _results = manager.find_relationships(
             entity_id="person-001",
             entity_type=EntityType.PERSON,
             depth=1,
@@ -287,7 +288,7 @@ class TestNetworkTraversal:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        results = manager.find_relationships(
+        _results = manager.find_relationships(
             entity_id="person-001",
             entity_type=EntityType.PERSON,
             depth=2,
@@ -322,7 +323,7 @@ class TestNetworkTraversal:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        network = manager.get_entity_network(
+        _network = manager.get_entity_network(
             entity_id="person-001",
             entity_type=EntityType.PERSON,
             depth=2,
@@ -345,7 +346,7 @@ class TestEntityDeletion:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        result = manager.delete_entity(
+        _result = manager.delete_entity(
             entity_id="person-001",
             entity_type=EntityType.PERSON,
         )
@@ -365,7 +366,7 @@ class TestEntityDeletion:
         mock_session.run.return_value = mock_result
         mock_neo4j_driver.session.return_value.__enter__.return_value = mock_session
 
-        result = manager.delete_entity(
+        _result = manager.delete_entity(
             entity_id="person-001",
             entity_type=EntityType.PERSON,
             detach=True,
@@ -402,10 +403,10 @@ class TestSchemaValidation:
 
     def test_invalid_person_missing_required(self):
         """Test that missing required fields raises error."""
-        with pytest.raises(Exception):  # Pydantic ValidationError
+        with pytest.raises(ValidationError):
             PersonCreate(first_name="John")  # Missing last_name
 
     def test_invalid_vehicle_missing_required(self):
         """Test that missing required fields raises error."""
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             VehicleCreate(make="Toyota")  # Missing plate_number

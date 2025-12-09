@@ -24,7 +24,7 @@ interface EntityProfileProps {
 
 /**
  * Entity Profile component for viewing comprehensive entity information.
- * 
+ *
  * Displays:
  * - Prior incidents
  * - Address history
@@ -89,17 +89,17 @@ export function EntityProfile({ entityId: initialEntityId, onProfileLoaded }: En
     <div className="space-y-4">
       {/* Search input */}
       <div className="card">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
           Entity Profile Lookup
         </h3>
-        
+
         <div className="flex gap-2">
           <input
             type="text"
             value={entityId}
             onChange={(e) => setEntityId(e.target.value)}
             placeholder="Enter entity ID"
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
             onKeyDown={(e) => e.key === 'Enter' && loadProfile()}
           />
           <button
@@ -116,9 +116,7 @@ export function EntityProfile({ entityId: initialEntityId, onProfileLoaded }: En
           </button>
         </div>
 
-        {error && (
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>
-        )}
+        {error && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
       </div>
 
       {/* Profile display */}
@@ -128,49 +126,43 @@ export function EntityProfile({ entityId: initialEntityId, onProfileLoaded }: En
           <div className="card">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {profile.name}
-                </h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{profile.name}</h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {profile.entity_type.toUpperCase()} - {profile.entity_id}
                 </p>
               </div>
-              <div className={`px-4 py-2 rounded-lg ${getRiskColor(profile.risk_score)}`}>
-                <div className="text-2xl font-bold">
-                  {(profile.risk_score * 100).toFixed(0)}%
-                </div>
-                <div className="text-xs font-medium">
-                  {getRiskLabel(profile.risk_score)} Risk
-                </div>
+              <div className={`rounded-lg px-4 py-2 ${getRiskColor(profile.risk_score)}`}>
+                <div className="text-2xl font-bold">{(profile.risk_score * 100).toFixed(0)}%</div>
+                <div className="text-xs font-medium">{getRiskLabel(profile.risk_score)} Risk</div>
               </div>
             </div>
           </div>
 
           {/* Stats grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div className="card text-center">
-              <AlertTriangle className="h-6 w-6 mx-auto text-orange-500 mb-2" />
+              <AlertTriangle className="mx-auto mb-2 h-6 w-6 text-orange-500" />
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
                 {profile.prior_incidents.length}
               </div>
               <div className="text-xs text-gray-600 dark:text-gray-400">Prior Incidents</div>
             </div>
             <div className="card text-center">
-              <Car className="h-6 w-6 mx-auto text-blue-500 mb-2" />
+              <Car className="mx-auto mb-2 h-6 w-6 text-blue-500" />
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
                 {profile.vehicle_connections.length}
               </div>
               <div className="text-xs text-gray-600 dark:text-gray-400">Vehicles</div>
             </div>
             <div className="card text-center">
-              <Users className="h-6 w-6 mx-auto text-purple-500 mb-2" />
+              <Users className="mx-auto mb-2 h-6 w-6 text-purple-500" />
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
                 {profile.known_associates.length}
               </div>
               <div className="text-xs text-gray-600 dark:text-gray-400">Associates</div>
             </div>
             <div className="card text-center">
-              <Camera className="h-6 w-6 mx-auto text-green-500 mb-2" />
+              <Camera className="mx-auto mb-2 h-6 w-6 text-green-500" />
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
                 {profile.lpr_activity.length}
               </div>
@@ -181,20 +173,18 @@ export function EntityProfile({ entityId: initialEntityId, onProfileLoaded }: En
           {/* Prior incidents */}
           {profile.prior_incidents.length > 0 && (
             <div className="card">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <h4 className="mb-3 flex items-center gap-2 font-medium text-gray-900 dark:text-white">
                 <AlertTriangle className="h-4 w-4 text-orange-500" />
                 Prior Incidents
               </h4>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
+              <div className="max-h-48 space-y-2 overflow-y-auto">
                 {profile.prior_incidents.map((incident, index) => (
-                  <div key={index} className="p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm">
+                  <div key={index} className="rounded bg-gray-50 p-2 text-sm dark:bg-gray-800">
                     <div className="flex justify-between">
                       <span className="font-medium">{incident.incident_id}</span>
                       <span className="text-gray-500">{incident.incident_type}</span>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-400 truncate">
-                      {incident.summary}
-                    </p>
+                    <p className="truncate text-gray-600 dark:text-gray-400">{incident.summary}</p>
                   </div>
                 ))}
               </div>
@@ -204,13 +194,13 @@ export function EntityProfile({ entityId: initialEntityId, onProfileLoaded }: En
           {/* Vehicle connections */}
           {profile.vehicle_connections.length > 0 && (
             <div className="card">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <h4 className="mb-3 flex items-center gap-2 font-medium text-gray-900 dark:text-white">
                 <Car className="h-4 w-4 text-blue-500" />
                 Vehicle Connections
               </h4>
               <div className="space-y-2">
                 {profile.vehicle_connections.map((vehicle, index) => (
-                  <div key={index} className="p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm">
+                  <div key={index} className="rounded bg-gray-50 p-2 text-sm dark:bg-gray-800">
                     <div className="font-medium">{vehicle.plate_number}</div>
                     <div className="text-gray-600 dark:text-gray-400">
                       {vehicle.year} {vehicle.make} {vehicle.model} - {vehicle.color}
@@ -227,19 +217,22 @@ export function EntityProfile({ entityId: initialEntityId, onProfileLoaded }: En
           {/* Known associates */}
           {profile.known_associates.length > 0 && (
             <div className="card">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <h4 className="mb-3 flex items-center gap-2 font-medium text-gray-900 dark:text-white">
                 <Users className="h-4 w-4 text-purple-500" />
                 Known Associates
               </h4>
               <div className="space-y-2">
                 {profile.known_associates.map((associate, index) => (
-                  <div key={index} className="p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm flex justify-between items-center">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between rounded bg-gray-50 p-2 text-sm dark:bg-gray-800"
+                  >
                     <div>
                       <div className="font-medium">{associate.name}</div>
                       <div className="text-xs text-gray-500">{associate.relationship}</div>
                     </div>
                     {associate.incident_count > 0 && (
-                      <span className="px-2 py-1 bg-orange-100 text-orange-600 rounded text-xs">
+                      <span className="rounded bg-orange-100 px-2 py-1 text-xs text-orange-600">
                         {associate.incident_count} incidents
                       </span>
                     )}
@@ -252,13 +245,13 @@ export function EntityProfile({ entityId: initialEntityId, onProfileLoaded }: En
           {/* Address history */}
           {profile.address_history.length > 0 && (
             <div className="card">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <h4 className="mb-3 flex items-center gap-2 font-medium text-gray-900 dark:text-white">
                 <MapPin className="h-4 w-4 text-red-500" />
                 Address History
               </h4>
               <div className="space-y-2">
                 {profile.address_history.map((address, index) => (
-                  <div key={index} className="p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm">
+                  <div key={index} className="rounded bg-gray-50 p-2 text-sm dark:bg-gray-800">
                     <div className="font-medium">{address.street}</div>
                     <div className="text-gray-600 dark:text-gray-400">
                       {address.city}, {address.state} {address.zip}
@@ -272,14 +265,16 @@ export function EntityProfile({ entityId: initialEntityId, onProfileLoaded }: En
           {/* Weapon matches */}
           {profile.weapon_matches.length > 0 && (
             <div className="card">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <h4 className="mb-3 flex items-center gap-2 font-medium text-gray-900 dark:text-white">
                 <Shield className="h-4 w-4 text-red-500" />
                 Weapon/Ballistic Matches
               </h4>
               <div className="space-y-2">
                 {profile.weapon_matches.map((weapon, index) => (
-                  <div key={index} className="p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm">
-                    <div className="font-medium">{weapon.weapon_type} - {weapon.caliber}</div>
+                  <div key={index} className="rounded bg-gray-50 p-2 text-sm dark:bg-gray-800">
+                    <div className="font-medium">
+                      {weapon.weapon_type} - {weapon.caliber}
+                    </div>
                     <div className="text-gray-600 dark:text-gray-400">
                       {weapon.make} {weapon.model}
                     </div>

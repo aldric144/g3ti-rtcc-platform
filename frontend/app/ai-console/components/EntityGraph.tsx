@@ -89,17 +89,17 @@ export function EntityGraph({ entities, relationships }: EntityGraphProps) {
           label: (
             <div className="flex flex-col items-center">
               <div
-                className="flex h-10 w-10 items-center justify-center rounded-full text-white font-bold text-lg"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold text-white"
                 style={{ backgroundColor: getEntityColor(entity) }}
               >
                 {getEntityIcon(entity.type)}
               </div>
-              <span className="mt-1 text-xs font-medium text-gray-700 dark:text-gray-300 max-w-[100px] truncate">
+              <span className="mt-1 max-w-[100px] truncate text-xs font-medium text-gray-700 dark:text-gray-300">
                 {entity.name}
               </span>
               {entity.risk_level && (
                 <span
-                  className="mt-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded"
+                  className="mt-0.5 rounded px-1.5 py-0.5 text-[10px] font-medium"
                   style={{
                     backgroundColor: riskColors[entity.risk_level.toLowerCase()] + '20',
                     color: riskColors[entity.risk_level.toLowerCase()],

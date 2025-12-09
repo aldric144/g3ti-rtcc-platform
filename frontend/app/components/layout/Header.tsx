@@ -2,16 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Bell,
-  Search,
-  User,
-  LogOut,
-  Settings,
-  ChevronDown,
-  Moon,
-  Sun,
-} from 'lucide-react';
+import { Bell, Search, User, LogOut, Settings, ChevronDown, Moon, Sun } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useAuthStore } from '@/lib/store/auth';
 import { useEventStore } from '@/lib/store/events';
@@ -23,7 +14,7 @@ export function Header() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const { unreadCount } = useEventStore();
-  
+
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isDark, setIsDark] = useState(false);
@@ -83,9 +74,7 @@ export function Header() {
           {showNotifications && (
             <div className="absolute right-0 top-full mt-2 w-80 rounded-lg border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
               <div className="border-b p-4 dark:border-gray-700">
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  Notifications
-                </h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
               </div>
               <div className="max-h-96 overflow-y-auto p-2">
                 <p className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
@@ -109,9 +98,7 @@ export function Header() {
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 {user?.firstName} {user?.lastName}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {user?.role}
-              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{user?.role}</p>
             </div>
             <ChevronDown className="h-4 w-4 text-gray-500" />
           </button>

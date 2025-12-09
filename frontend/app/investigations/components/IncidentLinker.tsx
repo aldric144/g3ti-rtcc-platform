@@ -15,7 +15,7 @@ interface IncidentLinkerProps {
 
 /**
  * Incident Linker component for finding related incidents.
- * 
+ *
  * Analyzes incidents for relationships including:
  * - Temporal proximity
  * - Geographic proximity
@@ -47,8 +47,8 @@ export function IncidentLinker({ onLinkageFound }: IncidentLinkerProps) {
   };
 
   const handleLink = async () => {
-    const validIds = incidentIds.filter(id => id.trim() !== '');
-    
+    const validIds = incidentIds.filter((id) => id.trim() !== '');
+
     if (validIds.length === 0) {
       setError('Please provide at least one incident ID');
       return;
@@ -96,10 +96,8 @@ export function IncidentLinker({ onLinkageFound }: IncidentLinkerProps) {
 
   return (
     <div className="card">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        Link Incidents
-      </h3>
-      
+      <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Link Incidents</h3>
+
       <div className="space-y-4">
         <div className="space-y-2">
           {incidentIds.map((id, index) => (
@@ -109,7 +107,7 @@ export function IncidentLinker({ onLinkageFound }: IncidentLinkerProps) {
                 value={id}
                 onChange={(e) => updateIncidentId(index, e.target.value)}
                 placeholder={`Incident ID ${index + 1}`}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               />
               {incidentIds.length > 1 && (
                 <button
@@ -125,14 +123,14 @@ export function IncidentLinker({ onLinkageFound }: IncidentLinkerProps) {
 
         <button
           onClick={addIncidentField}
-          className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+          className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
         >
           <Plus className="h-3 w-3" />
           Add another incident
         </button>
 
         {error && (
-          <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm">
+          <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
             <AlertCircle className="h-4 w-4" />
             {error}
           </div>
@@ -141,7 +139,7 @@ export function IncidentLinker({ onLinkageFound }: IncidentLinkerProps) {
         <button
           onClick={handleLink}
           disabled={isLinking}
-          className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-primary flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isLinking ? (
             <>
@@ -166,21 +164,21 @@ export function IncidentLinker({ onLinkageFound }: IncidentLinkerProps) {
           {result.linked_incidents.length > 0 && (
             <div className="space-y-2">
               {result.linked_incidents.map((incident, index) => (
-                <div
-                  key={index}
-                  className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
-                >
+                <div key={index} className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-gray-900 dark:text-white">
                       {incident.incident_id}
                     </span>
                     {result.confidence_scores[incident.incident_id] !== undefined && (
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${getConfidenceColor(result.confidence_scores[incident.incident_id])}`}>
-                        {(result.confidence_scores[incident.incident_id] * 100).toFixed(0)}% confidence
+                      <span
+                        className={`rounded px-2 py-1 text-xs font-medium ${getConfidenceColor(result.confidence_scores[incident.incident_id])}`}
+                      >
+                        {(result.confidence_scores[incident.incident_id] * 100).toFixed(0)}%
+                        confidence
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     {incident.incident_type} - {incident.summary || 'No summary'}
                   </p>
                 </div>
@@ -190,13 +188,13 @@ export function IncidentLinker({ onLinkageFound }: IncidentLinkerProps) {
 
           {result.explanations.length > 0 && (
             <div className="mt-4">
-              <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <h5 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 Linkage Explanations
               </h5>
-              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+              <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                 {result.explanations.slice(0, 5).map((explanation, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <span className="text-blue-500 mt-1">-</span>
+                    <span className="mt-1 text-blue-500">-</span>
                     {explanation}
                   </li>
                 ))}

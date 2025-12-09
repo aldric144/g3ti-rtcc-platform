@@ -41,7 +41,7 @@ export function StatsCard({
         <div className={clsx('rounded-lg p-2', colorClasses[color])}>
           <Icon className="h-5 w-5" />
         </div>
-        
+
         {trend && (
           <div
             className={clsx(
@@ -58,15 +58,13 @@ export function StatsCard({
           </div>
         )}
       </div>
-      
+
       <div className="mt-3">
         <p className="text-2xl font-bold text-gray-900 dark:text-white">
           {typeof value === 'number' ? value.toLocaleString() : value}
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-400">{title}</p>
-        {subtitle && (
-          <p className="text-xs text-gray-500 dark:text-gray-500">{subtitle}</p>
-        )}
+        {subtitle && <p className="text-xs text-gray-500 dark:text-gray-500">{subtitle}</p>}
       </div>
     </div>
   );

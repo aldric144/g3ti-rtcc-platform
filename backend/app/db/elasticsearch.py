@@ -91,13 +91,13 @@ class ElasticsearchManager:
 
         except AuthenticationException as e:
             logger.error("elasticsearch_auth_error", error=str(e))
-            raise ElasticsearchConnectionError(f"Elasticsearch authentication failed: {e}")
+            raise ElasticsearchConnectionError(f"Elasticsearch authentication failed: {e}") from e
         except ESConnectionError as e:
             logger.error("elasticsearch_connection_error", error=str(e))
-            raise ElasticsearchConnectionError(f"Failed to connect to Elasticsearch: {e}")
+            raise ElasticsearchConnectionError(f"Failed to connect to Elasticsearch: {e}") from e
         except Exception as e:
             logger.error("elasticsearch_error", error=str(e))
-            raise ElasticsearchConnectionError(f"Elasticsearch error: {e}")
+            raise ElasticsearchConnectionError(f"Elasticsearch error: {e}") from e
 
     async def close(self) -> None:
         """Close the Elasticsearch client connection."""

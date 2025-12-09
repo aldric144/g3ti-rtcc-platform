@@ -76,12 +76,12 @@ async def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=e.message,
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
     except AccountLockedError as e:
         raise HTTPException(
             status_code=status.HTTP_423_LOCKED,
             detail=e.message,
-        )
+        ) from e
 
 
 @router.post("/refresh", response_model=Token)
@@ -107,7 +107,7 @@ async def refresh_token(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
 
 
 @router.post("/logout")
@@ -138,11 +138,11 @@ async def get_current_user(
     try:
         user = await user_service.get_user(user_id)
         return user
-    except EntityNotFoundError:
+    except EntityNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
-        )
+        ) from e
 
 
 @router.put("/me", response_model=UserResponse)
@@ -162,16 +162,16 @@ async def update_current_user(
     try:
         user = await user_service.update_user(user_id, user_data, user_id)
         return user
-    except EntityNotFoundError:
+    except EntityNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
-        )
+        ) from e
     except DuplicateEntityError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=e.message,
-        )
+        ) from e
 
 
 @router.post("/me/password")
@@ -193,7 +193,7 @@ async def change_password(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=e.message,
-        )
+        ) from e
 
 
 # Admin endpoints for user management
@@ -245,12 +245,12 @@ async def create_user(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=e.message,
-        )
+        ) from e
     except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=e.message,
-        )
+        ) from e
 
 
 @router.get("/users/{user_id}", response_model=UserResponse)
@@ -267,11 +267,11 @@ async def get_user(
     try:
         user = await user_service.get_user(user_id)
         return user
-    except EntityNotFoundError:
+    except EntityNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
-        )
+        ) from e
 
 
 @router.put("/users/{user_id}", response_model=UserResponse)
@@ -289,16 +289,16 @@ async def update_user(
     try:
         user = await user_service.update_user(user_id, user_data, token.sub)
         return user
-    except EntityNotFoundError:
+    except EntityNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
-        )
+        ) from e
     except DuplicateEntityError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=e.message,
-        )
+        ) from e
 
 
 @router.delete("/users/{user_id}")
@@ -316,8 +316,8 @@ async def deactivate_user(
     try:
         await user_service.deactivate_user(user_id, token.sub)
         return {"message": "User deactivated successfully"}
-    except EntityNotFoundError:
+    except EntityNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
-        )
+        ) from e

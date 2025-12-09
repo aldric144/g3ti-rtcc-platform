@@ -5,18 +5,13 @@ This module provides predictive intelligence capabilities for forecasting
 crime patterns, vehicle movements, and other predictive analytics.
 """
 
-import math
 import uuid
-from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
 
 from app.ai_engine.models import (
-    ConfidenceLevel,
     EntityType,
-    GeoLocation,
-    PredictionResult,
     RiskLevel,
     RiskScore,
 )
@@ -548,7 +543,7 @@ class CrimePredictor(BasePredictor):
         """Predict crime hotspots."""
         center_lat = input_data.get("latitude", 0)
         center_lon = input_data.get("longitude", 0)
-        radius_km = input_data.get("radius_km", 5)
+        _radius_km = input_data.get("radius_km", 5)  # noqa: F841 - reserved for future use
 
         hotspots: list[dict[str, Any]] = []
 

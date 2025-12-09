@@ -9,7 +9,7 @@ interface MapContainerProps {
 
 /**
  * Main map container component.
- * 
+ *
  * Uses Mapbox GL JS for rendering the interactive map.
  * Falls back to placeholder if Mapbox token is not configured.
  */
@@ -65,15 +65,9 @@ export function MapContainer({ onEventSelect }: MapContainerProps) {
             el.style.borderRadius = '50%';
             el.style.cursor = 'pointer';
             el.style.backgroundColor =
-              marker.type === 'gunshot'
-                ? '#dc2626'
-                : marker.type === 'lpr'
-                ? '#ea580c'
-                : '#2563eb';
+              marker.type === 'gunshot' ? '#dc2626' : marker.type === 'lpr' ? '#ea580c' : '#2563eb';
 
-            new mapboxgl.Marker(el)
-              .setLngLat([marker.lng, marker.lat])
-              .addTo(map);
+            new mapboxgl.Marker(el).setLngLat([marker.lng, marker.lat]).addTo(map);
           });
         });
 

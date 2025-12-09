@@ -63,28 +63,28 @@ function RiskScoreCard({ score }: { score: RiskScore }) {
 
   return (
     <div className={`rounded-lg border p-3 ${config.bgColor} ${config.borderColor}`}>
-      <div className="flex items-center justify-between mb-2">
+      <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon className={`h-4 w-4 ${config.color}`} />
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-400 capitalize">
+          <span className="text-xs font-medium capitalize text-gray-600 dark:text-gray-400">
             {score.entity_type}
           </span>
         </div>
-        <span className={`text-lg font-bold ${config.color}`}>
-          {score.score.toFixed(0)}
-        </span>
+        <span className={`text-lg font-bold ${config.color}`}>{score.score.toFixed(0)}</span>
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]">
+        <span className="max-w-[120px] truncate text-xs text-gray-500 dark:text-gray-400">
           {score.entity_id}
         </span>
-        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${config.bgColor} ${config.color}`}>
+        <span
+          className={`rounded-full px-2 py-0.5 text-xs font-medium ${config.bgColor} ${config.color}`}
+        >
           {score.level}
         </span>
       </div>
       {score.factors && score.factors.length > 0 && (
-        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1">
+        <div className="mt-2 border-t border-gray-200 pt-2 dark:border-gray-700">
+          <p className="mb-1 text-[10px] font-medium text-gray-500 dark:text-gray-400">
             Top Factors
           </p>
           <div className="space-y-1">
@@ -109,23 +109,18 @@ function RiskSummary({ scores }: { scores: RiskScore[] }) {
     low: scores.filter((s) => s.level.toLowerCase() === 'low').length,
   };
 
-  const avgScore = scores.length > 0
-    ? scores.reduce((sum, s) => sum + s.score, 0) / scores.length
-    : 0;
+  const avgScore =
+    scores.length > 0 ? scores.reduce((sum, s) => sum + s.score, 0) / scores.length : 0;
 
   return (
     <div className="mb-4 grid grid-cols-2 gap-2">
       <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-700">
         <p className="text-xs text-gray-500 dark:text-gray-400">Avg Score</p>
-        <p className="text-2xl font-bold text-gray-900 dark:text-white">
-          {avgScore.toFixed(0)}
-        </p>
+        <p className="text-2xl font-bold text-gray-900 dark:text-white">{avgScore.toFixed(0)}</p>
       </div>
       <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-700">
         <p className="text-xs text-gray-500 dark:text-gray-400">Total Entities</p>
-        <p className="text-2xl font-bold text-gray-900 dark:text-white">
-          {scores.length}
-        </p>
+        <p className="text-2xl font-bold text-gray-900 dark:text-white">{scores.length}</p>
       </div>
       <div className="col-span-2 flex gap-2">
         {summary.critical > 0 && (
@@ -160,9 +155,7 @@ export function RiskDashboard({ riskScores }: RiskDashboardProps) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
         <Shield className="h-12 w-12 text-gray-300 dark:text-gray-600" />
-        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          No risk scores available
-        </p>
+        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">No risk scores available</p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
           Run a query to see entity risk scores
         </p>
@@ -175,7 +168,7 @@ export function RiskDashboard({ riskScores }: RiskDashboardProps) {
   return (
     <div>
       <RiskSummary scores={scores} />
-      <div className="space-y-2 max-h-[300px] overflow-y-auto">
+      <div className="max-h-[300px] space-y-2 overflow-y-auto">
         {sortedScores.map((score) => (
           <RiskScoreCard key={score.entity_id} score={score} />
         ))}

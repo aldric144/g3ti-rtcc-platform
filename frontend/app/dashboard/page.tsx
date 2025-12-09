@@ -18,7 +18,7 @@ import { SystemStatus } from '@/app/components/dashboard/SystemStatus';
 
 /**
  * Main dashboard page for the RTCC-UIP platform.
- * 
+ *
  * Displays:
  * - Key statistics cards
  * - Real-time event feed
@@ -39,12 +39,8 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Dashboard
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Real-time overview of RTCC operations
-        </p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="text-gray-600 dark:text-gray-400">Real-time overview of RTCC operations</p>
       </div>
 
       {/* Stats grid */}

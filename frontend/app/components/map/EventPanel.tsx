@@ -29,10 +29,8 @@ export function EventPanel({ eventId, onClose }: EventPanelProps) {
     <div className="rounded-lg bg-white shadow-lg dark:bg-gray-800">
       <div className="flex items-center justify-between border-b p-4 dark:border-gray-700">
         <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">
-            {event.title}
-          </h3>
+          <div className="h-3 w-3 animate-pulse rounded-full bg-red-500" />
+          <h3 className="font-semibold text-gray-900 dark:text-white">{event.title}</h3>
         </div>
         <button
           onClick={onClose}
@@ -42,10 +40,8 @@ export function EventPanel({ eventId, onClose }: EventPanelProps) {
         </button>
       </div>
 
-      <div className="p-4 space-y-4">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {event.description}
-        </p>
+      <div className="space-y-4 p-4">
+        <p className="text-sm text-gray-600 dark:text-gray-400">{event.description}</p>
 
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
@@ -60,9 +56,7 @@ export function EventPanel({ eventId, onClose }: EventPanelProps) {
 
         <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700">
           <p className="text-xs text-gray-500 dark:text-gray-400">Source</p>
-          <p className="font-medium text-gray-900 dark:text-white">
-            {event.source}
-          </p>
+          <p className="font-medium text-gray-900 dark:text-white">{event.source}</p>
         </div>
 
         <div className="flex gap-2">

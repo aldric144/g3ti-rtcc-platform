@@ -4,10 +4,8 @@ Unit tests for the NLP module.
 Tests query interpretation, DSL execution, and result composition.
 """
 
-import pytest
-from datetime import datetime, timedelta
 
-from app.ai_engine.nlp import QueryInterpreter, DSLExecutor, ResultComposer
+from app.ai_engine.nlp import DSLExecutor, QueryInterpreter, ResultComposer
 
 
 class TestQueryInterpreter:
@@ -52,7 +50,7 @@ class TestQueryInterpreter:
             ("past month", 720),
         ]
 
-        for query_part, expected_hours in queries_and_expected:
+        for query_part, _expected_hours in queries_and_expected:
             query = f"Show me incidents from the {query_part}"
             result = self.interpreter.interpret(query)
             if result.get("time_range"):
@@ -216,5 +214,5 @@ class TestResultComposer:
         )
 
         assert result is not None
-        unique_ids = set(e.get("id") for e in result.get("entities", []))
+        unique_ids = {e.get("id") for e in result.get("entities", [])}
         assert len(unique_ids) <= 2

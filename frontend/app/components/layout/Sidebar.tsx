@@ -37,7 +37,7 @@ const adminItems = [
 
 /**
  * Sidebar navigation component.
- * 
+ *
  * Features:
  * - Collapsible sidebar
  * - Role-based menu items
@@ -59,16 +59,14 @@ export function Sidebar() {
       )}
     >
       {/* Logo */}
-      <div className="flex h-16 items-center justify-between px-4 border-b border-white/10">
+      <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
           <div className="flex items-center gap-2">
             <Shield className="h-8 w-8 text-rtcc-accent" />
             <span className="text-lg font-bold text-white">RTCC-UIP</span>
           </div>
         )}
-        {collapsed && (
-          <Shield className="h-8 w-8 text-rtcc-accent mx-auto" />
-        )}
+        {collapsed && <Shield className="mx-auto h-8 w-8 text-rtcc-accent" />}
       </div>
 
       {/* Navigation */}
@@ -139,11 +137,7 @@ export function Sidebar() {
           onClick={() => setCollapsed(!collapsed)}
           className="flex w-full items-center justify-center rounded-lg p-2 text-white/70 hover:bg-white/10 hover:text-white"
         >
-          {collapsed ? (
-            <ChevronRight className="h-5 w-5" />
-          ) : (
-            <ChevronLeft className="h-5 w-5" />
-          )}
+          {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
         </button>
       </div>
     </aside>

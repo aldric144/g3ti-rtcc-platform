@@ -57,18 +57,18 @@ async def get_token_payload(
     try:
         payload = await auth_service.validate_token(credentials.credentials)
         return payload
-    except TokenExpiredError:
+    except TokenExpiredError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
             headers={"WWW-Authenticate": "Bearer"},
-        )
-    except InvalidTokenError:
+        ) from e
+    except InvalidTokenError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication token",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
 
 
 async def get_current_user_id(token: Annotated[TokenPayload, Depends(get_token_payload)]) -> str:

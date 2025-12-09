@@ -28,38 +28,39 @@ interface PatternResultsProps {
   patterns: Pattern[];
 }
 
-const patternTypeConfig: Record<string, { icon: typeof TrendingUp; color: string; label: string }> = {
-  vehicle_trajectory: {
-    icon: Car,
-    color: 'text-green-600 dark:text-green-400',
-    label: 'Vehicle Trajectory',
-  },
-  gunfire_recurrence: {
-    icon: Target,
-    color: 'text-red-600 dark:text-red-400',
-    label: 'Gunfire Recurrence',
-  },
-  offender_pathway: {
-    icon: Users,
-    color: 'text-orange-600 dark:text-orange-400',
-    label: 'Offender Pathway',
-  },
-  temporal: {
-    icon: Clock,
-    color: 'text-blue-600 dark:text-blue-400',
-    label: 'Temporal Pattern',
-  },
-  geographic: {
-    icon: MapPin,
-    color: 'text-purple-600 dark:text-purple-400',
-    label: 'Geographic Cluster',
-  },
-  crime_heat: {
-    icon: BarChart3,
-    color: 'text-yellow-600 dark:text-yellow-400',
-    label: 'Crime Heat',
-  },
-};
+const patternTypeConfig: Record<string, { icon: typeof TrendingUp; color: string; label: string }> =
+  {
+    vehicle_trajectory: {
+      icon: Car,
+      color: 'text-green-600 dark:text-green-400',
+      label: 'Vehicle Trajectory',
+    },
+    gunfire_recurrence: {
+      icon: Target,
+      color: 'text-red-600 dark:text-red-400',
+      label: 'Gunfire Recurrence',
+    },
+    offender_pathway: {
+      icon: Users,
+      color: 'text-orange-600 dark:text-orange-400',
+      label: 'Offender Pathway',
+    },
+    temporal: {
+      icon: Clock,
+      color: 'text-blue-600 dark:text-blue-400',
+      label: 'Temporal Pattern',
+    },
+    geographic: {
+      icon: MapPin,
+      color: 'text-purple-600 dark:text-purple-400',
+      label: 'Geographic Cluster',
+    },
+    crime_heat: {
+      icon: BarChart3,
+      color: 'text-yellow-600 dark:text-yellow-400',
+      label: 'Crime Heat',
+    },
+  };
 
 function StrengthBar({ strength }: { strength: number }) {
   const percentage = Math.min(100, Math.max(0, strength * 100));
@@ -73,14 +74,9 @@ function StrengthBar({ strength }: { strength: number }) {
   return (
     <div className="flex items-center gap-2">
       <div className="h-2 w-24 rounded-full bg-gray-200 dark:bg-gray-700">
-        <div
-          className={`h-2 rounded-full ${getColor()}`}
-          style={{ width: `${percentage}%` }}
-        />
+        <div className={`h-2 rounded-full ${getColor()}`} style={{ width: `${percentage}%` }} />
       </div>
-      <span className="text-xs text-gray-500 dark:text-gray-400">
-        {percentage.toFixed(0)}%
-      </span>
+      <span className="text-xs text-gray-500 dark:text-gray-400">{percentage.toFixed(0)}%</span>
     </div>
   );
 }
@@ -110,13 +106,9 @@ function PatternCard({ pattern }: { pattern: Pattern }) {
                 {pattern.frequency}x frequency
               </span>
             </div>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              {pattern.description}
-            </p>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{pattern.description}</p>
             <div className="mt-2">
-              <span className="text-xs text-gray-500 dark:text-gray-400 mr-2">
-                Strength:
-              </span>
+              <span className="mr-2 text-xs text-gray-500 dark:text-gray-400">Strength:</span>
               <StrengthBar strength={pattern.strength} />
             </div>
           </div>
@@ -137,7 +129,7 @@ function PatternCard({ pattern }: { pattern: Pattern }) {
         <div className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
           {pattern.entities.length > 0 && (
             <div className="mb-3">
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+              <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
                 Related Entities
               </p>
               <div className="flex flex-wrap gap-1">
@@ -155,15 +147,12 @@ function PatternCard({ pattern }: { pattern: Pattern }) {
 
           {pattern.locations && pattern.locations.length > 0 && (
             <div className="mb-3">
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+              <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
                 Locations ({pattern.locations.length})
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {pattern.locations.slice(0, 4).map((loc, index) => (
-                  <span
-                    key={index}
-                    className="text-xs text-gray-600 dark:text-gray-400"
-                  >
+                  <span key={index} className="text-xs text-gray-600 dark:text-gray-400">
                     {loc.lat.toFixed(4)}, {loc.lng.toFixed(4)}
                   </span>
                 ))}
@@ -178,7 +167,7 @@ function PatternCard({ pattern }: { pattern: Pattern }) {
 
           {pattern.time_range && (
             <div>
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+              <p className="mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
                 Time Range
               </p>
               <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -235,14 +224,14 @@ export function PatternResults({ patterns }: PatternResultsProps) {
         })}
       </div>
 
-      <div className="space-y-3 max-h-[400px] overflow-y-auto">
+      <div className="max-h-[400px] space-y-3 overflow-y-auto">
         {filteredPatterns.map((pattern) => (
           <PatternCard key={pattern.id} pattern={pattern} />
         ))}
       </div>
 
       {filteredPatterns.length === 0 && (
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400 py-4">
+        <p className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
           No patterns match the selected filter
         </p>
       )}
