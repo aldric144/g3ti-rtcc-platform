@@ -1391,3 +1391,788 @@ def get_tactical_zone_subscribers(zone_id: str | None = None) -> set[str]:
 def get_tactical_prediction_subscribers() -> set[str]:
     """Get the set of client IDs subscribed to prediction updates."""
     return _tactical_prediction_subscriptions.copy()
+
+
+# ============================================================================
+# Phase 8: Command Operations WebSocket Channels
+# ============================================================================
+
+# Store for command operations subscriptions
+_incident_subscriptions: dict[str, set[str]] = {}  # incident_id -> client_ids
+_ics_subscriptions: dict[str, set[str]] = {}  # incident_id -> client_ids
+_strategy_map_subscriptions: dict[str, set[str]] = {}  # incident_id -> client_ids
+_resources_subscriptions: dict[str, set[str]] = {}  # incident_id -> client_ids
+_timeline_subscriptions: dict[str, set[str]] = {}  # incident_id -> client_ids
+_briefing_subscriptions: dict[str, set[str]] = {}  # incident_id -> client_ids
+_command_subscriptions: set[str] = set()  # client_ids subscribed to all command events
+
+
+@router.websocket("/ws/command/incident/{incident_id}")
+async def websocket_command_incident(
+    websocket: WebSocket,
+    incident_id: str,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for incident updates.
+
+    Connect to receive real-time updates for a specific major incident.
+
+    Path Parameters:
+    - **incident_id**: The incident ID to subscribe to
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+
+    Message Types (server -> client):
+    - incident_update: Incident status/details changed
+    - incident_activated: Incident activated
+    - incident_closed: Incident closed
+    - commander_assigned: New commander assigned
+    - agency_added: Agency added to incident
+    - unit_assigned: Unit assigned to incident
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("command_incident_websocket_auth_failed", incident_id=incident_id, error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("command_incident_websocket_rejected", incident_id=incident_id, error=str(e))
+        return
+
+    if incident_id not in _incident_subscriptions:
+        _incident_subscriptions[incident_id] = set()
+    _incident_subscriptions[incident_id].add(client_id)
+
+    logger.info("command_incident_websocket_connected", incident_id=incident_id, client_id=client_id, user_id=user_id)
+
+    await websocket.send_json({
+        "type": "connected",
+        "incident_id": incident_id,
+        "message": f"Subscribed to updates for incident {incident_id}",
+    })
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            import json
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("command_incident_websocket_disconnected", incident_id=incident_id, client_id=client_id)
+    except Exception as e:
+        logger.error("command_incident_websocket_error", incident_id=incident_id, client_id=client_id, error=str(e))
+    finally:
+        if incident_id in _incident_subscriptions:
+            _incident_subscriptions[incident_id].discard(client_id)
+            if not _incident_subscriptions[incident_id]:
+                del _incident_subscriptions[incident_id]
+        await ws_manager.disconnect(client_id)
+
+
+@router.websocket("/ws/command/ics/{incident_id}")
+async def websocket_command_ics(
+    websocket: WebSocket,
+    incident_id: str,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for ICS structure updates.
+
+    Connect to receive real-time ICS role assignments and changes.
+
+    Path Parameters:
+    - **incident_id**: The incident ID to subscribe to
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+
+    Message Types (server -> client):
+    - ics_role_assigned: New role assignment
+    - ics_role_updated: Role reassigned
+    - ics_role_relieved: Role relieved
+    - ics_checklist_updated: Checklist item completed
+    - ics_structure_changed: Org chart changed
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("command_ics_websocket_auth_failed", incident_id=incident_id, error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("command_ics_websocket_rejected", incident_id=incident_id, error=str(e))
+        return
+
+    if incident_id not in _ics_subscriptions:
+        _ics_subscriptions[incident_id] = set()
+    _ics_subscriptions[incident_id].add(client_id)
+
+    logger.info("command_ics_websocket_connected", incident_id=incident_id, client_id=client_id, user_id=user_id)
+
+    await websocket.send_json({
+        "type": "connected",
+        "incident_id": incident_id,
+        "message": f"Subscribed to ICS updates for incident {incident_id}",
+    })
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            import json
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("command_ics_websocket_disconnected", incident_id=incident_id, client_id=client_id)
+    except Exception as e:
+        logger.error("command_ics_websocket_error", incident_id=incident_id, client_id=client_id, error=str(e))
+    finally:
+        if incident_id in _ics_subscriptions:
+            _ics_subscriptions[incident_id].discard(client_id)
+            if not _ics_subscriptions[incident_id]:
+                del _ics_subscriptions[incident_id]
+        await ws_manager.disconnect(client_id)
+
+
+@router.websocket("/ws/command/strategy-map/{incident_id}")
+async def websocket_command_strategy_map(
+    websocket: WebSocket,
+    incident_id: str,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for strategy map updates.
+
+    Connect to receive real-time map overlays and drawing updates.
+
+    Path Parameters:
+    - **incident_id**: The incident ID to subscribe to
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+
+    Message Types (server -> client):
+    - map_updated: Map center/zoom changed
+    - marker_added: New marker added
+    - shape_added: New shape drawn
+    - perimeter_updated: Perimeter changed
+    - unit_position_updated: Unit position changed
+    - camera_added: Camera overlay added
+    - gunfire_added: Gunfire detection added
+    - threat_zone_added: Threat zone added
+    - element_removed: Element removed from map
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("command_strategy_map_websocket_auth_failed", incident_id=incident_id, error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("command_strategy_map_websocket_rejected", incident_id=incident_id, error=str(e))
+        return
+
+    if incident_id not in _strategy_map_subscriptions:
+        _strategy_map_subscriptions[incident_id] = set()
+    _strategy_map_subscriptions[incident_id].add(client_id)
+
+    logger.info("command_strategy_map_websocket_connected", incident_id=incident_id, client_id=client_id, user_id=user_id)
+
+    await websocket.send_json({
+        "type": "connected",
+        "incident_id": incident_id,
+        "message": f"Subscribed to strategy map updates for incident {incident_id}",
+    })
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            import json
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("command_strategy_map_websocket_disconnected", incident_id=incident_id, client_id=client_id)
+    except Exception as e:
+        logger.error("command_strategy_map_websocket_error", incident_id=incident_id, client_id=client_id, error=str(e))
+    finally:
+        if incident_id in _strategy_map_subscriptions:
+            _strategy_map_subscriptions[incident_id].discard(client_id)
+            if not _strategy_map_subscriptions[incident_id]:
+                del _strategy_map_subscriptions[incident_id]
+        await ws_manager.disconnect(client_id)
+
+
+@router.websocket("/ws/command/resources/{incident_id}")
+async def websocket_command_resources(
+    websocket: WebSocket,
+    incident_id: str,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for resource assignment updates.
+
+    Connect to receive real-time resource assignment changes.
+
+    Path Parameters:
+    - **incident_id**: The incident ID to subscribe to
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+
+    Message Types (server -> client):
+    - resource_assigned: Resource assigned to incident
+    - resource_released: Resource released from incident
+    - resource_arrived: Resource arrived on scene
+    - resource_status_changed: Resource status updated
+    - resource_requested: New resource request
+    - resource_request_fulfilled: Request fulfilled
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("command_resources_websocket_auth_failed", incident_id=incident_id, error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("command_resources_websocket_rejected", incident_id=incident_id, error=str(e))
+        return
+
+    if incident_id not in _resources_subscriptions:
+        _resources_subscriptions[incident_id] = set()
+    _resources_subscriptions[incident_id].add(client_id)
+
+    logger.info("command_resources_websocket_connected", incident_id=incident_id, client_id=client_id, user_id=user_id)
+
+    await websocket.send_json({
+        "type": "connected",
+        "incident_id": incident_id,
+        "message": f"Subscribed to resource updates for incident {incident_id}",
+    })
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            import json
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("command_resources_websocket_disconnected", incident_id=incident_id, client_id=client_id)
+    except Exception as e:
+        logger.error("command_resources_websocket_error", incident_id=incident_id, client_id=client_id, error=str(e))
+    finally:
+        if incident_id in _resources_subscriptions:
+            _resources_subscriptions[incident_id].discard(client_id)
+            if not _resources_subscriptions[incident_id]:
+                del _resources_subscriptions[incident_id]
+        await ws_manager.disconnect(client_id)
+
+
+@router.websocket("/ws/command/timeline/{incident_id}")
+async def websocket_command_timeline(
+    websocket: WebSocket,
+    incident_id: str,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for timeline updates.
+
+    Connect to receive real-time timeline events.
+
+    Path Parameters:
+    - **incident_id**: The incident ID to subscribe to
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+
+    Message Types (server -> client):
+    - timeline_event: New event added to timeline
+    - timeline_event_pinned: Event pinned
+    - timeline_event_redacted: Event redacted
+    - critical_event: Critical priority event
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("command_timeline_websocket_auth_failed", incident_id=incident_id, error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("command_timeline_websocket_rejected", incident_id=incident_id, error=str(e))
+        return
+
+    if incident_id not in _timeline_subscriptions:
+        _timeline_subscriptions[incident_id] = set()
+    _timeline_subscriptions[incident_id].add(client_id)
+
+    logger.info("command_timeline_websocket_connected", incident_id=incident_id, client_id=client_id, user_id=user_id)
+
+    await websocket.send_json({
+        "type": "connected",
+        "incident_id": incident_id,
+        "message": f"Subscribed to timeline updates for incident {incident_id}",
+    })
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            import json
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("command_timeline_websocket_disconnected", incident_id=incident_id, client_id=client_id)
+    except Exception as e:
+        logger.error("command_timeline_websocket_error", incident_id=incident_id, client_id=client_id, error=str(e))
+    finally:
+        if incident_id in _timeline_subscriptions:
+            _timeline_subscriptions[incident_id].discard(client_id)
+            if not _timeline_subscriptions[incident_id]:
+                del _timeline_subscriptions[incident_id]
+        await ws_manager.disconnect(client_id)
+
+
+@router.websocket("/ws/command/briefing/{incident_id}")
+async def websocket_command_briefing(
+    websocket: WebSocket,
+    incident_id: str,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for briefing updates.
+
+    Connect to receive real-time briefing and note updates.
+
+    Path Parameters:
+    - **incident_id**: The incident ID to subscribe to
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+
+    Message Types (server -> client):
+    - note_added: New command note added
+    - note_updated: Note updated
+    - note_pinned: Note pinned
+    - briefing_generated: New briefing generated
+    - briefing_approved: Briefing approved
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("command_briefing_websocket_auth_failed", incident_id=incident_id, error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("command_briefing_websocket_rejected", incident_id=incident_id, error=str(e))
+        return
+
+    if incident_id not in _briefing_subscriptions:
+        _briefing_subscriptions[incident_id] = set()
+    _briefing_subscriptions[incident_id].add(client_id)
+
+    logger.info("command_briefing_websocket_connected", incident_id=incident_id, client_id=client_id, user_id=user_id)
+
+    await websocket.send_json({
+        "type": "connected",
+        "incident_id": incident_id,
+        "message": f"Subscribed to briefing updates for incident {incident_id}",
+    })
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            import json
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("command_briefing_websocket_disconnected", incident_id=incident_id, client_id=client_id)
+    except Exception as e:
+        logger.error("command_briefing_websocket_error", incident_id=incident_id, client_id=client_id, error=str(e))
+    finally:
+        if incident_id in _briefing_subscriptions:
+            _briefing_subscriptions[incident_id].discard(client_id)
+            if not _briefing_subscriptions[incident_id]:
+                del _briefing_subscriptions[incident_id]
+        await ws_manager.disconnect(client_id)
+
+
+# ============================================================================
+# Command Operations Broadcast Functions
+# ============================================================================
+
+
+async def broadcast_incident_update(
+    incident_id: str,
+    update_type: str,
+    data: dict,
+) -> None:
+    """
+    Broadcast an incident update to all subscribed clients.
+
+    Args:
+        incident_id: The incident ID to broadcast to
+        update_type: Type of update
+        data: Update data to send
+    """
+    if incident_id not in _incident_subscriptions:
+        return
+
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": update_type,
+        "incident_id": incident_id,
+        "data": data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    for client_id in list(_incident_subscriptions[incident_id]):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning(
+                "incident_update_broadcast_failed",
+                incident_id=incident_id,
+                client_id=client_id,
+                error=str(e),
+            )
+
+
+async def broadcast_ics_update(
+    incident_id: str,
+    update_type: str,
+    data: dict,
+) -> None:
+    """
+    Broadcast an ICS update to all subscribed clients.
+
+    Args:
+        incident_id: The incident ID to broadcast to
+        update_type: Type of update (ics_role_assigned, ics_role_updated, etc.)
+        data: Update data to send
+    """
+    if incident_id not in _ics_subscriptions:
+        return
+
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": update_type,
+        "incident_id": incident_id,
+        "data": data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    for client_id in list(_ics_subscriptions[incident_id]):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning(
+                "ics_update_broadcast_failed",
+                incident_id=incident_id,
+                client_id=client_id,
+                error=str(e),
+            )
+
+
+async def broadcast_strategy_map_update(
+    incident_id: str,
+    update_type: str,
+    data: dict,
+) -> None:
+    """
+    Broadcast a strategy map update to all subscribed clients.
+
+    Args:
+        incident_id: The incident ID to broadcast to
+        update_type: Type of update
+        data: Update data to send
+    """
+    if incident_id not in _strategy_map_subscriptions:
+        return
+
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": update_type,
+        "incident_id": incident_id,
+        "data": data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    for client_id in list(_strategy_map_subscriptions[incident_id]):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning(
+                "strategy_map_update_broadcast_failed",
+                incident_id=incident_id,
+                client_id=client_id,
+                error=str(e),
+            )
+
+
+async def broadcast_resource_update(
+    incident_id: str,
+    update_type: str,
+    data: dict,
+) -> None:
+    """
+    Broadcast a resource update to all subscribed clients.
+
+    Args:
+        incident_id: The incident ID to broadcast to
+        update_type: Type of update (resource_assigned, resource_released, etc.)
+        data: Update data to send
+    """
+    if incident_id not in _resources_subscriptions:
+        return
+
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": update_type,
+        "incident_id": incident_id,
+        "data": data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    for client_id in list(_resources_subscriptions[incident_id]):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning(
+                "resource_update_broadcast_failed",
+                incident_id=incident_id,
+                client_id=client_id,
+                error=str(e),
+            )
+
+
+async def broadcast_timeline_update(
+    incident_id: str,
+    update_type: str,
+    data: dict,
+) -> None:
+    """
+    Broadcast a timeline update to all subscribed clients.
+
+    Args:
+        incident_id: The incident ID to broadcast to
+        update_type: Type of update (timeline_event, critical_event, etc.)
+        data: Update data to send
+    """
+    if incident_id not in _timeline_subscriptions:
+        return
+
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": update_type,
+        "incident_id": incident_id,
+        "data": data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    for client_id in list(_timeline_subscriptions[incident_id]):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning(
+                "timeline_update_broadcast_failed",
+                incident_id=incident_id,
+                client_id=client_id,
+                error=str(e),
+            )
+
+
+async def broadcast_briefing_update(
+    incident_id: str,
+    update_type: str,
+    data: dict,
+) -> None:
+    """
+    Broadcast a briefing update to all subscribed clients.
+
+    Args:
+        incident_id: The incident ID to broadcast to
+        update_type: Type of update (note_added, briefing_generated, etc.)
+        data: Update data to send
+    """
+    if incident_id not in _briefing_subscriptions:
+        return
+
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": update_type,
+        "incident_id": incident_id,
+        "data": data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    for client_id in list(_briefing_subscriptions[incident_id]):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning(
+                "briefing_update_broadcast_failed",
+                incident_id=incident_id,
+                client_id=client_id,
+                error=str(e),
+            )
+
+
+# ============================================================================
+# Command Operations Subscription Helpers
+# ============================================================================
+
+
+def get_incident_subscribers(incident_id: str) -> set[str]:
+    """Get the set of client IDs subscribed to an incident."""
+    return _incident_subscriptions.get(incident_id, set()).copy()
+
+
+def get_ics_subscribers(incident_id: str) -> set[str]:
+    """Get the set of client IDs subscribed to ICS updates for an incident."""
+    return _ics_subscriptions.get(incident_id, set()).copy()
+
+
+def get_strategy_map_subscribers(incident_id: str) -> set[str]:
+    """Get the set of client IDs subscribed to strategy map updates for an incident."""
+    return _strategy_map_subscriptions.get(incident_id, set()).copy()
+
+
+def get_resource_subscribers(incident_id: str) -> set[str]:
+    """Get the set of client IDs subscribed to resource updates for an incident."""
+    return _resources_subscriptions.get(incident_id, set()).copy()
+
+
+def get_timeline_subscribers(incident_id: str) -> set[str]:
+    """Get the set of client IDs subscribed to timeline updates for an incident."""
+    return _timeline_subscriptions.get(incident_id, set()).copy()
+
+
+def get_briefing_subscribers(incident_id: str) -> set[str]:
+    """Get the set of client IDs subscribed to briefing updates for an incident."""
+    return _briefing_subscriptions.get(incident_id, set()).copy()
+
+
+def get_all_command_subscribed_incidents() -> list[str]:
+    """Get list of all incidents with active command subscriptions."""
+    all_incidents = set()
+    all_incidents.update(_incident_subscriptions.keys())
+    all_incidents.update(_ics_subscriptions.keys())
+    all_incidents.update(_strategy_map_subscriptions.keys())
+    all_incidents.update(_resources_subscriptions.keys())
+    all_incidents.update(_timeline_subscriptions.keys())
+    all_incidents.update(_briefing_subscriptions.keys())
+    return list(all_incidents)
