@@ -345,6 +345,655 @@ def get_subscribed_cases() -> list[str]:
 
 
 # ============================================================================
+# Phase 6: Officer Safety WebSocket Channels
+# ============================================================================
+
+# Store for officer safety subscriptions
+_officer_location_subscriptions: dict[str, set[str]] = {}  # badge -> client_ids
+_officer_threat_subscriptions: set[str] = set()  # client_ids subscribed to all threats
+_officer_ambush_subscriptions: set[str] = set()  # client_ids subscribed to ambush alerts
+_officer_perimeter_subscriptions: dict[str, set[str]] = {}  # incident_id -> client_ids
+_officer_safety_score_subscriptions: set[str] = set()  # client_ids subscribed to safety scores
+_officer_down_subscriptions: set[str] = set()  # client_ids subscribed to officer down alerts
+
+
+@router.websocket("/ws/officer/location")
+async def websocket_officer_location(
+    websocket: WebSocket,
+    badge: str | None = Query(default=None),
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for officer location updates.
+
+    Connect to receive real-time officer location telemetry.
+
+    Query Parameters:
+    - **badge**: Optional badge number to subscribe to specific officer
+    - **token**: JWT access token for authentication
+
+    Message Types (server -> client):
+    - location_update: Officer position update
+    - status_change: Officer status changed
+    - all_positions: Periodic broadcast of all officer positions
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    # Validate token if provided
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("officer_location_websocket_auth_failed", error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    # Accept connection
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("officer_location_websocket_rejected", error=str(e))
+        return
+
+    # Add to subscriptions
+    subscription_key = badge or "all"
+    if subscription_key not in _officer_location_subscriptions:
+        _officer_location_subscriptions[subscription_key] = set()
+    _officer_location_subscriptions[subscription_key].add(client_id)
+
+    logger.info(
+        "officer_location_websocket_connected",
+        client_id=client_id,
+        badge=badge,
+        user_id=user_id,
+    )
+
+    # Send connection confirmation
+    await websocket.send_json(
+        {
+            "type": "connected",
+            "subscription": subscription_key,
+            "message": "Subscribed to officer location updates"
+            + (f" for badge {badge}" if badge else " for all officers"),
+        }
+    )
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            import json
+
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("officer_location_websocket_disconnected", client_id=client_id)
+    except Exception as e:
+        logger.error("officer_location_websocket_error", client_id=client_id, error=str(e))
+    finally:
+        if subscription_key in _officer_location_subscriptions:
+            _officer_location_subscriptions[subscription_key].discard(client_id)
+            if not _officer_location_subscriptions[subscription_key]:
+                del _officer_location_subscriptions[subscription_key]
+        await ws_manager.disconnect(client_id)
+
+
+@router.websocket("/ws/officer/threats")
+async def websocket_officer_threats(
+    websocket: WebSocket,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for officer threat alerts.
+
+    Connect to receive real-time threat proximity alerts.
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+
+    Message Types (server -> client):
+    - threat_alert: New threat detected near officer
+    - threat_resolved: Threat no longer in proximity
+    - threat_update: Threat status changed
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("officer_threats_websocket_auth_failed", error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("officer_threats_websocket_rejected", error=str(e))
+        return
+
+    _officer_threat_subscriptions.add(client_id)
+
+    logger.info("officer_threats_websocket_connected", client_id=client_id, user_id=user_id)
+
+    await websocket.send_json(
+        {"type": "connected", "message": "Subscribed to officer threat alerts"}
+    )
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            import json
+
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("officer_threats_websocket_disconnected", client_id=client_id)
+    except Exception as e:
+        logger.error("officer_threats_websocket_error", client_id=client_id, error=str(e))
+    finally:
+        _officer_threat_subscriptions.discard(client_id)
+        await ws_manager.disconnect(client_id)
+
+
+@router.websocket("/ws/officer/ambush")
+async def websocket_officer_ambush(
+    websocket: WebSocket,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for ambush warning alerts.
+
+    Connect to receive real-time ambush pattern detection alerts.
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+
+    Message Types (server -> client):
+    - ambush_warning: Potential ambush pattern detected
+    - ambush_cleared: Ambush warning cleared
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("officer_ambush_websocket_auth_failed", error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("officer_ambush_websocket_rejected", error=str(e))
+        return
+
+    _officer_ambush_subscriptions.add(client_id)
+
+    logger.info("officer_ambush_websocket_connected", client_id=client_id, user_id=user_id)
+
+    await websocket.send_json(
+        {"type": "connected", "message": "Subscribed to ambush warning alerts"}
+    )
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            import json
+
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("officer_ambush_websocket_disconnected", client_id=client_id)
+    except Exception as e:
+        logger.error("officer_ambush_websocket_error", client_id=client_id, error=str(e))
+    finally:
+        _officer_ambush_subscriptions.discard(client_id)
+        await ws_manager.disconnect(client_id)
+
+
+@router.websocket("/ws/officer/perimeter/{incident_id}")
+async def websocket_officer_perimeter(
+    websocket: WebSocket,
+    incident_id: str,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for perimeter updates.
+
+    Connect to receive real-time perimeter updates for an incident.
+
+    Path Parameters:
+    - **incident_id**: Incident ID to subscribe to
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+
+    Message Types (server -> client):
+    - perimeter_update: Perimeter boundaries changed
+    - route_update: Approach routes updated
+    - unit_position: Unit position within perimeter
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("officer_perimeter_websocket_auth_failed", error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("officer_perimeter_websocket_rejected", error=str(e))
+        return
+
+    if incident_id not in _officer_perimeter_subscriptions:
+        _officer_perimeter_subscriptions[incident_id] = set()
+    _officer_perimeter_subscriptions[incident_id].add(client_id)
+
+    logger.info(
+        "officer_perimeter_websocket_connected",
+        client_id=client_id,
+        incident_id=incident_id,
+        user_id=user_id,
+    )
+
+    await websocket.send_json(
+        {
+            "type": "connected",
+            "incident_id": incident_id,
+            "message": f"Subscribed to perimeter updates for incident {incident_id}",
+        }
+    )
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            import json
+
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("officer_perimeter_websocket_disconnected", client_id=client_id)
+    except Exception as e:
+        logger.error("officer_perimeter_websocket_error", client_id=client_id, error=str(e))
+    finally:
+        if incident_id in _officer_perimeter_subscriptions:
+            _officer_perimeter_subscriptions[incident_id].discard(client_id)
+            if not _officer_perimeter_subscriptions[incident_id]:
+                del _officer_perimeter_subscriptions[incident_id]
+        await ws_manager.disconnect(client_id)
+
+
+@router.websocket("/ws/officer/safetyscore")
+async def websocket_officer_safety_score(
+    websocket: WebSocket,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for officer safety score updates.
+
+    Connect to receive real-time safety score changes.
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+
+    Message Types (server -> client):
+    - safety_score_update: Officer safety score changed
+    - risk_level_change: Risk level threshold crossed
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("officer_safety_score_websocket_auth_failed", error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("officer_safety_score_websocket_rejected", error=str(e))
+        return
+
+    _officer_safety_score_subscriptions.add(client_id)
+
+    logger.info("officer_safety_score_websocket_connected", client_id=client_id, user_id=user_id)
+
+    await websocket.send_json(
+        {"type": "connected", "message": "Subscribed to officer safety score updates"}
+    )
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            import json
+
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("officer_safety_score_websocket_disconnected", client_id=client_id)
+    except Exception as e:
+        logger.error("officer_safety_score_websocket_error", client_id=client_id, error=str(e))
+    finally:
+        _officer_safety_score_subscriptions.discard(client_id)
+        await ws_manager.disconnect(client_id)
+
+
+@router.websocket("/ws/officer/down")
+async def websocket_officer_down(
+    websocket: WebSocket,
+    token: str | None = Query(default=None),
+):
+    """
+    WebSocket endpoint for officer down / SOS alerts.
+
+    Connect to receive critical officer emergency alerts.
+
+    Query Parameters:
+    - **token**: JWT access token for authentication
+
+    Message Types (server -> client):
+    - officer_down: Officer down alert triggered
+    - officer_sos: SOS alert triggered
+    - emergency_cleared: Emergency cleared
+    """
+    ws_manager = get_websocket_manager()
+    auth_service = get_auth_service()
+
+    user_id = None
+    user_role = None
+
+    if token:
+        try:
+            payload = await auth_service.validate_token(token)
+            user_id = payload.sub
+            user_role = payload.role.value
+        except Exception as e:
+            logger.warning("officer_down_websocket_auth_failed", error=str(e))
+            await websocket.close(code=4001, reason="Authentication failed")
+            return
+
+    try:
+        client_id = await ws_manager.connect(
+            websocket=websocket, user_id=user_id, user_role=user_role
+        )
+    except ConnectionError as e:
+        logger.warning("officer_down_websocket_rejected", error=str(e))
+        return
+
+    _officer_down_subscriptions.add(client_id)
+
+    logger.info("officer_down_websocket_connected", client_id=client_id, user_id=user_id)
+
+    await websocket.send_json(
+        {"type": "connected", "message": "Subscribed to officer down / SOS alerts"}
+    )
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            import json
+
+            try:
+                message = json.loads(data)
+                if message.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except json.JSONDecodeError:
+                pass
+
+    except WebSocketDisconnect:
+        logger.info("officer_down_websocket_disconnected", client_id=client_id)
+    except Exception as e:
+        logger.error("officer_down_websocket_error", client_id=client_id, error=str(e))
+    finally:
+        _officer_down_subscriptions.discard(client_id)
+        await ws_manager.disconnect(client_id)
+
+
+# Broadcast functions for officer safety events
+async def broadcast_officer_location(
+    badge: str,
+    location_data: dict,
+) -> None:
+    """Broadcast officer location update to subscribers."""
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": "location_update",
+        "badge": badge,
+        "data": location_data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    # Send to badge-specific subscribers
+    if badge in _officer_location_subscriptions:
+        for client_id in list(_officer_location_subscriptions[badge]):
+            try:
+                await ws_manager.send_to_client(client_id, message)
+            except Exception as e:
+                logger.warning("officer_location_broadcast_failed", client_id=client_id, error=str(e))
+
+    # Send to all-officers subscribers
+    if "all" in _officer_location_subscriptions:
+        for client_id in list(_officer_location_subscriptions["all"]):
+            try:
+                await ws_manager.send_to_client(client_id, message)
+            except Exception as e:
+                logger.warning("officer_location_broadcast_failed", client_id=client_id, error=str(e))
+
+
+async def broadcast_threat_alert(
+    badge: str,
+    threat_data: dict,
+) -> None:
+    """Broadcast threat alert to subscribers."""
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": "threat_alert",
+        "badge": badge,
+        "data": threat_data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    for client_id in list(_officer_threat_subscriptions):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning("threat_alert_broadcast_failed", client_id=client_id, error=str(e))
+
+
+async def broadcast_ambush_warning(
+    badge: str,
+    ambush_data: dict,
+) -> None:
+    """Broadcast ambush warning to subscribers."""
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": "ambush_warning",
+        "badge": badge,
+        "data": ambush_data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    for client_id in list(_officer_ambush_subscriptions):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning("ambush_warning_broadcast_failed", client_id=client_id, error=str(e))
+
+
+async def broadcast_perimeter_update(
+    incident_id: str,
+    perimeter_data: dict,
+) -> None:
+    """Broadcast perimeter update to subscribers."""
+    if incident_id not in _officer_perimeter_subscriptions:
+        return
+
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": "perimeter_update",
+        "incident_id": incident_id,
+        "data": perimeter_data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    for client_id in list(_officer_perimeter_subscriptions[incident_id]):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning("perimeter_update_broadcast_failed", client_id=client_id, error=str(e))
+
+
+async def broadcast_safety_score_update(
+    badge: str,
+    score_data: dict,
+) -> None:
+    """Broadcast safety score update to subscribers."""
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": "safety_score_update",
+        "badge": badge,
+        "data": score_data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+    }
+
+    for client_id in list(_officer_safety_score_subscriptions):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning("safety_score_broadcast_failed", client_id=client_id, error=str(e))
+
+
+async def broadcast_officer_down(
+    badge: str,
+    emergency_data: dict,
+) -> None:
+    """Broadcast officer down alert to all subscribers."""
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": "officer_down",
+        "badge": badge,
+        "data": emergency_data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+        "priority": "critical",
+    }
+
+    for client_id in list(_officer_down_subscriptions):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning("officer_down_broadcast_failed", client_id=client_id, error=str(e))
+
+
+async def broadcast_officer_sos(
+    badge: str,
+    sos_data: dict,
+) -> None:
+    """Broadcast SOS alert to all subscribers."""
+    ws_manager = get_websocket_manager()
+    message = {
+        "type": "officer_sos",
+        "badge": badge,
+        "data": sos_data,
+        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+        "priority": "critical",
+    }
+
+    for client_id in list(_officer_down_subscriptions):
+        try:
+            await ws_manager.send_to_client(client_id, message)
+        except Exception as e:
+            logger.warning("officer_sos_broadcast_failed", client_id=client_id, error=str(e))
+
+
+# Subscription info functions
+def get_officer_location_subscribers() -> dict[str, int]:
+    """Get count of subscribers per badge/all."""
+    return {k: len(v) for k, v in _officer_location_subscriptions.items()}
+
+
+def get_officer_threat_subscriber_count() -> int:
+    """Get count of threat alert subscribers."""
+    return len(_officer_threat_subscriptions)
+
+
+def get_officer_down_subscriber_count() -> int:
+    """Get count of officer down alert subscribers."""
+    return len(_officer_down_subscriptions)
+
+
+# ============================================================================
 # Phase 5: Tactical Analytics WebSocket Channels
 # ============================================================================
 
