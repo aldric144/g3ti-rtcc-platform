@@ -1,0 +1,249 @@
+name: EOC Self-Test (Phase 21)
+
+on:
+  push:
+    branches:
+      - main
+      - 'devin/*'
+    paths:
+      - 'backend/app/emergency/**'
+      - 'backend/app/api/emergency/**'
+      - 'backend/app/websockets/emergency.py'
+      - 'frontend/app/emergency-operations-center/**'
+      - 'tests/phase21/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/app/emergency/**'
+      - 'backend/app/api/emergency/**'
+      - 'backend/app/websockets/emergency.py'
+      - 'frontend/app/emergency-operations-center/**'
+      - 'tests/phase21/**'
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+
+jobs:
+  # =============================================================================
+  # Backend Tests - Emergency Management Modules
+  # =============================================================================
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+
+      - name: Run Crisis Detection Engine Tests
+        working-directory: ./backend
+        run: |
+          pytest ../tests/phase21/test_crisis_detection.py -v --tb=short
+
+      - name: Run Evacuation AI Tests
+        working-directory: ./backend
+        run: |
+          pytest ../tests/phase21/test_evacuation_ai.py -v --tb=short
+
+      - name: Run Resource Logistics Tests
+        working-directory: ./backend
+        run: |
+          pytest ../tests/phase21/test_resource_logistics.py -v --tb=short
+
+      - name: Run Medical Surge AI Tests
+        working-directory: ./backend
+        run: |
+          pytest ../tests/phase21/test_medical_surge.py -v --tb=short
+
+      - name: Run Multi-Incident Command Tests
+        working-directory: ./backend
+        run: |
+          pytest ../tests/phase21/test_multi_incident_command.py -v --tb=short
+
+      - name: Run Damage Assessment Tests
+        working-directory: ./backend
+        run: |
+          pytest ../tests/phase21/test_damage_assessment.py -v --tb=short
+
+      - name: Run Emergency API Tests
+        working-directory: ./backend
+        run: |
+          pytest ../tests/phase21/test_emergency_api.py -v --tb=short
+
+      - name: Run Emergency WebSocket Tests
+        working-directory: ./backend
+        run: |
+          pytest ../tests/phase21/test_emergency_websockets.py -v --tb=short
+
+  # =============================================================================
+  # Frontend Tests - Emergency Operations Center
+  # =============================================================================
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run TypeScript check
+        working-directory: ./frontend
+        run: npm run type-check || true
+
+      - name: Run ESLint
+        working-directory: ./frontend
+        run: npm run lint || true
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+  # =============================================================================
+  # Integration Tests
+  # =============================================================================
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run Integration Tests
+        working-directory: ./backend
+        env:
+          REDIS_URL: redis://localhost:6379/0
+          ENVIRONMENT: test
+        run: |
+          pytest ../tests/phase21/ -v --tb=short -k "integration" || true
+
+  # =============================================================================
+  # Code Quality
+  # =============================================================================
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install linters
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff black isort
+
+      - name: Run Ruff
+        run: |
+          ruff check backend/app/emergency/ --ignore E501 || true
+
+      - name: Check Black formatting
+        run: |
+          black --check backend/app/emergency/ || true
+
+      - name: Check import sorting
+        run: |
+          isort --check-only backend/app/emergency/ || true
+
+  # =============================================================================
+  # Security Scan
+  # =============================================================================
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit security scan
+        run: |
+          bandit -r backend/app/emergency/ -ll || true
+
+  # =============================================================================
+  # Docker Build Test
+  # =============================================================================
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: false
+          tags: rtcc-backend:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -1028,6 +1028,211 @@ services:
     profiles:
       - ada
 
+  # =============================================================================
+  # Emergency Crisis Detection Engine (Phase 21)
+  # AI Emergency Management & Disaster Response Engine
+  # =============================================================================
+  emergency-crisis:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-emergency-crisis
+    command: python -m app.emergency.crisis_detection_engine.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - CRISIS_STORM_TRACKING_ENABLED=true
+      - CRISIS_FLOOD_PREDICTION_ENABLED=true
+      - CRISIS_FIRE_MODELING_ENABLED=true
+      - CRISIS_EARTHQUAKE_MONITORING_ENABLED=true
+      - CRISIS_EXPLOSION_DETECTION_ENABLED=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - emergency
+
+  # =============================================================================
+  # Emergency Evacuation AI (Phase 21)
+  # Dynamic Evacuation Route Optimization
+  # =============================================================================
+  emergency-evacuation:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-emergency-evacuation
+    command: python -m app.emergency.evacuation_ai.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - EVAC_ROUTE_OPTIMIZATION_ENABLED=true
+      - EVAC_CONTRAFLOW_ENABLED=true
+      - EVAC_SPECIAL_NEEDS_TRACKING_ENABLED=true
+      - EVAC_TRAFFIC_SIMULATION_ENABLED=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - emergency
+
+  # =============================================================================
+  # Emergency Resource Logistics (Phase 21)
+  # Shelter Capacity and Supply Chain Management
+  # =============================================================================
+  emergency-logistics:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-emergency-logistics
+    command: python -m app.emergency.resource_logistics.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - LOGISTICS_SHELTER_TRACKING_ENABLED=true
+      - LOGISTICS_SUPPLY_CHAIN_ENABLED=true
+      - LOGISTICS_DEPLOYMENT_ALLOCATION_ENABLED=true
+      - LOGISTICS_INFRASTRUCTURE_MONITORING_ENABLED=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - emergency
+
+  # =============================================================================
+  # Emergency Medical Surge AI (Phase 21)
+  # Hospital Load Prediction and Triage Management
+  # =============================================================================
+  emergency-medical:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-emergency-medical
+    command: python -m app.emergency.medical_surge_ai.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - MEDICAL_HOSPITAL_PREDICTION_ENABLED=true
+      - MEDICAL_EMS_FORECASTING_ENABLED=true
+      - MEDICAL_TRIAGE_START_ALGORITHM_ENABLED=true
+      - MEDICAL_SUPPLY_TRACKING_ENABLED=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - emergency
+
+  # =============================================================================
+  # Emergency Multi-Incident Command (Phase 21)
+  # Incident Room Management and EOC Coordination
+  # =============================================================================
+  emergency-command:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-emergency-command
+    command: python -m app.emergency.multi_incident_command.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - COMMAND_INCIDENT_ROOMS_ENABLED=true
+      - COMMAND_AI_BRIEFING_ENABLED=true
+      - COMMAND_TASK_ASSIGNMENT_ENABLED=true
+      - COMMAND_TIMELINE_SYNC_ENABLED=true
+      - COMMAND_EOC_COORDINATION_ENABLED=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - emergency
+
+  # =============================================================================
+  # Emergency Damage Assessment (Phase 21)
+  # Drone Image Classification and Recovery Planning
+  # =============================================================================
+  emergency-damage:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-emergency-damage
+    command: python -m app.emergency.damage_assessment.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - DAMAGE_DRONE_CLASSIFICATION_ENABLED=true
+      - DAMAGE_STRUCTURAL_RISK_SCORING_ENABLED=true
+      - DAMAGE_COST_ESTIMATION_ENABLED=true
+      - DAMAGE_RECOVERY_TIMELINE_ENABLED=true
+      - CUDA_VISIBLE_DEVICES=0
+      - ENABLE_GPU=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - emergency-models:/app/models
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - emergency
+      - gpu
+
 # =============================================================================
 # Networks
 # =============================================================================
@@ -1072,3 +1277,5 @@ volumes:
     name: rtcc-robotics-models
   ada-models:
     name: rtcc-ada-models
+  emergency-models:
+    name: rtcc-emergency-models
