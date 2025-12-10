@@ -1,0 +1,213 @@
+name: Threat Intelligence Self-Test
+
+on:
+  push:
+    branches:
+      - main
+      - 'devin/**'
+    paths:
+      - 'backend/app/threat_intel/**'
+      - 'backend/app/api/threat_intel/**'
+      - 'backend/app/websockets/threat_intel.py'
+      - 'tests/phase17/**'
+      - '.github/workflows/threat-intel-selftest.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/app/threat_intel/**'
+      - 'backend/app/api/threat_intel/**'
+      - 'backend/app/websockets/threat_intel.py'
+      - 'tests/phase17/**'
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  threat-intel-tests:
+    name: Phase 17 - Global Threat Intelligence Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov httpx
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+          if [ -f backend/pyproject.toml ]; then pip install -e backend/; fi
+
+      - name: Run Dark Web Monitor Tests
+        run: |
+          cd backend
+          python -m pytest ../tests/phase17/test_dark_web_monitor.py -v --tb=short
+        continue-on-error: false
+
+      - name: Run OSINT Harvester Tests
+        run: |
+          cd backend
+          python -m pytest ../tests/phase17/test_osint_harvester.py -v --tb=short
+        continue-on-error: false
+
+      - name: Run Extremist Networks Tests
+        run: |
+          cd backend
+          python -m pytest ../tests/phase17/test_extremist_networks.py -v --tb=short
+        continue-on-error: false
+
+      - name: Run Global Incidents Tests
+        run: |
+          cd backend
+          python -m pytest ../tests/phase17/test_global_incidents.py -v --tb=short
+        continue-on-error: false
+
+      - name: Run Threat Scoring Engine Tests
+        run: |
+          cd backend
+          python -m pytest ../tests/phase17/test_threat_scoring_engine.py -v --tb=short
+        continue-on-error: false
+
+      - name: Run Threat Alerts Tests
+        run: |
+          cd backend
+          python -m pytest ../tests/phase17/test_threat_alerts.py -v --tb=short
+        continue-on-error: false
+
+      - name: Run All Phase 17 Tests with Coverage
+        run: |
+          cd backend
+          python -m pytest ../tests/phase17/ -v --cov=app.threat_intel --cov-report=xml --cov-report=term-missing
+        continue-on-error: false
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          files: backend/coverage.xml
+          flags: threat-intel
+          name: phase17-coverage
+        continue-on-error: true
+
+  threat-intel-lint:
+    name: Phase 17 - Lint & Type Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install linting tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+
+      - name: Run Ruff linter on threat_intel module
+        run: |
+          ruff check backend/app/threat_intel/ --ignore=E501,F401
+        continue-on-error: true
+
+      - name: Run Ruff linter on threat_intel API
+        run: |
+          ruff check backend/app/api/threat_intel/ --ignore=E501,F401
+        continue-on-error: true
+
+      - name: Run Ruff linter on threat_intel WebSocket
+        run: |
+          ruff check backend/app/websockets/threat_intel.py --ignore=E501,F401
+        continue-on-error: true
+
+  threat-intel-integration:
+    name: Phase 17 - Integration Validation
+    runs-on: ubuntu-latest
+    needs: [threat-intel-tests, threat-intel-lint]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+          if [ -f backend/pyproject.toml ]; then pip install -e backend/; fi
+
+      - name: Validate module imports
+        run: |
+          cd backend
+          python -c "
+          from app.threat_intel import (
+              DarkWebMonitor,
+              OSINTHarvester,
+              ExtremistNetworkAnalyzer,
+              GlobalIncidentMonitor,
+              ThreatScoringEngine,
+              ThreatAlertManager,
+          )
+          print('All Phase 17 modules imported successfully')
+          
+          # Validate service instantiation
+          dwm = DarkWebMonitor()
+          osint = OSINTHarvester()
+          ena = ExtremistNetworkAnalyzer()
+          gim = GlobalIncidentMonitor()
+          tse = ThreatScoringEngine()
+          tam = ThreatAlertManager()
+          
+          print('All Phase 17 services instantiated successfully')
+          
+          # Validate metrics collection
+          print('Dark Web Monitor metrics:', dwm.get_metrics())
+          print('OSINT Harvester metrics:', osint.get_metrics())
+          print('Extremist Network metrics:', ena.get_metrics())
+          print('Global Incidents metrics:', gim.get_metrics())
+          print('Threat Scoring metrics:', tse.get_metrics())
+          print('Threat Alerts metrics:', tam.get_metrics())
+          "
+
+      - name: Validate WebSocket module
+        run: |
+          cd backend
+          python -c "
+          from app.websockets.threat_intel import (
+              ThreatIntelWebSocketManager,
+              ThreatIntelChannel,
+              MessageType,
+              threat_intel_ws_manager,
+          )
+          print('WebSocket module imported successfully')
+          print('Available channels:', [c.value for c in ThreatIntelChannel])
+          print('Message types:', [m.value for m in MessageType])
+          "
+
+      - name: Phase 17 Integration Complete
+        run: |
+          echo "Phase 17 - Global Threat Intelligence Engine integration validated successfully"
+          echo "Modules validated:"
+          echo "  - dark_web_monitor"
+          echo "  - osint_harvester"
+          echo "  - extremist_networks"
+          echo "  - global_incidents"
+          echo "  - threat_scoring_engine"
+          echo "  - threat_alerts"
+          echo "  - WebSocket channels"

@@ -465,6 +465,112 @@ services:
       - fusion
 
   # =============================================================================
+  # Threat Intel OSINT Harvester (Phase 17)
+  # Global Threat Intelligence Engine - OSINT Pipeline
+  # =============================================================================
+  threat-intel-osint:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-threat-intel-osint
+    command: python -m app.threat_intel.osint_harvester.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - OSINT_RSS_POLL_INTERVAL=300
+      - OSINT_SOCIAL_POLL_INTERVAL=60
+      - OSINT_SPIKE_DETECTION_ENABLED=true
+      - OSINT_HATE_SPEECH_CLASSIFIER_ENABLED=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - threat-intel
+
+  # =============================================================================
+  # Threat Intel Dark Web Monitor (Phase 17)
+  # Global Threat Intelligence Engine - Dark Web Pipeline
+  # =============================================================================
+  threat-intel-darkweb:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-threat-intel-darkweb
+    command: python -m app.threat_intel.dark_web_monitor.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - DARKWEB_TOR_ENABLED=false
+      - DARKWEB_KEYWORD_DETECTION_ENABLED=true
+      - DARKWEB_MARKET_ANALYSIS_ENABLED=true
+      - DARKWEB_SENTIMENT_SCORING_ENABLED=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - threat-intel
+
+  # =============================================================================
+  # Threat Intel Scoring Engine (Phase 17)
+  # Global Threat Intelligence Engine - ML Scoring Pipeline
+  # =============================================================================
+  threat-intel-scoring:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-threat-intel-scoring
+    command: python -m app.threat_intel.threat_scoring_engine.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - SCORING_ML_ENABLED=true
+      - SCORING_FUSION_METHOD=bayesian
+      - SCORING_ALERT_THRESHOLD=70
+      - CUDA_VISIBLE_DEVICES=0
+      - ENABLE_GPU=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - threat-intel-models:/app/threat_models
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - threat-intel
+      - gpu
+
+  # =============================================================================
   # Ops Health Monitor (Phase 14)
   # Dedicated service for operational continuity monitoring
   # =============================================================================
@@ -528,3 +634,5 @@ volumes:
     name: rtcc-predictive-models
   building-models:
     name: rtcc-building-models
+  threat-intel-models:
+    name: rtcc-threat-intel-models
