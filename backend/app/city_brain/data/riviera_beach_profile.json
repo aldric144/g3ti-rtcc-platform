@@ -1,0 +1,627 @@
+{
+  "city": {
+    "name": "Riviera Beach",
+    "state": "Florida",
+    "zip_code": "33404",
+    "county": "Palm Beach",
+    "incorporated": 1922,
+    "population": 37964,
+    "area_sq_miles": 9.76,
+    "elevation_ft": 13,
+    "timezone": "America/New_York"
+  },
+  "bounding_box": {
+    "north": 26.8100,
+    "south": 26.7500,
+    "east": -80.0300,
+    "west": -80.1100,
+    "center": {
+      "latitude": 26.7753,
+      "longitude": -80.0583
+    }
+  },
+  "districts": [
+    {
+      "id": "district-1",
+      "name": "Downtown/Marina District",
+      "type": "commercial",
+      "population": 5200,
+      "area_sq_miles": 1.2,
+      "boundaries": {
+        "north": 26.7850,
+        "south": 26.7700,
+        "east": -80.0400,
+        "west": -80.0600
+      }
+    },
+    {
+      "id": "district-2",
+      "name": "Singer Island",
+      "type": "residential_beach",
+      "population": 4800,
+      "area_sq_miles": 2.1,
+      "boundaries": {
+        "north": 26.8100,
+        "south": 26.7600,
+        "east": -80.0300,
+        "west": -80.0450
+      }
+    },
+    {
+      "id": "district-3",
+      "name": "Westside",
+      "type": "residential",
+      "population": 12500,
+      "area_sq_miles": 2.8,
+      "boundaries": {
+        "north": 26.7900,
+        "south": 26.7500,
+        "east": -80.0700,
+        "west": -80.1100
+      }
+    },
+    {
+      "id": "district-4",
+      "name": "Central Business District",
+      "type": "mixed_use",
+      "population": 8200,
+      "area_sq_miles": 1.5,
+      "boundaries": {
+        "north": 26.7850,
+        "south": 26.7650,
+        "east": -80.0550,
+        "west": -80.0750
+      }
+    },
+    {
+      "id": "district-5",
+      "name": "Industrial/Port Area",
+      "type": "industrial",
+      "population": 1200,
+      "area_sq_miles": 1.1,
+      "boundaries": {
+        "north": 26.7750,
+        "south": 26.7550,
+        "east": -80.0450,
+        "west": -80.0600
+      }
+    },
+    {
+      "id": "district-6",
+      "name": "North Riviera",
+      "type": "residential",
+      "population": 6064,
+      "area_sq_miles": 1.06,
+      "boundaries": {
+        "north": 26.8000,
+        "south": 26.7850,
+        "east": -80.0550,
+        "west": -80.0900
+      }
+    }
+  ],
+  "population_density": {
+    "overall_per_sq_mile": 3889,
+    "by_district": {
+      "district-1": 4333,
+      "district-2": 2286,
+      "district-3": 4464,
+      "district-4": 5467,
+      "district-5": 1091,
+      "district-6": 5721
+    },
+    "demographics": {
+      "median_age": 38.5,
+      "households": 14200,
+      "avg_household_size": 2.67
+    }
+  },
+  "elevation_data": {
+    "min_ft": 0,
+    "max_ft": 25,
+    "avg_ft": 13,
+    "sea_level_zones": [
+      {
+        "name": "Singer Island Beachfront",
+        "elevation_ft": 5,
+        "flood_risk": "high"
+      },
+      {
+        "name": "Marina District",
+        "elevation_ft": 8,
+        "flood_risk": "high"
+      },
+      {
+        "name": "Intracoastal Areas",
+        "elevation_ft": 10,
+        "flood_risk": "moderate"
+      },
+      {
+        "name": "Westside Residential",
+        "elevation_ft": 18,
+        "flood_risk": "low"
+      }
+    ]
+  },
+  "flood_zones": [
+    {
+      "id": "fz-ae-1",
+      "fema_zone": "AE",
+      "name": "Singer Island Coastal",
+      "base_flood_elevation_ft": 11,
+      "risk_level": "high",
+      "area_sq_miles": 1.8,
+      "affected_population": 4500
+    },
+    {
+      "id": "fz-ae-2",
+      "fema_zone": "AE",
+      "name": "Marina/Port Area",
+      "base_flood_elevation_ft": 10,
+      "risk_level": "high",
+      "area_sq_miles": 0.9,
+      "affected_population": 2200
+    },
+    {
+      "id": "fz-ah-1",
+      "fema_zone": "AH",
+      "name": "Intracoastal Lowlands",
+      "base_flood_elevation_ft": 8,
+      "risk_level": "moderate",
+      "area_sq_miles": 1.2,
+      "affected_population": 3500
+    },
+    {
+      "id": "fz-x-1",
+      "fema_zone": "X",
+      "name": "Westside Elevated",
+      "base_flood_elevation_ft": 0,
+      "risk_level": "low",
+      "area_sq_miles": 4.5,
+      "affected_population": 18000
+    },
+    {
+      "id": "fz-ve-1",
+      "fema_zone": "VE",
+      "name": "Beachfront High Velocity",
+      "base_flood_elevation_ft": 14,
+      "risk_level": "extreme",
+      "area_sq_miles": 0.5,
+      "affected_population": 1200
+    }
+  ],
+  "schools": [
+    {
+      "id": "school-1",
+      "name": "Riviera Beach Preparatory Academy",
+      "type": "elementary",
+      "address": "1200 W 13th St, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7712, "longitude": -80.0789},
+      "enrollment": 650,
+      "dismissal_time": "14:30"
+    },
+    {
+      "id": "school-2",
+      "name": "John F. Kennedy Middle School",
+      "type": "middle",
+      "address": "300 W 28th St, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7891, "longitude": -80.0678},
+      "enrollment": 890,
+      "dismissal_time": "15:00"
+    },
+    {
+      "id": "school-3",
+      "name": "Suncoast Community High School",
+      "type": "high",
+      "address": "600 W 28th St, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7895, "longitude": -80.0712},
+      "enrollment": 1450,
+      "dismissal_time": "15:30"
+    },
+    {
+      "id": "school-4",
+      "name": "Lincoln Elementary School",
+      "type": "elementary",
+      "address": "1200 W 10th St, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7678, "longitude": -80.0801},
+      "enrollment": 520,
+      "dismissal_time": "14:30"
+    },
+    {
+      "id": "school-5",
+      "name": "Washington Elementary School",
+      "type": "elementary",
+      "address": "800 W 6th St, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7634, "longitude": -80.0756},
+      "enrollment": 480,
+      "dismissal_time": "14:30"
+    }
+  ],
+  "police_stations": [
+    {
+      "id": "pd-1",
+      "name": "Riviera Beach Police Department HQ",
+      "address": "600 W Blue Heron Blvd, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7753, "longitude": -80.0712},
+      "phone": "561-845-4123",
+      "type": "headquarters",
+      "officers": 145,
+      "patrol_zones": ["zone-1", "zone-2", "zone-3", "zone-4"]
+    },
+    {
+      "id": "pd-2",
+      "name": "Singer Island Substation",
+      "address": "2600 N Ocean Dr, Singer Island, FL 33404",
+      "location": {"latitude": 26.7912, "longitude": -80.0378},
+      "phone": "561-845-4200",
+      "type": "substation",
+      "officers": 25,
+      "patrol_zones": ["zone-5"]
+    }
+  ],
+  "fire_stations": [
+    {
+      "id": "fs-1",
+      "name": "Riviera Beach Fire Station 1",
+      "address": "600 W Blue Heron Blvd, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7756, "longitude": -80.0718},
+      "phone": "561-845-4100",
+      "type": "headquarters",
+      "apparatus": ["Engine 1", "Ladder 1", "Rescue 1", "Battalion 1"],
+      "personnel": 45
+    },
+    {
+      "id": "fs-2",
+      "name": "Riviera Beach Fire Station 2",
+      "address": "1800 Broadway, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7823, "longitude": -80.0567},
+      "phone": "561-845-4110",
+      "type": "station",
+      "apparatus": ["Engine 2", "Rescue 2"],
+      "personnel": 18
+    },
+    {
+      "id": "fs-3",
+      "name": "Singer Island Fire Station",
+      "address": "2500 N Ocean Dr, Singer Island, FL 33404",
+      "location": {"latitude": 26.7901, "longitude": -80.0389},
+      "phone": "561-845-4120",
+      "type": "station",
+      "apparatus": ["Engine 3", "Marine 3"],
+      "personnel": 15
+    }
+  ],
+  "marina": {
+    "id": "marina-1",
+    "name": "Riviera Beach Marina",
+    "address": "200 E 13th St, Riviera Beach, FL 33404",
+    "location": {"latitude": 26.7712, "longitude": -80.0478},
+    "slips": 195,
+    "max_vessel_length_ft": 150,
+    "fuel_dock": true,
+    "boat_ramp": true,
+    "services": ["fuel", "pump_out", "electric", "water", "wifi"],
+    "operating_hours": "06:00-22:00",
+    "weekend_density": "high",
+    "events": ["fishing_tournaments", "boat_shows", "marine_festivals"]
+  },
+  "major_roads": [
+    {
+      "id": "road-1",
+      "name": "Blue Heron Boulevard",
+      "type": "arterial",
+      "direction": "east_west",
+      "lanes": 6,
+      "speed_limit_mph": 45,
+      "daily_traffic_volume": 42000,
+      "intersections": ["Broadway", "Congress Ave", "Military Trail", "I-95"],
+      "congestion_peak_hours": ["07:30-09:00", "16:30-18:30"]
+    },
+    {
+      "id": "road-2",
+      "name": "Broadway",
+      "type": "arterial",
+      "direction": "north_south",
+      "lanes": 4,
+      "speed_limit_mph": 35,
+      "daily_traffic_volume": 28000,
+      "intersections": ["Blue Heron Blvd", "13th St", "21st St"],
+      "congestion_peak_hours": ["07:00-08:30", "17:00-18:30"]
+    },
+    {
+      "id": "road-3",
+      "name": "Martin Luther King Jr Boulevard",
+      "type": "arterial",
+      "direction": "east_west",
+      "lanes": 4,
+      "speed_limit_mph": 40,
+      "daily_traffic_volume": 18000,
+      "intersections": ["Congress Ave", "Military Trail"],
+      "congestion_peak_hours": ["07:30-08:30", "16:00-17:30"]
+    },
+    {
+      "id": "road-4",
+      "name": "I-95",
+      "type": "interstate",
+      "direction": "north_south",
+      "lanes": 8,
+      "speed_limit_mph": 70,
+      "daily_traffic_volume": 185000,
+      "exits": ["Blue Heron Blvd (Exit 77)", "45th St (Exit 76)"],
+      "congestion_peak_hours": ["06:30-09:30", "15:30-19:00"]
+    },
+    {
+      "id": "road-5",
+      "name": "Military Trail",
+      "type": "arterial",
+      "direction": "north_south",
+      "lanes": 6,
+      "speed_limit_mph": 45,
+      "daily_traffic_volume": 35000,
+      "intersections": ["Blue Heron Blvd", "MLK Blvd", "45th St"],
+      "congestion_peak_hours": ["07:00-09:00", "16:00-18:00"]
+    },
+    {
+      "id": "road-6",
+      "name": "Congress Avenue",
+      "type": "arterial",
+      "direction": "north_south",
+      "lanes": 6,
+      "speed_limit_mph": 45,
+      "daily_traffic_volume": 38000,
+      "intersections": ["Blue Heron Blvd", "MLK Blvd"],
+      "congestion_peak_hours": ["07:00-09:00", "16:30-18:30"]
+    },
+    {
+      "id": "road-7",
+      "name": "Ocean Drive",
+      "type": "local",
+      "direction": "north_south",
+      "lanes": 2,
+      "speed_limit_mph": 35,
+      "daily_traffic_volume": 8000,
+      "intersections": ["Blue Heron Blvd"],
+      "congestion_peak_hours": ["10:00-12:00", "14:00-17:00"]
+    }
+  ],
+  "utility_zones": [
+    {
+      "id": "util-1",
+      "name": "Central Water District",
+      "type": "water",
+      "provider": "Riviera Beach Utilities",
+      "customers": 8500,
+      "infrastructure": {
+        "water_mains_miles": 45,
+        "pump_stations": 3,
+        "storage_tanks": 2,
+        "treatment_plant": "Riviera Beach WTP"
+      }
+    },
+    {
+      "id": "util-2",
+      "name": "Sewer District A",
+      "type": "sewer",
+      "provider": "Riviera Beach Utilities",
+      "customers": 8500,
+      "infrastructure": {
+        "sewer_mains_miles": 42,
+        "lift_stations": 12,
+        "treatment_plant": "East Central Regional WWTP"
+      }
+    },
+    {
+      "id": "util-3",
+      "name": "FPL Service Area",
+      "type": "electric",
+      "provider": "Florida Power & Light",
+      "customers": 14200,
+      "infrastructure": {
+        "substations": 3,
+        "distribution_feeders": 18,
+        "transmission_lines_miles": 12
+      }
+    },
+    {
+      "id": "util-4",
+      "name": "TECO Gas District",
+      "type": "gas",
+      "provider": "TECO Peoples Gas",
+      "customers": 4200,
+      "infrastructure": {
+        "gas_mains_miles": 28,
+        "regulator_stations": 4
+      }
+    }
+  ],
+  "critical_infrastructure": [
+    {
+      "id": "ci-1",
+      "name": "Riviera Beach Water Treatment Plant",
+      "type": "water_treatment",
+      "address": "1800 W 10th St, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7678, "longitude": -80.0856},
+      "capacity_mgd": 12,
+      "serves_population": 38000,
+      "backup_power": true,
+      "criticality": "critical"
+    },
+    {
+      "id": "ci-2",
+      "name": "FPL Blue Heron Substation",
+      "type": "electrical_substation",
+      "address": "500 W Blue Heron Blvd, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7753, "longitude": -80.0689},
+      "capacity_mw": 150,
+      "serves_customers": 8500,
+      "backup_power": true,
+      "criticality": "critical"
+    },
+    {
+      "id": "ci-3",
+      "name": "FPL Singer Island Substation",
+      "type": "electrical_substation",
+      "address": "2200 N Ocean Dr, Singer Island, FL 33404",
+      "location": {"latitude": 26.7867, "longitude": -80.0401},
+      "capacity_mw": 45,
+      "serves_customers": 3200,
+      "backup_power": true,
+      "criticality": "high"
+    },
+    {
+      "id": "ci-4",
+      "name": "AT&T Central Office",
+      "type": "telecommunications",
+      "address": "700 W Blue Heron Blvd, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7753, "longitude": -80.0734},
+      "serves_customers": 12000,
+      "backup_power": true,
+      "criticality": "high"
+    },
+    {
+      "id": "ci-5",
+      "name": "Riviera Beach Lift Station 1",
+      "type": "sewer_lift_station",
+      "address": "100 E Blue Heron Blvd, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7753, "longitude": -80.0523},
+      "capacity_gpm": 2500,
+      "serves_population": 8000,
+      "backup_power": true,
+      "criticality": "high"
+    },
+    {
+      "id": "ci-6",
+      "name": "Port of Palm Beach",
+      "type": "port",
+      "address": "1 E 11th St, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7689, "longitude": -80.0478},
+      "berths": 17,
+      "annual_cargo_tons": 2500000,
+      "criticality": "high"
+    },
+    {
+      "id": "ci-7",
+      "name": "Riviera Beach Emergency Operations Center",
+      "type": "emergency_management",
+      "address": "600 W Blue Heron Blvd, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7753, "longitude": -80.0712},
+      "backup_power": true,
+      "generator_runtime_hours": 168,
+      "criticality": "critical"
+    }
+  ],
+  "weather_stations": [
+    {
+      "id": "wx-1",
+      "name": "Riviera Beach ASOS",
+      "type": "automated",
+      "location": {"latitude": 26.7753, "longitude": -80.0583},
+      "nws_station_id": "KPBI",
+      "measurements": ["temperature", "humidity", "wind", "pressure", "precipitation"]
+    }
+  ],
+  "hurricane_zones": {
+    "evacuation_zones": [
+      {
+        "zone": "A",
+        "name": "Singer Island/Beachfront",
+        "population": 5200,
+        "evacuation_trigger": "Category 1",
+        "shelter_assignments": ["shelter-1", "shelter-2"]
+      },
+      {
+        "zone": "B",
+        "name": "Marina/Intracoastal",
+        "population": 8500,
+        "evacuation_trigger": "Category 2",
+        "shelter_assignments": ["shelter-2", "shelter-3"]
+      },
+      {
+        "zone": "C",
+        "name": "Central Riviera Beach",
+        "population": 12000,
+        "evacuation_trigger": "Category 3",
+        "shelter_assignments": ["shelter-3", "shelter-4"]
+      }
+    ],
+    "storm_surge_risk": {
+      "category_1_surge_ft": 4,
+      "category_2_surge_ft": 6,
+      "category_3_surge_ft": 9,
+      "category_4_surge_ft": 13,
+      "category_5_surge_ft": 18
+    }
+  },
+  "points_of_interest": [
+    {
+      "id": "poi-1",
+      "name": "Riviera Beach Marina Village",
+      "type": "entertainment",
+      "location": {"latitude": 26.7712, "longitude": -80.0478},
+      "typical_attendance": 2500,
+      "peak_hours": ["18:00-22:00"]
+    },
+    {
+      "id": "poi-2",
+      "name": "Phil Foster Park",
+      "type": "park",
+      "location": {"latitude": 26.7823, "longitude": -80.0412},
+      "typical_attendance": 1500,
+      "peak_hours": ["09:00-17:00"]
+    },
+    {
+      "id": "poi-3",
+      "name": "Peanut Island",
+      "type": "park",
+      "location": {"latitude": 26.7756, "longitude": -80.0389},
+      "typical_attendance": 800,
+      "peak_hours": ["10:00-16:00"]
+    },
+    {
+      "id": "poi-4",
+      "name": "Singer Island Beach",
+      "type": "beach",
+      "location": {"latitude": 26.7912, "longitude": -80.0345},
+      "typical_attendance": 3000,
+      "peak_hours": ["10:00-17:00"]
+    }
+  ],
+  "churches": [
+    {
+      "id": "church-1",
+      "name": "Tabernacle Missionary Baptist Church",
+      "address": "801 W 8th St, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7656, "longitude": -80.0767},
+      "capacity": 1200,
+      "service_times": ["08:00", "11:00"]
+    },
+    {
+      "id": "church-2",
+      "name": "St. Mary's Catholic Church",
+      "address": "1200 W Blue Heron Blvd, Riviera Beach, FL 33404",
+      "location": {"latitude": 26.7753, "longitude": -80.0812},
+      "capacity": 800,
+      "service_times": ["09:00", "11:00", "17:00"]
+    }
+  ],
+  "hospitals_nearby": [
+    {
+      "id": "hosp-1",
+      "name": "St. Mary's Medical Center",
+      "address": "901 45th St, West Palm Beach, FL 33407",
+      "location": {"latitude": 26.7534, "longitude": -80.0712},
+      "distance_miles": 3.2,
+      "trauma_level": 1,
+      "beds": 464
+    },
+    {
+      "id": "hosp-2",
+      "name": "Good Samaritan Medical Center",
+      "address": "1309 N Flagler Dr, West Palm Beach, FL 33401",
+      "location": {"latitude": 26.7234, "longitude": -80.0512},
+      "distance_miles": 4.8,
+      "trauma_level": 2,
+      "beds": 333
+    }
+  ]
+}
