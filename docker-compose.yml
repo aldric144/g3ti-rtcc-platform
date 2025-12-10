@@ -711,6 +711,174 @@ services:
       - monitoring
 
 # =============================================================================
+  # Robotics Fleet Service (Phase 19)
+  # Autonomous Tactical Robotics Engine - Fleet Management
+  # =============================================================================
+  robotics-fleet:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-robotics-fleet
+    command: python -m app.robotics.robotics_fleet.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ROBOTICS_TELEMETRY_INTERVAL=100
+      - ROBOTICS_HEALTH_CHECK_INTERVAL=30
+      - ROBOTICS_COMMAND_TIMEOUT=60
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - robotics
+
+  # =============================================================================
+  # Robotics Autonomy Engine (Phase 19)
+  # Autonomous Tactical Robotics Engine - Navigation & Pathfinding
+  # =============================================================================
+  robotics-autonomy:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-robotics-autonomy
+    command: python -m app.robotics.autonomy_engine.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - PATHFINDING_ALGORITHM=a_star
+      - OBSTACLE_AVOIDANCE_ENABLED=true
+      - INDOOR_NAVIGATION_ENABLED=true
+      - PATROL_PATTERN_GENERATION=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - robotics-maps:/app/navigation_maps
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - robotics
+
+  # =============================================================================
+  # Robotics Perimeter Security (Phase 19)
+  # Autonomous Tactical Robotics Engine - Perimeter Monitoring
+  # =============================================================================
+  robotics-perimeter:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-robotics-perimeter
+    command: python -m app.robotics.perimeter_security.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - THERMAL_SENSOR_ENABLED=true
+      - MOTION_RADAR_ENABLED=true
+      - BREACH_DETECTION_ENABLED=true
+      - AUTO_RESPONSE_ENABLED=true
+      - BREACH_ALERT_THRESHOLD=50
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - robotics
+
+  # =============================================================================
+  # Robotics Swarm Coordinator (Phase 19)
+  # Autonomous Tactical Robotics Engine - Multi-Robot Swarm Management
+  # =============================================================================
+  robotics-swarm:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-robotics-swarm
+    command: python -m app.robotics.swarm_coordination.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - SWARM_FORMATION_ENABLED=true
+      - SWARM_TASK_ALLOCATION=true
+      - SWARM_TELEMETRY_SYNC_INTERVAL=100
+      - SWARM_MAX_UNITS=20
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - robotics
+
+  # =============================================================================
+  # Robotics Mission Engine (Phase 19)
+  # Autonomous Tactical Robotics Engine - Mission Planning & Dispatch
+  # =============================================================================
+  robotics-mission:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-robotics-mission
+    command: python -m app.robotics.robotics_mission_engine.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - MISSION_AUTO_DISPATCH_ENABLED=true
+      - MISSION_TIMELINE_ENABLED=true
+      - MISSION_STREAMING_ENABLED=true
+      - CUDA_VISIBLE_DEVICES=0
+      - ENABLE_GPU=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - robotics-models:/app/robotics_models
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - robotics
+      - gpu
+
+# =============================================================================
 # Networks
 # =============================================================================
 networks:
@@ -748,3 +916,7 @@ volumes:
     name: rtcc-threat-intel-models
   nse-models:
     name: rtcc-nse-models
+  robotics-maps:
+    name: rtcc-robotics-maps
+  robotics-models:
+    name: rtcc-robotics-models
