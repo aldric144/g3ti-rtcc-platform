@@ -571,6 +571,116 @@ services:
       - gpu
 
   # =============================================================================
+  # National Security Cyber Intel Worker (Phase 18)
+  # Autonomous National Security Engine - Cyber Intelligence Pipeline
+  # =============================================================================
+  nse-cyber-intel:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-nse-cyber-intel
+    command: python -m app.national_security.cyber_intel.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - CYBER_MALWARE_DETECTION_ENABLED=true
+      - CYBER_BOTNET_PREDICTION_ENABLED=true
+      - CYBER_RANSOMWARE_ALERT_ENABLED=true
+      - CYBER_VULNERABILITY_SCAN_ENABLED=true
+      - CYBER_IOC_CHECK_INTERVAL=60
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - national-security
+
+  # =============================================================================
+  # National Security Financial Crime Worker (Phase 18)
+  # Autonomous National Security Engine - Financial Crime Intelligence Pipeline
+  # =============================================================================
+  nse-financial-crime:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-nse-financial-crime
+    command: python -m app.national_security.financial_crime_intel.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - FINANCIAL_FRAUD_DETECTION_ENABLED=true
+      - FINANCIAL_CRYPTO_ANALYSIS_ENABLED=true
+      - FINANCIAL_TRANSACTION_ANOMALY_ENABLED=true
+      - FINANCIAL_NETWORK_GRAPH_ENABLED=true
+      - FINANCIAL_ANALYSIS_INTERVAL=120
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - national-security
+
+  # =============================================================================
+  # National Security Risk Fusion Engine (Phase 18)
+  # Autonomous National Security Engine - GPU-accelerated Risk Modeling
+  # =============================================================================
+  nse-risk-fusion:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-nse-risk-fusion
+    command: python -m app.national_security.national_risk_fusion.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - FUSION_STABILITY_SCORE_ENABLED=true
+      - FUSION_EARLY_WARNING_ENABLED=true
+      - FUSION_TREND_PREDICTION_ENABLED=true
+      - FUSION_METHOD=ensemble
+      - FUSION_UPDATE_INTERVAL=300
+      - CUDA_VISIBLE_DEVICES=0
+      - ENABLE_GPU=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - nse-models:/app/nse_models
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - national-security
+      - gpu
+
+  # =============================================================================
   # Ops Health Monitor (Phase 14)
   # Dedicated service for operational continuity monitoring
   # =============================================================================
@@ -636,3 +746,5 @@ volumes:
     name: rtcc-building-models
   threat-intel-models:
     name: rtcc-threat-intel-models
+  nse-models:
+    name: rtcc-nse-models
