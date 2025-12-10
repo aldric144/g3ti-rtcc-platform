@@ -280,6 +280,126 @@ services:
       - redundancy
 
   # =============================================================================
+  # Drone Telemetry Service (Phase 15)
+  # Autonomous Drone Task Force Engine
+  # =============================================================================
+  drone-telemetry:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-drone-telemetry
+    command: python -m app.drones.telemetry_service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - DRONE_TELEMETRY_INTERVAL=100
+      - DRONE_VIDEO_WEBRTC_ENABLED=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - drones
+
+  # =============================================================================
+  # Predictive AI Service (Phase 15)
+  # GPU-accelerated predictive policing models
+  # =============================================================================
+  predictive-ai:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-predictive-ai
+    command: python -m app.predictive_ai.service
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-rtcc_neo4j_password}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - PREDICTIVE_MODEL_PATH=/app/models
+      - CUDA_VISIBLE_DEVICES=0
+      - ENABLE_GPU=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - predictive-models:/app/models
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - predictive
+      - gpu
+
+  # =============================================================================
+  # Sensor Grid Processor (Phase 15)
+  # Smart Sensor Grid Integration Layer
+  # =============================================================================
+  sensor-grid:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-sensor-grid
+    command: python -m app.sensor_grid.processor
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - SENSOR_POLLING_INTERVAL=1000
+      - GUNSHOT_DETECTION_ENABLED=true
+      - CROWD_DENSITY_ENABLED=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - sensors
+
+  # =============================================================================
+  # Digital Twin Renderer (Phase 15)
+  # City Digital Twin Engine
+  # =============================================================================
+  digital-twin:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rtcc-digital-twin
+    command: python -m app.digital_twin.renderer
+    environment:
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://redis:6379/0
+      - DIGITAL_TWIN_UPDATE_INTERVAL=100
+      - ENABLE_3D_RENDERING=true
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - building-models:/app/building_models
+    networks:
+      - rtcc-network
+    restart: unless-stopped
+    profiles:
+      - digital-twin
+
+  # =============================================================================
   # Ops Health Monitor (Phase 14)
   # Dedicated service for operational continuity monitoring
   # =============================================================================
@@ -339,3 +459,7 @@ volumes:
     name: rtcc-frontend-node-modules
   frontend-next:
     name: rtcc-frontend-next
+  predictive-models:
+    name: rtcc-predictive-models
+  building-models:
+    name: rtcc-building-models
