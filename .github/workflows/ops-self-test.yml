@@ -1,0 +1,247 @@
+name: Ops Self-Test
+
+on:
+  push:
+    branches:
+      - main
+      - 'devin/*'
+    paths:
+      - 'backend/app/ops_continuity/**'
+      - 'backend/app/api/ops_continuity/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/ops-self-test.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/app/ops_continuity/**'
+      - 'backend/app/api/ops_continuity/**'
+      - 'docker-compose.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  ops-module-tests:
+    name: Ops Continuity Module Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+
+      - name: Run ops continuity unit tests
+        working-directory: ./backend
+        run: |
+          pytest tests/ops_continuity/ -v --cov=app/ops_continuity --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./backend/coverage.xml
+          flags: ops-continuity
+          name: ops-continuity-coverage
+
+  ops-api-tests:
+    name: Ops API Endpoint Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio httpx
+
+      - name: Run API endpoint tests
+        working-directory: ./backend
+        run: |
+          pytest tests/ops_continuity/test_api_endpoints.py -v
+
+  healthcheck-validation:
+    name: Docker Healthcheck Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate docker-compose syntax
+        run: |
+          docker compose config --quiet
+
+      - name: Check healthcheck definitions
+        run: |
+          echo "Validating healthcheck configurations..."
+          
+          services_with_healthcheck=$(grep -c "healthcheck:" docker-compose.yml || true)
+          echo "Services with healthcheck: $services_with_healthcheck"
+          
+          if [ "$services_with_healthcheck" -lt 5 ]; then
+            echo "Warning: Expected at least 5 services with healthchecks"
+          fi
+          
+          echo "Healthcheck validation complete"
+
+  failover-simulation:
+    name: Failover Simulation Tests
+    runs-on: ubuntu-latest
+    needs: [ops-module-tests]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run failover simulation tests
+        working-directory: ./backend
+        run: |
+          pytest tests/ops_continuity/test_failover_manager.py -v -k "failover or recovery"
+
+  redundancy-tests:
+    name: Redundancy Manager Tests
+    runs-on: ubuntu-latest
+    needs: [ops-module-tests]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run redundancy tests
+        working-directory: ./backend
+        run: |
+          pytest tests/ops_continuity/test_redundancy_manager.py -v
+
+  diagnostics-tests:
+    name: Diagnostics Engine Tests
+    runs-on: ubuntu-latest
+    needs: [ops-module-tests]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run diagnostics tests
+        working-directory: ./backend
+        run: |
+          pytest tests/ops_continuity/test_diagnostics.py -v
+
+  audit-log-tests:
+    name: Ops Audit Log Tests
+    runs-on: ubuntu-latest
+    needs: [ops-module-tests]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run audit log tests
+        working-directory: ./backend
+        run: |
+          pytest tests/ops_continuity/test_ops_audit_log.py -v
+
+  ops-self-test-summary:
+    name: Ops Self-Test Summary
+    runs-on: ubuntu-latest
+    needs: [ops-module-tests, ops-api-tests, healthcheck-validation, failover-simulation, redundancy-tests, diagnostics-tests, audit-log-tests]
+    if: always()
+    
+    steps:
+      - name: Check test results
+        run: |
+          echo "=== Ops Self-Test Summary ==="
+          echo ""
+          echo "Module Tests: ${{ needs.ops-module-tests.result }}"
+          echo "API Tests: ${{ needs.ops-api-tests.result }}"
+          echo "Healthcheck Validation: ${{ needs.healthcheck-validation.result }}"
+          echo "Failover Simulation: ${{ needs.failover-simulation.result }}"
+          echo "Redundancy Tests: ${{ needs.redundancy-tests.result }}"
+          echo "Diagnostics Tests: ${{ needs.diagnostics-tests.result }}"
+          echo "Audit Log Tests: ${{ needs.audit-log-tests.result }}"
+          echo ""
+          
+          if [ "${{ needs.ops-module-tests.result }}" != "success" ] || \
+             [ "${{ needs.ops-api-tests.result }}" != "success" ] || \
+             [ "${{ needs.healthcheck-validation.result }}" != "success" ]; then
+            echo "CRITICAL: Core ops tests failed!"
+            exit 1
+          fi
+          
+          echo "All critical ops self-tests passed!"
