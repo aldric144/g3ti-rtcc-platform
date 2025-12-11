@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rtcc-uip
+  labels:
+    app.kubernetes.io/name: g3ti-rtcc-uip
+    app.kubernetes.io/part-of: rtcc-platform
+    environment: production
+    compliance: cjis
+    agency: riviera-beach-pd
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rtcc-uip-staging
+  labels:
+    app.kubernetes.io/name: g3ti-rtcc-uip
+    app.kubernetes.io/part-of: rtcc-platform
+    environment: staging
+    compliance: cjis
+    agency: riviera-beach-pd
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: rtcc-resource-quota
+  namespace: rtcc-uip
+spec:
+  hard:
+    requests.cpu: "100"
+    requests.memory: 200Gi
+    limits.cpu: "200"
+    limits.memory: 400Gi
+    persistentvolumeclaims: "50"
+    pods: "200"
+    services: "50"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: rtcc-limit-range
+  namespace: rtcc-uip
+spec:
+  limits:
+  - default:
+      cpu: "2"
+      memory: 4Gi
+    defaultRequest:
+      cpu: "500m"
+      memory: 1Gi
+    type: Container

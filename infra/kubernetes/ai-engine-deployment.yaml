@@ -1,0 +1,154 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-engine
+  namespace: rtcc-uip
+  labels:
+    app: ai-engine
+    tier: ai
+    compliance: cjis
+    gpu-required: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-engine
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: ai-engine
+        tier: ai
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      serviceAccountName: rtcc-ai-engine
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: ai-engine
+        image: rtcc-registry.rivierabeach.gov/ai-engine:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+        - name: GPU_ENABLED
+          value: "true"
+        - name: MODEL_PATH
+          value: "/models"
+        - name: ETHICS_GUARDIAN_ENABLED
+          value: "true"
+        - name: BIAS_DETECTION_ENABLED
+          value: "true"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: rtcc-secrets
+              key: database-url
+        - name: ELASTICSEARCH_URL
+          valueFrom:
+            secretKeyRef:
+              name: rtcc-secrets
+              key: elasticsearch-url
+        - name: NEO4J_URL
+          valueFrom:
+            secretKeyRef:
+              name: rtcc-secrets
+              key: neo4j-url
+        resources:
+          requests:
+            cpu: "2"
+            memory: 8Gi
+            nvidia.com/gpu: 1
+          limits:
+            cpu: "8"
+            memory: 32Gi
+            nvidia.com/gpu: 1
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: models
+          mountPath: /models
+          readOnly: true
+        - name: config
+          mountPath: /etc/config
+          readOnly: true
+      volumes:
+      - name: models
+        persistentVolumeClaim:
+          claimName: ai-models-pvc
+      - name: config
+        configMap:
+          name: ai-engine-config
+      nodeSelector:
+        gpu: "true"
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-engine
+  namespace: rtcc-uip
+  labels:
+    app: ai-engine
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: ai-engine
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ai-engine-hpa
+  namespace: rtcc-uip
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ai-engine
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
