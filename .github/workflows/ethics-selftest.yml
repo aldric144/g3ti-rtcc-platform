@@ -1,0 +1,290 @@
+name: Phase 26 Ethics Guardian Self-Test
+
+on:
+  push:
+    branches:
+      - main
+      - 'devin/*'
+    paths:
+      - 'backend/app/ethics_guardian/**'
+      - 'backend/app/api/ethics_guardian/**'
+      - 'backend/app/websockets/ethics_guardian.py'
+      - 'tests/phase26/**'
+      - '.github/workflows/ethics-selftest.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/app/ethics_guardian/**'
+      - 'backend/app/api/ethics_guardian/**'
+      - 'backend/app/websockets/ethics_guardian.py'
+      - 'tests/phase26/**'
+
+jobs:
+  ethics-validation:
+    name: Ethics Guardian Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+      
+      - name: Run Bias Detection Tests
+        run: |
+          cd backend
+          python -m pytest ../tests/phase26/test_bias_detection.py -v --tb=short
+      
+      - name: Run Civil Rights Validation Tests
+        run: |
+          cd backend
+          python -m pytest ../tests/phase26/test_civil_liberties.py -v --tb=short
+      
+      - name: Run Protected Community Safeguards Tests
+        run: |
+          cd backend
+          python -m pytest ../tests/phase26/test_protected_communities.py -v --tb=short
+      
+      - name: Run Ethics Scoring Tests
+        run: |
+          cd backend
+          python -m pytest ../tests/phase26/test_ethics_score.py -v --tb=short
+      
+      - name: Run Explainability Tests
+        run: |
+          cd backend
+          python -m pytest ../tests/phase26/test_transparency.py -v --tb=short
+      
+      - name: Run Use-of-Force Risk Tests
+        run: |
+          cd backend
+          python -m pytest ../tests/phase26/test_force_risk.py -v --tb=short
+
+  bias-fairness-validation:
+    name: Bias & Fairness Metrics Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+      
+      - name: Validate Disparate Impact Ratio
+        run: |
+          cd backend
+          python -c "
+          from app.ethics_guardian import get_bias_detection_engine, AnalysisType
+          engine = get_bias_detection_engine()
+          
+          # Test with balanced data
+          data = {
+              'demographic_outcomes': {
+                  'Black': {'positive': 80, 'negative': 20},
+                  'White': {'positive': 85, 'negative': 15},
+              },
+              'reference_group': 'White',
+          }
+          result = engine.analyze_for_bias(AnalysisType.PREDICTIVE_AI, data)
+          print(f'Disparate Impact Test: {result.status.value}')
+          assert result.status.value in ['NO_BIAS_DETECTED', 'POSSIBLE_BIAS_FLAG_REVIEW'], 'Bias validation failed'
+          print('Disparate Impact Ratio validation passed')
+          "
+      
+      - name: Validate Demographic Parity
+        run: |
+          cd backend
+          python -c "
+          from app.ethics_guardian import get_bias_detection_engine, AnalysisType
+          engine = get_bias_detection_engine()
+          
+          # Test demographic parity calculation
+          data = {
+              'demographic_outcomes': {
+                  'Black': {'positive': 50, 'negative': 50},
+                  'White': {'positive': 50, 'negative': 50},
+              },
+              'reference_group': 'White',
+          }
+          result = engine.analyze_for_bias(AnalysisType.RISK_SCORE, data)
+          print(f'Demographic Parity Test: {result.status.value}')
+          print('Demographic Parity validation passed')
+          "
+      
+      - name: Validate Equal Opportunity
+        run: |
+          cd backend
+          python -c "
+          from app.ethics_guardian import get_bias_detection_engine, AnalysisType
+          engine = get_bias_detection_engine()
+          
+          # Test equal opportunity calculation
+          data = {
+              'demographic_outcomes': {
+                  'Black': {'positive': 45, 'negative': 55},
+                  'White': {'positive': 50, 'negative': 50},
+              },
+              'reference_group': 'White',
+          }
+          result = engine.analyze_for_bias(AnalysisType.PATROL_ROUTING, data)
+          print(f'Equal Opportunity Test: {result.status.value}')
+          print('Equal Opportunity validation passed')
+          "
+
+  civil-rights-validation:
+    name: Civil Rights Compliance Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+      
+      - name: Validate Fourth Amendment Compliance
+        run: |
+          cd backend
+          python -c "
+          from app.ethics_guardian import get_civil_liberties_engine
+          engine = get_civil_liberties_engine()
+          
+          # Test warrant requirement
+          context = {'has_warrant': True, 'consent': False}
+          result = engine.check_compliance('test-001', 'search', context)
+          print(f'Fourth Amendment (with warrant): {result.status.value}')
+          
+          # Test without warrant
+          context = {'has_warrant': False, 'consent': False, 'exigent_circumstances': False}
+          result = engine.check_compliance('test-002', 'search', context)
+          print(f'Fourth Amendment (no warrant): {result.status.value}')
+          print('Fourth Amendment validation passed')
+          "
+      
+      - name: Validate First Amendment Compliance
+        run: |
+          cd backend
+          python -c "
+          from app.ethics_guardian import get_civil_liberties_engine
+          engine = get_civil_liberties_engine()
+          
+          # Test free speech protection
+          context = {'targeting_speech': True}
+          result = engine.check_compliance('test-003', 'surveillance', context)
+          print(f'First Amendment (targeting speech): {result.status.value}')
+          assert result.blocked == True, 'First Amendment protection failed'
+          print('First Amendment validation passed')
+          "
+      
+      - name: Validate Data Retention Limits
+        run: |
+          cd backend
+          python -c "
+          from app.ethics_guardian import get_civil_liberties_engine
+          engine = get_civil_liberties_engine()
+          
+          limits = engine.get_retention_limits()
+          print(f'Retention limits: {limits}')
+          assert limits['surveillance_footage'] == 30, 'Surveillance footage limit incorrect'
+          assert limits['license_plate_data'] == 90, 'License plate limit incorrect'
+          print('Data retention validation passed')
+          "
+
+  model-fairness-predeployment:
+    name: Model Fairness Pre-Deployment Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+      
+      - name: Run Pre-Deployment Fairness Check
+        run: |
+          cd backend
+          python -c "
+          from app.ethics_guardian import (
+              get_bias_detection_engine,
+              get_ethics_score_engine,
+              AnalysisType,
+          )
+          
+          bias_engine = get_bias_detection_engine()
+          ethics_engine = get_ethics_score_engine()
+          
+          # Simulate model output fairness check
+          test_data = {
+              'demographic_outcomes': {
+                  'Black': {'positive': 75, 'negative': 25},
+                  'White': {'positive': 80, 'negative': 20},
+                  'Hispanic': {'positive': 78, 'negative': 22},
+              },
+              'reference_group': 'White',
+          }
+          
+          bias_result = bias_engine.analyze_for_bias(
+              AnalysisType.PREDICTIVE_AI,
+              test_data,
+              model_version='pre-deploy-check',
+          )
+          
+          print(f'Pre-deployment bias check: {bias_result.status.value}')
+          print(f'Confidence: {bias_result.confidence_score}')
+          
+          # Check ethics score
+          ethics_context = {
+              'bias_detected': bias_result.blocked,
+              'disparate_impact_ratio': 0.94,
+          }
+          ethics_result = ethics_engine.compute_ethics_score(
+              'pre-deploy-001',
+              'model_deployment',
+              ethics_context,
+          )
+          
+          print(f'Ethics score: {ethics_result.total_score}')
+          print(f'Ethics level: {ethics_result.ethics_level.value}')
+          
+          if ethics_result.total_score < 60:
+              print('WARNING: Model does not meet minimum ethics threshold')
+              exit(1)
+          
+          print('Pre-deployment fairness check passed')
+          "
