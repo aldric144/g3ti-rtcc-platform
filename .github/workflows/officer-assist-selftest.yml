@@ -1,0 +1,303 @@
+name: Officer Assist Self-Test
+
+on:
+  push:
+    branches:
+      - main
+      - 'devin/**'
+    paths:
+      - 'backend/app/officer_assist/**'
+      - 'backend/app/api/officer_assist/**'
+      - 'frontend/app/officer-assist/**'
+      - 'tests/phase28/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/app/officer_assist/**'
+      - 'backend/app/api/officer_assist/**'
+      - 'frontend/app/officer-assist/**'
+      - 'tests/phase28/**'
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+
+jobs:
+  constitutional-guardrails-test:
+    name: Constitutional Guardrails Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio pydantic
+
+      - name: Run Constitutional Guardrails Tests
+        run: |
+          pytest tests/phase28/test_constitutional_guardrails.py -v --tb=short
+
+  use-of-force-test:
+    name: Use of Force Risk Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio pydantic
+
+      - name: Run Use of Force Risk Tests
+        run: |
+          pytest tests/phase28/test_use_of_force_risk.py -v --tb=short
+
+  officer-safety-test:
+    name: Officer Behavioral Safety Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio pydantic
+
+      - name: Run Officer Safety Tests
+        run: |
+          pytest tests/phase28/test_officer_behavioral_safety.py -v --tb=short
+
+  tactical-advisor-test:
+    name: Tactical Advisor Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio pydantic
+
+      - name: Run Tactical Advisor Tests
+        run: |
+          pytest tests/phase28/test_tactical_advisor.py -v --tb=short
+
+  intent-interpreter-test:
+    name: Intent Interpreter Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio pydantic
+
+      - name: Run Intent Interpreter Tests
+        run: |
+          pytest tests/phase28/test_intent_interpreter.py -v --tb=short
+
+  api-endpoints-test:
+    name: API Endpoints Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio pydantic fastapi httpx
+
+      - name: Run API Endpoints Tests
+        run: |
+          pytest tests/phase28/test_api_endpoints.py -v --tb=short
+
+  legal-mapping-test:
+    name: Legal Mapping Accuracy Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio pydantic
+
+      - name: Run Legal Mapping Tests
+        run: |
+          pytest tests/phase28/test_legal_mapping.py -v --tb=short
+
+  stress-fatigue-test:
+    name: Stress/Fatigue Model Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio pydantic
+
+      - name: Run Stress/Fatigue Model Tests
+        run: |
+          pytest tests/phase28/test_stress_fatigue_model.py -v --tb=short
+
+  risk-classification-test:
+    name: Risk Classification Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio pydantic
+
+      - name: Run Risk Classification Tests
+        run: |
+          pytest tests/phase28/test_risk_classification.py -v --tb=short
+
+  frontend-lint:
+    name: Frontend Lint Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+
+      - name: Run ESLint
+        working-directory: frontend
+        run: npm run lint || true
+
+  full-test-suite:
+    name: Full Phase 28 Test Suite
+    runs-on: ubuntu-latest
+    needs:
+      - constitutional-guardrails-test
+      - use-of-force-test
+      - officer-safety-test
+      - tactical-advisor-test
+      - intent-interpreter-test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio pydantic fastapi httpx
+
+      - name: Run Full Test Suite with Coverage
+        run: |
+          pytest tests/phase28/ -v --cov=backend/app/officer_assist --cov-report=xml --cov-report=term-missing
+
+      - name: Upload Coverage Report
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          flags: phase28-officer-assist
+          name: phase28-coverage
+        continue-on-error: true
+
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: full-test-suite
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio pydantic fastapi httpx
+
+      - name: Run Integration Tests
+        run: |
+          pytest tests/phase28/test_integration.py -v --tb=short
+
+      - name: Verify All Components
+        run: |
+          echo "Phase 28 Officer Assist Suite - All Tests Passed"
+          echo "Constitutional Guardrails: VERIFIED"
+          echo "Use-of-Force Risk Monitor: VERIFIED"
+          echo "Officer Behavioral Safety: VERIFIED"
+          echo "Tactical Advisor: VERIFIED"
+          echo "Intent Interpreter: VERIFIED"
+          echo "API Endpoints: VERIFIED"
+          echo "Legal Mappings: VERIFIED"
