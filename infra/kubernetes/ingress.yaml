@@ -1,0 +1,123 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rtcc-ingress
+  namespace: rtcc-uip
+  labels:
+    app: rtcc-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: DENY";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-XSS-Protection: 1; mode=block";
+      more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains";
+      more_set_headers "Content-Security-Policy: default-src 'self'";
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - rtcc.rivierabeach.gov
+    - api.rtcc.rivierabeach.gov
+    - ws.rtcc.rivierabeach.gov
+    secretName: rtcc-tls-secret
+  rules:
+  - host: rtcc.rivierabeach.gov
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+  - host: api.rtcc.rivierabeach.gov
+    http:
+      paths:
+      - path: /api/v1
+        pathType: Prefix
+        backend:
+          service:
+            name: api-gateway
+            port:
+              number: 80
+      - path: /api/infra
+        pathType: Prefix
+        backend:
+          service:
+            name: infra-service
+            port:
+              number: 80
+      - path: /api/ethics
+        pathType: Prefix
+        backend:
+          service:
+            name: ethics-guardian
+            port:
+              number: 80
+  - host: ws.rtcc.rivierabeach.gov
+    http:
+      paths:
+      - path: /ws
+        pathType: Prefix
+        backend:
+          service:
+            name: websocket-broker
+            port:
+              number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: rtcc-network-policy
+  namespace: rtcc-uip
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: rtcc-uip
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+  - from:
+    - ipBlock:
+        cidr: 10.0.0.0/8
+    - ipBlock:
+        cidr: 172.16.0.0/12
+    - ipBlock:
+        cidr: 192.168.0.0/16
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: rtcc-uip
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 169.254.169.254/32
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 5432
+    - protocol: TCP
+      port: 6379
+    - protocol: TCP
+      port: 9200
+    - protocol: TCP
+      port: 7687

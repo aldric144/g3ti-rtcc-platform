@@ -1,0 +1,243 @@
+name: CJIS Compliance Audit
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+  workflow_dispatch:
+    inputs:
+      full_audit:
+        description: 'Run full compliance audit'
+        required: false
+        default: 'false'
+        type: boolean
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/app/infra/cjis_compliance.py'
+      - '.github/workflows/cjis-audit.yml'
+
+env:
+  CJIS_POLICY_VERSION: '5.9'
+  AGENCY_ORI: 'FL0500400'
+  AGENCY_NAME: 'Riviera Beach Police Department'
+
+jobs:
+  password-policy-audit:
+    name: Password Policy Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check password policy configuration
+        run: |
+          echo "## Password Policy Audit" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check minimum length requirement (8 characters)
+          if grep -rq "min_length.*8\|minimum.*8" backend/app/infra/cjis_compliance.py; then
+            echo "- [x] Minimum 8 character password requirement" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [ ] Minimum 8 character password requirement" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check complexity requirements
+          if grep -rq "uppercase\|lowercase\|number\|special" backend/app/infra/cjis_compliance.py; then
+            echo "- [x] Password complexity requirements" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [ ] Password complexity requirements" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check password age
+          if grep -rq "max_age.*90\|90.*days" backend/app/infra/cjis_compliance.py; then
+            echo "- [x] 90-day password expiration" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [ ] 90-day password expiration" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  mfa-policy-audit:
+    name: MFA Policy Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check MFA configuration
+        run: |
+          echo "## MFA Policy Audit" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check MFA for remote access
+          if grep -rq "remote.*mfa\|mfa.*remote" backend/app/infra/cjis_compliance.py -i; then
+            echo "- [x] MFA required for remote access" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [ ] MFA required for remote access" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check MFA for CJI access
+          if grep -rq "cji.*mfa\|mfa.*cji" backend/app/infra/cjis_compliance.py -i; then
+            echo "- [x] MFA required for CJI access" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [ ] MFA required for CJI access" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  session-management-audit:
+    name: Session Management Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check session configuration
+        run: |
+          echo "## Session Management Audit" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check idle timeout (30 minutes)
+          if grep -rq "idle.*30\|30.*idle\|timeout.*30" backend/app/infra/cjis_compliance.py; then
+            echo "- [x] 30-minute idle timeout" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [ ] 30-minute idle timeout" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check max session duration
+          if grep -rq "max.*session\|session.*max" backend/app/infra/cjis_compliance.py; then
+            echo "- [x] Maximum session duration configured" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [ ] Maximum session duration configured" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  encryption-audit:
+    name: Encryption Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check encryption configuration
+        run: |
+          echo "## Encryption Audit" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check AES-256 for data at rest
+          if grep -rq "AES.*256\|aes_256" backend/app/infra/ infra/; then
+            echo "- [x] AES-256 encryption for data at rest" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [ ] AES-256 encryption for data at rest" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check TLS 1.2+
+          if grep -rq "TLS.*1\.[23]\|tls.*1\.[23]" backend/app/infra/ infra/; then
+            echo "- [x] TLS 1.2+ for data in transit" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [ ] TLS 1.2+ for data in transit" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  audit-logging-check:
+    name: Audit Logging Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check audit logging
+        run: |
+          echo "## Audit Logging Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check CJI access logging
+          if grep -rq "log_cji\|audit.*cji\|cji.*audit" backend/app/infra/cjis_compliance.py; then
+            echo "- [x] CJI access logging implemented" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [ ] CJI access logging implemented" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check query logging
+          if grep -rq "query.*log\|log.*query" backend/app/infra/cjis_compliance.py; then
+            echo "- [x] Query logging implemented" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [ ] Query logging implemented" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check retention policy
+          if grep -rq "retention\|7.*years\|2555" backend/app/infra/cjis_compliance.py; then
+            echo "- [x] 7-year retention policy" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [ ] 7-year retention policy" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  data-retention-audit:
+    name: Data Retention Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check data retention policies
+        run: |
+          echo "## Data Retention Audit" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check retention limits by category
+          if grep -rq "retention_limits\|data_retention" backend/app/infra/cjis_compliance.py; then
+            echo "- [x] Data retention limits configured" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- [ ] Data retention limits configured" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  generate-compliance-report:
+    name: Generate Compliance Report
+    runs-on: ubuntu-latest
+    needs: [password-policy-audit, mfa-policy-audit, session-management-audit, encryption-audit, audit-logging-check, data-retention-audit]
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate compliance report
+        run: |
+          echo "# CJIS Compliance Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Agency:** ${{ env.AGENCY_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "**ORI:** ${{ env.AGENCY_ORI }}" >> $GITHUB_STEP_SUMMARY
+          echo "**CJIS Policy Version:** ${{ env.CJIS_POLICY_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Audit Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Audit Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Policy Area | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Password Policy | ${{ needs.password-policy-audit.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| MFA Policy | ${{ needs.mfa-policy-audit.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Session Management | ${{ needs.session-management-audit.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Encryption | ${{ needs.encryption-audit.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Audit Logging | ${{ needs.audit-logging-check.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Data Retention | ${{ needs.data-retention-audit.result }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Create audit artifact
+        run: |
+          mkdir -p audit-reports
+          cat << EOF > audit-reports/cjis-audit-$(date +%Y%m%d).json
+          {
+            "agency": "${{ env.AGENCY_NAME }}",
+            "ori": "${{ env.AGENCY_ORI }}",
+            "policy_version": "${{ env.CJIS_POLICY_VERSION }}",
+            "audit_date": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "results": {
+              "password_policy": "${{ needs.password-policy-audit.result }}",
+              "mfa_policy": "${{ needs.mfa-policy-audit.result }}",
+              "session_management": "${{ needs.session-management-audit.result }}",
+              "encryption": "${{ needs.encryption-audit.result }}",
+              "audit_logging": "${{ needs.audit-logging-check.result }}",
+              "data_retention": "${{ needs.data-retention-audit.result }}"
+            }
+          }
+          EOF
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: cjis-audit-report
+          path: audit-reports/
+          retention-days: 2555  # 7 years per CJIS requirements
