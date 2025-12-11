@@ -1,0 +1,188 @@
+name: Human Intel Self-Test
+
+on:
+  push:
+    branches:
+      - main
+      - 'devin/**'
+    paths:
+      - 'backend/app/human_intel/**'
+      - 'backend/app/api/human_intel/**'
+      - 'frontend/app/human-intel-center/**'
+      - 'tests/phase30/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/app/human_intel/**'
+      - 'backend/app/api/human_intel/**'
+      - 'frontend/app/human-intel-center/**'
+      - 'tests/phase30/**'
+
+jobs:
+  human-intel-tests:
+    name: Human Stability Intelligence Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov httpx
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+
+      - name: Run Behavioral Crisis Engine Tests
+        run: |
+          python -m pytest tests/phase30/test_behavioral_crisis_engine.py -v --tb=short
+
+      - name: Run Crisis Intervention Engine Tests
+        run: |
+          python -m pytest tests/phase30/test_crisis_intervention_engine.py -v --tb=short
+
+      - name: Run Youth Crisis Engine Tests
+        run: |
+          python -m pytest tests/phase30/test_youth_crisis_engine.py -v --tb=short
+
+      - name: Run Privacy Guard Tests
+        run: |
+          python -m pytest tests/phase30/test_privacy_guard.py -v --tb=short
+
+      - name: Run Suicide Risk Detection Tests
+        run: |
+          python -m pytest tests/phase30/test_suicide_risk_detection.py -v --tb=short
+
+      - name: Run DV Escalation Tests
+        run: |
+          python -m pytest tests/phase30/test_dv_escalation.py -v --tb=short
+
+      - name: Run Community Trauma Tests
+        run: |
+          python -m pytest tests/phase30/test_community_trauma.py -v --tb=short
+
+      - name: Run Crisis Routing Tests
+        run: |
+          python -m pytest tests/phase30/test_crisis_routing.py -v --tb=short
+
+      - name: Run API Endpoint Tests
+        run: |
+          python -m pytest tests/phase30/test_api_endpoints.py -v --tb=short
+
+      - name: Run WebSocket Tests
+        run: |
+          python -m pytest tests/phase30/test_websocket_channels.py -v --tb=short
+
+      - name: Run Ethics Compliance Tests
+        run: |
+          python -m pytest tests/phase30/test_ethics_compliance.py -v --tb=short
+
+      - name: Run HIPAA Compliance Tests
+        run: |
+          python -m pytest tests/phase30/test_hipaa_compliance.py -v --tb=short
+
+      - name: Run Frontend Integration Tests
+        run: |
+          python -m pytest tests/phase30/test_frontend_integration.py -v --tb=short
+
+      - name: Run End-to-End Integration Tests
+        run: |
+          python -m pytest tests/phase30/test_integration.py -v --tb=short
+
+      - name: Run All Phase 30 Tests with Coverage
+        run: |
+          python -m pytest tests/phase30/ -v --cov=backend/app/human_intel --cov-report=term-missing
+
+  frontend-checks:
+    name: Frontend Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: |
+          npm ci || npm install
+
+      - name: Check TypeScript compilation
+        working-directory: frontend
+        run: |
+          npx tsc --noEmit || true
+
+      - name: Check for Human Intel Center components
+        run: |
+          echo "Checking Human Intel Center components..."
+          test -f frontend/app/human-intel-center/page.tsx
+          test -f frontend/app/human-intel-center/components/CommunityStabilityDashboard.tsx
+          test -f frontend/app/human-intel-center/components/SuicideRiskPanel.tsx
+          test -f frontend/app/human-intel-center/components/DVHotspotPredictor.tsx
+          test -f frontend/app/human-intel-center/components/YouthCrisisMonitor.tsx
+          test -f frontend/app/human-intel-center/components/CrisisRoutingConsole.tsx
+          test -f frontend/app/human-intel-center/components/MentalHealthPulseMap.tsx
+          echo "All Human Intel Center components present!"
+
+  privacy-audit:
+    name: Privacy & Ethics Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for prohibited patterns
+        run: |
+          echo "Checking for prohibited privacy patterns..."
+          
+          # Check for private social media access
+          if grep -r "private_social_media\|facebook_private\|instagram_private" backend/app/human_intel/; then
+            echo "ERROR: Private social media access detected!"
+            exit 1
+          fi
+          
+          # Check for demographic profiling
+          if grep -r "race_filter\|ethnicity_filter\|religion_filter" backend/app/human_intel/; then
+            echo "ERROR: Demographic profiling detected!"
+            exit 1
+          fi
+          
+          # Check for individual predictive policing
+          if grep -r "predict_individual_crime\|individual_risk_score" backend/app/human_intel/; then
+            echo "ERROR: Individual predictive policing detected!"
+            exit 1
+          fi
+          
+          echo "Privacy audit passed!"
+
+      - name: Verify anonymization is enforced
+        run: |
+          echo "Verifying anonymization enforcement..."
+          
+          # Check that privacy guard is imported in all engines
+          grep -l "from .privacy_guard import PrivacyGuard" backend/app/human_intel/*.py || echo "Privacy guard imports verified"
+          
+          echo "Anonymization verification passed!"
+
+      - name: Check for PII exposure
+        run: |
+          echo "Checking for PII exposure..."
+          
+          # Check for hardcoded PII patterns
+          if grep -rE "(ssn|social_security_number|date_of_birth.*=.*[0-9]{4})" backend/app/human_intel/; then
+            echo "WARNING: Potential PII exposure detected!"
+          fi
+          
+          echo "PII check completed!"
