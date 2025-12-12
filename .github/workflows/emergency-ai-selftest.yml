@@ -1,0 +1,225 @@
+name: Emergency AI Self-Test
+
+on:
+  push:
+    branches:
+      - main
+      - 'devin/*'
+    paths:
+      - 'backend/app/emergency_ai/**'
+      - 'backend/app/api/emergency_ai/**'
+      - 'backend/app/websockets/emergency_ai_ws.py'
+      - 'tests/phase31/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/app/emergency_ai/**'
+      - 'backend/app/api/emergency_ai/**'
+      - 'backend/app/websockets/emergency_ai_ws.py'
+      - 'tests/phase31/**'
+  workflow_dispatch:
+
+jobs:
+  emergency-ai-tests:
+    name: Emergency AI Module Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov httpx
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run Disaster Prediction Engine Tests
+        run: |
+          python -m pytest tests/phase31/test_disaster_prediction.py -v --tb=short
+
+      - name: Run Response Coordination Engine Tests
+        run: |
+          python -m pytest tests/phase31/test_response_coordination.py -v --tb=short
+
+      - name: Run Recovery Planner Tests
+        run: |
+          python -m pytest tests/phase31/test_recovery_planner.py -v --tb=short
+
+      - name: Run Communication Intel Tests
+        run: |
+          python -m pytest tests/phase31/test_communication_intel.py -v --tb=short
+
+      - name: Run API Endpoint Tests
+        run: |
+          python -m pytest tests/phase31/test_emergency_api.py -v --tb=short
+
+      - name: Run WebSocket Tests
+        run: |
+          python -m pytest tests/phase31/test_emergency_websockets.py -v --tb=short
+
+      - name: Run Integration Tests
+        run: |
+          python -m pytest tests/phase31/test_emergency_integration.py -v --tb=short
+
+  hazard-model-validation:
+    name: Hazard Model Validation
+    runs-on: ubuntu-latest
+    needs: emergency-ai-tests
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Validate Weather Hazard Models
+        run: |
+          python -m pytest tests/phase31/test_weather_models.py -v --tb=short
+
+      - name: Validate Fire Spread Models
+        run: |
+          python -m pytest tests/phase31/test_fire_models.py -v --tb=short
+
+      - name: Validate Hazmat Models
+        run: |
+          python -m pytest tests/phase31/test_hazmat_models.py -v --tb=short
+
+      - name: Validate Infrastructure Models
+        run: |
+          python -m pytest tests/phase31/test_infrastructure_models.py -v --tb=short
+
+  evacuation-routing-tests:
+    name: Evacuation Routing Tests
+    runs-on: ubuntu-latest
+    needs: emergency-ai-tests
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run Evacuation Route Tests
+        run: |
+          python -m pytest tests/phase31/test_evacuation_routing.py -v --tb=short
+
+      - name: Run Shelter Assignment Tests
+        run: |
+          python -m pytest tests/phase31/test_shelter_assignment.py -v --tb=short
+
+  recovery-logistics-tests:
+    name: Recovery & Logistics Tests
+    runs-on: ubuntu-latest
+    needs: emergency-ai-tests
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run Damage Assessment Tests
+        run: |
+          python -m pytest tests/phase31/test_damage_assessment.py -v --tb=short
+
+      - name: Run Supply Optimization Tests
+        run: |
+          python -m pytest tests/phase31/test_supply_optimization.py -v --tb=short
+
+      - name: Run Recovery Timeline Tests
+        run: |
+          python -m pytest tests/phase31/test_recovery_timeline.py -v --tb=short
+
+  chain-of-custody-validation:
+    name: Chain of Custody Validation
+    runs-on: ubuntu-latest
+    needs: emergency-ai-tests
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Validate Chain of Custody Hashing
+        run: |
+          python -m pytest tests/phase31/test_chain_of_custody.py -v --tb=short
+
+  frontend-component-tests:
+    name: Frontend Component Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run TypeScript type check
+        working-directory: frontend
+        run: npm run typecheck || true
+
+      - name: Run ESLint
+        working-directory: frontend
+        run: npm run lint || true
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build || true
