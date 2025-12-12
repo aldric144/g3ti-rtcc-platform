@@ -1,0 +1,284 @@
+name: AI Sentinel Supervisor Self-Test
+
+on:
+  push:
+    branches:
+      - main
+      - 'devin/**'
+    paths:
+      - 'backend/app/ai_supervisor/**'
+      - 'backend/app/api/ai_supervisor/**'
+      - 'backend/app/websockets/ai_supervisor_ws.py'
+      - 'tests/phase33/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/app/ai_supervisor/**'
+      - 'backend/app/api/ai_supervisor/**'
+      - 'backend/app/websockets/ai_supervisor_ws.py'
+      - 'tests/phase33/**'
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+
+jobs:
+  system-monitor-tests:
+    name: System Monitor Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov
+
+      - name: Run System Monitor tests
+        run: |
+          pytest tests/phase33/test_system_monitor.py -v --tb=short
+
+  auto-corrector-tests:
+    name: Auto-Corrector Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov
+
+      - name: Run Auto-Corrector tests
+        run: |
+          pytest tests/phase33/test_auto_corrector.py -v --tb=short
+
+  ethics-guard-tests:
+    name: Ethics Guard Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov
+
+      - name: Run Ethics Guard tests
+        run: |
+          pytest tests/phase33/test_ethics_guard.py -v --tb=short
+
+  sentinel-engine-tests:
+    name: Sentinel Engine Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov
+
+      - name: Run Sentinel Engine tests
+        run: |
+          pytest tests/phase33/test_sentinel_engine.py -v --tb=short
+
+  api-tests:
+    name: API Endpoint Tests
+    runs-on: ubuntu-latest
+    needs: [system-monitor-tests, auto-corrector-tests, ethics-guard-tests, sentinel-engine-tests]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov fastapi httpx
+
+      - name: Run API tests
+        run: |
+          pytest tests/phase33/test_supervisor_api.py -v --tb=short
+
+  websocket-tests:
+    name: WebSocket Tests
+    runs-on: ubuntu-latest
+    needs: [system-monitor-tests, auto-corrector-tests, ethics-guard-tests, sentinel-engine-tests]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov fastapi websockets
+
+      - name: Run WebSocket tests
+        run: |
+          pytest tests/phase33/test_supervisor_websockets.py -v --tb=short
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [api-tests, websocket-tests]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov fastapi httpx websockets
+
+      - name: Run Integration tests
+        run: |
+          pytest tests/phase33/test_supervisor_integration.py -v --tb=short
+
+  ethics-compliance-audit:
+    name: Ethics Compliance Audit
+    runs-on: ubuntu-latest
+    needs: [ethics-guard-tests]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio
+
+      - name: Run Ethics Compliance Audit
+        run: |
+          pytest tests/phase33/test_ethics_compliance_audit.py -v --tb=short
+
+  model-drift-detection:
+    name: Model Drift Detection
+    runs-on: ubuntu-latest
+    needs: [auto-corrector-tests]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio
+
+      - name: Run Model Drift Detection tests
+        run: |
+          pytest tests/phase33/test_model_drift_detection.py -v --tb=short
+
+  full-e2e-test:
+    name: Full E2E Governance Test
+    runs-on: ubuntu-latest
+    needs: [integration-tests, ethics-compliance-audit, model-drift-detection]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov fastapi httpx websockets
+
+      - name: Run Full E2E Governance Test
+        run: |
+          pytest tests/phase33/test_e2e_governance.py -v --tb=short
+
+      - name: Generate Coverage Report
+        run: |
+          pytest tests/phase33/ --cov=backend/app/ai_supervisor --cov-report=xml --cov-report=html
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov/
+
+  sentinel-health-check:
+    name: Sentinel Health Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio
+
+      - name: Run Sentinel Health Check
+        run: |
+          echo "Running scheduled health check for AI Sentinel Supervisor"
+          pytest tests/phase33/test_system_monitor.py -v -k "health" --tb=short
+          pytest tests/phase33/test_ethics_guard.py -v -k "compliance" --tb=short
+
+      - name: Report Health Status
+        if: failure()
+        run: |
+          echo "::error::AI Sentinel Supervisor health check failed!"
+          exit 1
