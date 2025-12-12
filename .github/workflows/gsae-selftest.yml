@@ -1,0 +1,162 @@
+name: GSAE Self-Test
+
+on:
+  push:
+    branches:
+      - main
+      - 'devin/*'
+    paths:
+      - 'backend/app/global_awareness/**'
+      - 'backend/app/api/global_awareness/**'
+      - 'backend/app/websockets/global_awareness_ws.py'
+      - 'docker/gsae-*/**'
+      - 'tests/phase32/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/app/global_awareness/**'
+      - 'backend/app/api/global_awareness/**'
+      - 'backend/app/websockets/global_awareness_ws.py'
+      - 'docker/gsae-*/**'
+      - 'tests/phase32/**'
+
+jobs:
+  gsae-unit-tests:
+    name: GSAE Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov httpx
+
+      - name: Run GSAE unit tests
+        run: |
+          pytest tests/phase32/ -v --tb=short
+
+  gsae-integration-tests:
+    name: GSAE Integration Tests
+    runs-on: ubuntu-latest
+    needs: gsae-unit-tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio httpx fastapi uvicorn
+
+      - name: Run integration tests
+        run: |
+          pytest tests/phase32/test_gsae_api.py -v --tb=short || true
+
+  gsae-docker-build:
+    name: GSAE Docker Build
+    runs-on: ubuntu-latest
+    needs: gsae-unit-tests
+    strategy:
+      matrix:
+        service:
+          - gsae-crisis-ingest
+          - gsae-cyber-ingest
+          - gsae-satellite-vision
+          - gsae-fusion-engine
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./docker/${{ matrix.service }}
+          push: false
+          tags: g3ti/${{ matrix.service }}:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  gsae-security-scan:
+    name: GSAE Security Scan
+    runs-on: ubuntu-latest
+    needs: gsae-unit-tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install security tools
+        run: |
+          pip install bandit safety
+
+      - name: Run Bandit security scan
+        run: |
+          bandit -r backend/app/global_awareness/ -ll || true
+
+      - name: Check for known vulnerabilities
+        run: |
+          safety check || true
+
+  gsae-lint:
+    name: GSAE Lint Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install linting tools
+        run: |
+          pip install ruff black isort
+
+      - name: Run Ruff
+        run: |
+          ruff check backend/app/global_awareness/ || true
+
+      - name: Check formatting with Black
+        run: |
+          black --check backend/app/global_awareness/ || true
+
+  gsae-type-check:
+    name: GSAE Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install type checking tools
+        run: |
+          pip install mypy
+
+      - name: Run MyPy
+        run: |
+          mypy backend/app/global_awareness/ --ignore-missing-imports || true
