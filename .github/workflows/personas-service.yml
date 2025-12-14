@@ -1,0 +1,175 @@
+name: Personas Service CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'devin/*'
+    paths:
+      - 'backend/app/personas/**'
+      - 'backend/app/api/personas/**'
+      - 'backend/app/websockets/personas_ws.py'
+      - 'tests/phase34/**'
+      - '.github/workflows/personas-service.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/app/personas/**'
+      - 'backend/app/api/personas/**'
+      - 'backend/app/websockets/personas_ws.py'
+      - 'tests/phase34/**'
+
+jobs:
+  test:
+    name: Test Personas Service
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+      
+      - name: Run Persona Engine tests
+        run: |
+          pytest tests/phase34/test_persona_engine.py -v --tb=short
+      
+      - name: Run Interaction Engine tests
+        run: |
+          pytest tests/phase34/test_interaction_engine.py -v --tb=short
+      
+      - name: Run Mission Reasoner tests
+        run: |
+          pytest tests/phase34/test_mission_reasoner.py -v --tb=short
+      
+      - name: Run Compliance Integration tests
+        run: |
+          pytest tests/phase34/test_compliance_integration.py -v --tb=short
+      
+      - name: Run API tests
+        run: |
+          pytest tests/phase34/test_personas_api.py -v --tb=short
+      
+      - name: Run WebSocket tests
+        run: |
+          pytest tests/phase34/test_personas_websockets.py -v --tb=short
+      
+      - name: Run Multi-Agent Cooperation tests
+        run: |
+          pytest tests/phase34/test_multi_agent_cooperation.py -v --tb=short
+      
+      - name: Run Persona Memory tests
+        run: |
+          pytest tests/phase34/test_persona_memory.py -v --tb=short
+      
+      - name: Run Safety Constraints tests
+        run: |
+          pytest tests/phase34/test_safety_constraints.py -v --tb=short
+      
+      - name: Run E2E Personas tests
+        run: |
+          pytest tests/phase34/test_e2e_personas.py -v --tb=short
+      
+      - name: Run all Phase 34 tests with coverage
+        run: |
+          pytest tests/phase34/ -v --cov=backend/app/personas --cov-report=xml --cov-report=term-missing
+      
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          flags: personas-service
+          name: personas-coverage
+          fail_ci_if_error: false
+
+  lint:
+    name: Lint Personas Service
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install linting tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort mypy
+      
+      - name: Run flake8
+        run: |
+          flake8 backend/app/personas/ --max-line-length=120 --ignore=E501,W503
+        continue-on-error: true
+      
+      - name: Check formatting with black
+        run: |
+          black --check backend/app/personas/ --line-length=120
+        continue-on-error: true
+      
+      - name: Check imports with isort
+        run: |
+          isort --check-only backend/app/personas/
+        continue-on-error: true
+
+  build:
+    name: Build Personas Service Docker Image
+    runs-on: ubuntu-latest
+    needs: [test, lint]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/personas-service/Dockerfile
+          push: false
+          tags: g3ti-personas-service:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'backend/app/personas/'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+        continue-on-error: true
+      
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+        continue-on-error: true
