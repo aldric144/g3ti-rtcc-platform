@@ -221,7 +221,7 @@ export default function CameraMapPage() {
 
         {/* Camera Markers Overlay (simplified) */}
         <div className="absolute inset-0 pointer-events-none">
-          {cameras.slice(0, 20).map((camera, index) => {
+          {cameras.map((camera, index) => {
             // Simple positioning based on lat/lng relative to center
             const offsetX = ((camera.longitude - mapCenter.lng) * 5000) + 50;
             const offsetY = ((mapCenter.lat - camera.latitude) * 5000) + 50;
