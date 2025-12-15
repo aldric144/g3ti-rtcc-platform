@@ -34,7 +34,7 @@ interface Trajectory {
   offender_id: string;
   offender_name: string;
   jurisdictions_crossed: string[];
-  total_incidents: int;
+  total_incidents: number;
   risk_level: string;
   confidence: string;
   last_known_location?: {
