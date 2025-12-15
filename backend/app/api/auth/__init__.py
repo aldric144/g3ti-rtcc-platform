@@ -39,11 +39,38 @@ from app.schemas.auth import (
     UserUpdate,
 )
 from app.schemas.common import PaginatedResponse
-from app.services.auth.auth_service import AuthService, get_auth_service
+from app.services.auth.auth_service import (
+    AuthService,
+    get_auth_service,
+    DEMO_AUTH_ENABLED,
+    DEMO_USER_ID,
+    DEMO_USERNAME,
+    DEMO_ROLE,
+)
 from app.services.auth.user_service import UserService, get_user_service
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+# DEMO_AUTH_BLOCK_BEGIN
+from datetime import UTC, datetime
+
+def _get_demo_user_response() -> UserResponse:
+    """Get demo user response for SAFE-MODE."""
+    return UserResponse(
+        id=DEMO_USER_ID,
+        username=DEMO_USERNAME,
+        email="admin@demo.local",
+        first_name="Demo",
+        last_name="Admin",
+        badge_number="DEMO-001",
+        department="System Administration",
+        role=DEMO_ROLE,
+        is_active=True,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+# DEMO_AUTH_BLOCK_END
 
 
 @router.post("/login", response_model=Token)
@@ -135,6 +162,12 @@ async def get_current_user(
 
     Returns the profile information for the currently authenticated user.
     """
+    # DEMO_AUTH_BLOCK_BEGIN
+    # Return demo user if in SAFE-MODE and user_id matches demo user
+    if DEMO_AUTH_ENABLED and user_id == DEMO_USER_ID:
+        return _get_demo_user_response()
+    # DEMO_AUTH_BLOCK_END
+    
     try:
         user = await user_service.get_user(user_id)
         return user

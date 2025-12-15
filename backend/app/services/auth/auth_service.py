@@ -35,6 +35,19 @@ from app.services.auth.user_service import UserService, get_user_service
 
 logger = get_logger(__name__)
 
+# DEMO_AUTH_BLOCK_BEGIN
+# Demo authentication credentials for SAFE-MODE when databases are unavailable
+# WARNING: DO NOT USE IN PRODUCTION - This is for demonstration purposes only
+DEMO_AUTH_ENABLED = settings.safe_mode
+DEMO_USERNAME = "admin"
+DEMO_PASSWORD = "admin123"
+DEMO_USER_ID = "demo-admin-001"
+DEMO_ROLE = Role.ADMIN
+
+if DEMO_AUTH_ENABLED:
+    logger.warning("SAFE-MODE ACTIVE — DEMO AUTH ENABLED. DO NOT USE IN PRODUCTION.")
+# DEMO_AUTH_BLOCK_END
+
 
 class AuthService:
     """
@@ -74,6 +87,38 @@ class AuthService:
             AccountLockedError: If account is locked
         """
         username = login_data.username
+
+        # DEMO_AUTH_BLOCK_BEGIN
+        # Check for demo authentication in SAFE-MODE
+        if DEMO_AUTH_ENABLED and username == DEMO_USERNAME and login_data.password == DEMO_PASSWORD:
+            logger.warning("SAFE-MODE ACTIVE — DEMO AUTH ENABLED. DO NOT USE IN PRODUCTION.")
+            # Create demo user object
+            demo_user = UserInDB(
+                id=DEMO_USER_ID,
+                username=DEMO_USERNAME,
+                email="admin@demo.local",
+                hashed_password="",  # Not used for demo auth
+                first_name="Demo",
+                last_name="Admin",
+                badge_number="DEMO-001",
+                department="System Administration",
+                role=DEMO_ROLE,
+                is_active=True,
+                created_at=datetime.now(UTC),
+                updated_at=datetime.now(UTC),
+            )
+            # Generate tokens for demo user
+            tokens = self._generate_tokens(demo_user)
+            audit_logger.log_authentication(
+                user_id=demo_user.id,
+                username=username,
+                success=True,
+                ip_address=ip_address,
+                user_agent=user_agent,
+            )
+            logger.info("demo_user_authenticated", user_id=demo_user.id, username=username, ip_address=ip_address)
+            return tokens
+        # DEMO_AUTH_BLOCK_END
 
         # Check rate limiting
         if login_rate_limiter.is_locked_out(username):
