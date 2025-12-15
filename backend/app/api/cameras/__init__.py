@@ -5,6 +5,7 @@ Provides REST API endpoints for camera management, including:
 - Public camera catalog access
 - Camera CRUD operations
 - Camera filtering by type, source, and sector
+- FDOT traffic camera integration with live snapshots
 """
 
 from datetime import datetime
@@ -20,7 +21,13 @@ from app.cameras import (
     PLACEHOLDER_STREAM_URL,
 )
 
+# Import FDOT router
+from app.api.cameras.fdot_router import router as fdot_router
+
 router = APIRouter(prefix="/cameras", tags=["cameras"])
+
+# Include FDOT sub-router (routes will be at /cameras/fdot/*)
+router.include_router(fdot_router)
 
 
 class CameraCreateRequest(BaseModel):
