@@ -77,7 +77,6 @@ def _get_demo_user_response() -> UserResponse:
 async def login(
     login_data: LoginRequest,
     request: Request,
-    auth_service: Annotated[AuthService, Depends(get_auth_service)],
     client_ip: ClientIP,
     user_agent: UserAgent,
 ) -> Token:
@@ -94,6 +93,31 @@ async def login(
     Returns access and refresh tokens on successful authentication.
     """
     logger.info("login_endpoint_reached", username=login_data.username, client_ip=client_ip)
+    
+    # DEMO_AUTH_BLOCK_BEGIN
+    # Fast path for demo authentication - bypass all heavy initialization
+    if DEMO_AUTH_ENABLED and login_data.username == DEMO_USERNAME and login_data.password == "admin123":
+        logger.warning("SAFE-MODE ACTIVE — DEMO AUTH ENABLED. DO NOT USE IN PRODUCTION.")
+        from app.core.security import SecurityManager
+        security = SecurityManager()
+        token_data = {
+            "sub": DEMO_USER_ID,
+            "username": DEMO_USERNAME,
+            "role": DEMO_ROLE.value,
+        }
+        access_token = security.create_access_token(token_data)
+        refresh_token = security.create_refresh_token(token_data)
+        from app.core.config import settings
+        return Token(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+            expires_in=settings.access_token_expire_minutes * 60,
+        )
+    # DEMO_AUTH_BLOCK_END
+    
+    # For non-demo auth, use the full auth service
+    auth_service = get_auth_service()
     try:
         tokens = await auth_service.authenticate(
             login_data=login_data, ip_address=client_ip, user_agent=user_agent
