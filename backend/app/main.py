@@ -92,7 +92,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Log startup complete
     audit_logger.log_system_event(
-        event_type="application_started",
+        "application_started",
         details={"version": settings.app_version, "environment": settings.environment},
     )
 
@@ -112,7 +112,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await close_redis()
 
     audit_logger.log_system_event(
-        event_type="application_stopped", details={"reason": "normal_shutdown"}
+        "application_stopped", details={"reason": "normal_shutdown"}
     )
 
     logger.info("application_stopped")
