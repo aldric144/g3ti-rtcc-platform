@@ -287,3 +287,89 @@ security_manager = SecurityManager()
 
 # Global rate limiter for login attempts
 login_rate_limiter = RateLimiter(max_attempts=5, lockout_duration_minutes=15)
+
+
+# FastAPI dependency functions for authentication
+from typing import Annotated
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+security_bearer = HTTPBearer(auto_error=False)
+
+
+async def get_current_user(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security_bearer)],
+) -> "UserInDB":
+    """
+    Get the current authenticated user from JWT token.
+    
+    Args:
+        credentials: HTTP Bearer credentials
+        
+    Returns:
+        UserInDB: User object with id, username, and role
+        
+    Raises:
+        HTTPException: If token is missing or invalid
+    """
+    from app.schemas.auth import Role, UserInDB
+    
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing authentication token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    payload = security_manager.decode_token(credentials.credentials)
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    user_id = payload.get("sub", "unknown")
+    role_str = payload.get("role", "officer")
+    
+    try:
+        role = Role(role_str)
+    except ValueError:
+        role = Role.OFFICER
+    
+    return UserInDB(
+        id=user_id,
+        username=user_id,
+        role=role,
+        email=f"{user_id}@rtcc.local",
+        hashed_password="",
+        is_active=True,
+    )
+
+
+def require_roles(*required_roles: str):
+    """
+    Create a dependency that requires specific roles.
+    
+    Args:
+        required_roles: List of required role names
+        
+    Returns:
+        Dependency function
+    """
+    from app.schemas.auth import Role
+    
+    async def role_checker(
+        credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security_bearer)],
+    ) -> "UserInDB":
+        user = await get_current_user(credentials)
+        
+        if user.role.value not in required_roles and user.role.value != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Insufficient permissions. Required roles: {required_roles}",
+            )
+        
+        return user
+    
+    return role_checker

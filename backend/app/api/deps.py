@@ -97,6 +97,28 @@ async def get_current_user_role(token: Annotated[TokenPayload, Depends(get_token
     return token.role
 
 
+async def get_current_user(token: Annotated[TokenPayload, Depends(get_token_payload)]) -> "UserInDB":
+    """
+    Get the current authenticated user.
+
+    Args:
+        token: Validated token payload
+
+    Returns:
+        UserInDB: User object with id, username, and role
+    """
+    from app.schemas.auth import UserInDB
+    
+    return UserInDB(
+        id=token.sub,
+        username=token.sub,
+        role=token.role,
+        email=f"{token.sub}@rtcc.local",
+        hashed_password="",
+        is_active=True,
+    )
+
+
 def require_role(required_role: Role):
     """
     Create a dependency that requires a specific role or higher.
