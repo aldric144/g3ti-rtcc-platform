@@ -100,6 +100,18 @@ async def list_fdot_cameras(
     )
 
 
+@router.get("/status", response_model=FDOTStatusResponse)
+async def get_fdot_status() -> FDOTStatusResponse:
+    """
+    Get FDOT camera system status.
+    
+    Returns overall status including camera counts and demo mode indicator.
+    """
+    scraper = get_fdot_scraper()
+    status = await scraper.get_status()
+    return FDOTStatusResponse(**status)
+
+
 @router.get("/{camera_id}")
 async def get_fdot_camera(camera_id: str) -> dict:
     """
@@ -178,18 +190,6 @@ async def get_fdot_snapshot(camera_id: str) -> StreamingResponse:
             "Cache-Control": "no-cache, no-store, must-revalidate",
         }
     )
-
-
-@router.get("/status", response_model=FDOTStatusResponse)
-async def get_fdot_status() -> FDOTStatusResponse:
-    """
-    Get FDOT camera system status.
-    
-    Returns overall status including camera counts and demo mode indicator.
-    """
-    scraper = get_fdot_scraper()
-    status = await scraper.get_status()
-    return FDOTStatusResponse(**status)
 
 
 # WebSocket connections for status updates
