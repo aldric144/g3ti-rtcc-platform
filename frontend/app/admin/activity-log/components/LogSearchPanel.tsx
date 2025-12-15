@@ -22,14 +22,16 @@ const PRIORITIES = [
   { value: 'critical', label: 'Critical' },
 ];
 
+interface LogSearchParams {
+  keyword: string;
+  logType: string;
+  priority: string;
+  includeArchived: boolean;
+}
+
 interface LogSearchPanelProps {
-  searchParams: {
-    keyword: string;
-    logType: string;
-    priority: string;
-    includeArchived: boolean;
-  };
-  onSearchChange: (params: typeof searchParams) => void;
+  searchParams: LogSearchParams;
+  onSearchChange: (params: LogSearchParams) => void;
 }
 
 export function LogSearchPanel({ searchParams, onSearchChange }: LogSearchPanelProps) {
