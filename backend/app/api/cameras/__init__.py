@@ -86,6 +86,17 @@ class CameraStatsResponse(BaseModel):
     by_sector: dict
 
 
+@router.get("/test")
+async def camera_api_test() -> dict:
+    """
+    Test endpoint to verify camera API is online.
+    
+    Returns:
+        Status message confirming camera API is operational.
+    """
+    return {"status": "camera-api-online"}
+
+
 @router.get("/public", response_model=CameraListResponse)
 async def get_public_cameras(
     camera_type: Optional[str] = Query(None, description="Filter by camera type"),

@@ -23,7 +23,7 @@ from app.core.logging import get_logger
 
 logger = get_logger(__name__)
 
-router = APIRouter(prefix="/cameras/fdot", tags=["FDOT Cameras"])
+router = APIRouter(prefix="/fdot", tags=["FDOT Cameras"])
 
 
 class FDOTCameraResponse(BaseModel):
