@@ -203,7 +203,7 @@ export default function OrchestrationTimeline() {
                             <span>{getStatusIcon(step.status)}</span>
                             <span>{step.name}</span>
                             {(step.duration_ms ?? 0) > 0 && (
-                              <span className="text-gray-500">({formatDuration(step.duration_ms!)})</span>
+                              <span className="text-gray-500">({formatDuration(step.duration_ms ?? 0)})</span>
                             )}
                           </div>
                           {index < execution.steps.length - 1 && (
@@ -294,7 +294,7 @@ export default function OrchestrationTimeline() {
                           <span className="text-sm">{step.name}</span>
                         </div>
                         {(step.duration_ms ?? 0) > 0 && (
-                          <span className="text-xs text-gray-400">{formatDuration(step.duration_ms!)}</span>
+                          <span className="text-xs text-gray-400">{formatDuration(step.duration_ms ?? 0)}</span>
                         )}
                       </div>
                     ))}

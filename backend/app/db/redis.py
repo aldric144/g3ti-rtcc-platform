@@ -9,6 +9,8 @@ This module provides connection management for Redis, used for:
 - Temporary data storage
 """
 
+from __future__ import annotations
+
 import json
 from typing import Any
 

@@ -9,7 +9,12 @@ import { useAuthStore } from '@/lib/store/auth';
  */
 export default function Home() {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
+
+  // Check auth state on mount
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   useEffect(() => {
     if (!isLoading) {

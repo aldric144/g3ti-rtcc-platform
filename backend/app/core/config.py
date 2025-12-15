@@ -63,8 +63,25 @@ class Settings(BaseSettings):
 
     # CORS Settings
     cors_origins: list[str] = Field(
-        default=["http://localhost:3000", "http://localhost:8000"],
+        default=[
+            "http://localhost:3000",
+            "http://localhost:8000",
+            "https://g3ti-rtcc-preview-ui.vercel.app",
+            "https://session-recovery-app-i18v0ake.devinapps.com",
+        ],
         description="Allowed CORS origins",
+    )
+    
+    # Safe Mode - graceful degradation when external services unavailable
+    safe_mode: bool = Field(
+        default=True,
+        description="Enable safe mode for graceful degradation when services unavailable",
+    )
+    
+    # Demo Auth Mode - enable demo authentication when in SAFE_MODE
+    demo_auth_mode: bool = Field(
+        default=True,
+        description="Enable demo authentication mode (admin/admin123) when in SAFE_MODE",
     )
 
     # Neo4j Database Settings

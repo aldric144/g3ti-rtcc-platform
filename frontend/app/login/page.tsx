@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import Image from 'next/image';
+import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/auth';
 
 /**
@@ -37,17 +38,24 @@ export default function LoginPage() {
       {/* Left side - Branding */}
       <div className="hidden flex-col justify-center px-12 lg:flex lg:w-1/2">
         <div className="max-w-md">
-          <div className="mb-8 flex items-center gap-3">
-            <Shield className="h-12 w-12 text-rtcc-accent" />
-            <div>
-              <h1 className="text-3xl font-bold text-white">G3TI RTCC-UIP</h1>
-              <p className="text-white/70">Real Time Crime Center</p>
-            </div>
+          {/* RBPD Badge */}
+          <div className="mb-8 flex flex-col items-center">
+            <Image
+              src="/assets/rbpd/rbpd_logo_256.png"
+              alt="Riviera Beach Police Department Badge"
+              width={256}
+              height={256}
+              priority
+            />
+            <h1 className="mt-4 text-2xl font-bold text-white text-center">
+              Riviera Beach Police Department
+            </h1>
+            <p className="text-white/70 text-center">Real Time Crime Center UIP</p>
           </div>
 
-          <h2 className="mb-4 text-4xl font-bold text-white">Unified Intelligence Platform</h2>
+          <h2 className="mb-4 text-3xl font-bold text-white text-center">Unified Intelligence Platform</h2>
 
-          <p className="mb-8 text-lg text-white/80">
+          <p className="mb-8 text-lg text-white/80 text-center">
             Comprehensive situational awareness and investigative intelligence for law enforcement
             operations.
           </p>
@@ -78,9 +86,17 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="rounded-2xl bg-white p-8 shadow-2xl">
             {/* Mobile logo */}
-            <div className="mb-8 flex items-center justify-center gap-2 lg:hidden">
-              <Shield className="h-8 w-8 text-rtcc-primary" />
-              <span className="text-xl font-bold text-rtcc-primary">G3TI RTCC-UIP</span>
+            <div className="mb-8 flex flex-col items-center lg:hidden">
+              <Image
+                src="/assets/rbpd/rbpd_logo_128.png"
+                alt="RBPD Badge"
+                width={128}
+                height={128}
+              />
+              <span className="mt-2 text-lg font-bold text-rtcc-primary text-center">
+                Riviera Beach Police Department
+              </span>
+              <span className="text-sm text-gray-600">RTCC-UIP</span>
             </div>
 
             <h2 className="mb-2 text-2xl font-bold text-gray-900">Sign in to your account</h2>

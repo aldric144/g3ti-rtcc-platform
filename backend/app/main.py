@@ -54,55 +54,75 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         app_name=settings.app_name,
         version=settings.app_version,
         environment=settings.environment,
+        safe_mode=settings.safe_mode,
+        demo_auth_mode=settings.demo_auth_mode,
     )
 
-    # Initialize database connections (graceful degradation for demo mode)
-    try:
-        neo4j = await get_neo4j()
-        if neo4j._driver is not None:
-            await neo4j.initialize_schema()
-            logger.info("neo4j_initialized")
-        else:
-            logger.warning("neo4j_running_in_demo_mode")
-    except Exception as e:
-        logger.warning("neo4j_init_failed", error=str(e))
+    # SAFE_MODE: Skip ALL database initialization to avoid memory overhead
+    if settings.safe_mode:
+        logger.warning(
+            "SAFE_MODE_ACTIVE",
+            message="Skipping ALL database initialization - Neo4j, Elasticsearch, Redis",
+            demo_auth_mode=settings.demo_auth_mode,
+        )
+        if settings.demo_auth_mode:
+            logger.warning("DEMO_AUTH_ENABLED", message="Demo authentication active (admin/admin123)")
+    else:
+        # Initialize database connections only when NOT in SAFE_MODE
+        try:
+            neo4j = await get_neo4j()
+            if neo4j._driver is not None:
+                await neo4j.initialize_schema()
+                logger.info("neo4j_initialized")
+            else:
+                logger.warning("neo4j_running_in_demo_mode")
+        except Exception as e:
+            logger.warning("neo4j_init_failed", error=str(e))
 
-    try:
-        es = await get_elasticsearch()
-        if es._client is not None:
-            await es.initialize_indices()
-            logger.info("elasticsearch_initialized")
-        else:
-            logger.warning("elasticsearch_running_in_demo_mode")
-    except Exception as e:
-        logger.warning("elasticsearch_init_failed", error=str(e))
+        try:
+            es = await get_elasticsearch()
+            if es._client is not None:
+                await es.initialize_indices()
+                logger.info("elasticsearch_initialized")
+            else:
+                logger.warning("elasticsearch_running_in_demo_mode")
+        except Exception as e:
+            logger.warning("elasticsearch_init_failed", error=str(e))
 
-    try:
-        redis_mgr = await get_redis()
-        if redis_mgr._client is not None:
-            logger.info("redis_initialized")
-        else:
-            logger.warning("redis_running_in_demo_mode")
-    except Exception as e:
-        logger.warning("redis_init_failed", error=str(e))
+        try:
+            redis_mgr = await get_redis()
+            if redis_mgr._client is not None:
+                logger.info("redis_initialized")
+            else:
+                logger.warning("redis_running_in_demo_mode")
+        except Exception as e:
+            logger.warning("redis_init_failed", error=str(e))
 
-    # Start WebSocket manager
+    # Start WebSocket manager (lightweight, always start)
     ws_manager = get_websocket_manager()
     await ws_manager.start()
     logger.info("websocket_manager_started")
 
-    # Initialize AI Engine
-    try:
-        ai_manager = get_ai_manager()
-        await ai_manager.initialize()
-        logger.info("ai_engine_initialized")
-    except Exception as e:
-        logger.warning("ai_engine_init_failed", error=str(e))
+    # Initialize AI Engine only when NOT in SAFE_MODE
+    if not settings.safe_mode:
+        try:
+            ai_manager = get_ai_manager()
+            await ai_manager.initialize()
+            logger.info("ai_engine_initialized")
+        except Exception as e:
+            logger.warning("ai_engine_init_failed", error=str(e))
+    else:
+        logger.info("ai_engine_skipped_safe_mode")
 
     # Log startup complete
     audit_logger.log_system_event(
-        event_type="application_started",
-        details={"version": settings.app_version, "environment": settings.environment},
+        "application_started",
+        details={
+            "version": settings.app_version,
+            "environment": settings.environment,
+            "safe_mode": settings.safe_mode,
+            "demo_auth_mode": settings.demo_auth_mode,
+        },
     )
 
     logger.info("application_started")
@@ -115,13 +135,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Stop WebSocket manager
     await ws_manager.stop()
 
-    # Close database connections
-    await close_neo4j()
-    await close_elasticsearch()
-    await close_redis()
+    # Close database connections only if NOT in SAFE_MODE
+    if not settings.safe_mode:
+        await close_neo4j()
+        await close_elasticsearch()
+        await close_redis()
 
     audit_logger.log_system_event(
-        event_type="application_stopped", details={"reason": "normal_shutdown"}
+        "application_stopped", details={"reason": "normal_shutdown"}
     )
 
     logger.info("application_stopped")
@@ -273,6 +294,21 @@ async def root() -> dict:
         "api_docs": f"{settings.api_v1_prefix}/docs",
         "health": f"{settings.api_v1_prefix}/system/health",
         "timestamp": datetime.now(UTC).isoformat(),
+    }
+
+
+# Simple health endpoint for SAFE_MODE status
+@app.get("/health")
+async def simple_health() -> dict:
+    """
+    Simple health endpoint showing SAFE_MODE and DEMO_AUTH status.
+    
+    This endpoint is lightweight and doesn't require any database connections.
+    """
+    return {
+        "status": "ok",
+        "safe_mode": settings.safe_mode,
+        "demo_auth": settings.demo_auth_mode,
     }
 
 

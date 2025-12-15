@@ -39,18 +39,44 @@ from app.schemas.auth import (
     UserUpdate,
 )
 from app.schemas.common import PaginatedResponse
-from app.services.auth.auth_service import AuthService, get_auth_service
+from app.services.auth.auth_service import (
+    AuthService,
+    get_auth_service,
+    DEMO_AUTH_ENABLED,
+    DEMO_USER_ID,
+    DEMO_USERNAME,
+    DEMO_ROLE,
+)
 from app.services.auth.user_service import UserService, get_user_service
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+# DEMO_AUTH_BLOCK_BEGIN
+from datetime import UTC, datetime
+
+def _get_demo_user_response() -> UserResponse:
+    """Get demo user response for SAFE-MODE."""
+    return UserResponse(
+        id=DEMO_USER_ID,
+        username=DEMO_USERNAME,
+        email="admin@g3ti-demo.com",
+        first_name="Demo",
+        last_name="Admin",
+        badge_number="DEMO-001",
+        department="System Administration",
+        role=DEMO_ROLE,
+        is_active=True,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+# DEMO_AUTH_BLOCK_END
 
 
 @router.post("/login", response_model=Token)
 async def login(
     login_data: LoginRequest,
     request: Request,
-    auth_service: Annotated[AuthService, Depends(get_auth_service)],
     client_ip: ClientIP,
     user_agent: UserAgent,
 ) -> Token:
@@ -66,6 +92,32 @@ async def login(
 
     Returns access and refresh tokens on successful authentication.
     """
+    logger.info("login_endpoint_reached", username=login_data.username, client_ip=client_ip)
+    
+    # DEMO_AUTH_BLOCK_BEGIN
+    # Fast path for demo authentication - bypass all heavy initialization
+    if DEMO_AUTH_ENABLED and login_data.username == DEMO_USERNAME and login_data.password == "admin123":
+        logger.warning("SAFE-MODE ACTIVE — DEMO AUTH ENABLED. DO NOT USE IN PRODUCTION.")
+        from app.core.security import SecurityManager
+        security = SecurityManager()
+        token_data = {
+            "sub": DEMO_USER_ID,
+            "username": DEMO_USERNAME,
+            "role": DEMO_ROLE.value,
+        }
+        access_token = security.create_access_token(token_data)
+        refresh_token = security.create_refresh_token(token_data)
+        from app.core.config import settings
+        return Token(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+            expires_in=settings.access_token_expire_minutes * 60,
+        )
+    # DEMO_AUTH_BLOCK_END
+    
+    # For non-demo auth, use the full auth service
+    auth_service = get_auth_service()
     try:
         tokens = await auth_service.authenticate(
             login_data=login_data, ip_address=client_ip, user_agent=user_agent
@@ -128,13 +180,21 @@ async def logout(
 @router.get("/me", response_model=UserResponse)
 async def get_current_user(
     user_id: CurrentUserId,
-    user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserResponse:
     """
     Get current authenticated user's profile.
 
     Returns the profile information for the currently authenticated user.
     """
+    # DEMO_AUTH_BLOCK_BEGIN
+    # Return demo user if in SAFE-MODE and user_id matches demo user
+    # This check runs BEFORE any heavy service initialization
+    if DEMO_AUTH_ENABLED and user_id == DEMO_USER_ID:
+        return _get_demo_user_response()
+    # DEMO_AUTH_BLOCK_END
+    
+    # For non-demo users, use the full user service
+    user_service = get_user_service()
     try:
         user = await user_service.get_user(user_id)
         return user

@@ -16,14 +16,36 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from app.core.config import settings
 
-# Password hashing context using bcrypt
-pwd_context = CryptContext(
-    schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12  # CJIS-compliant work factor
-)
+# DEMO_AUTH_BLOCK_BEGIN
+# In SAFE-MODE, use a lightweight dummy context to avoid bcrypt memory overhead
+# This is only for demo/preview purposes - production should always use bcrypt
+import sys
+print(f"[SECURITY_INIT] safe_mode={settings.safe_mode}", file=sys.stderr, flush=True)
+
+if settings.safe_mode:
+    print("[SECURITY_INIT] Using DummyContext - bcrypt NOT loaded", file=sys.stderr, flush=True)
+    class DummyContext:
+        """Lightweight password context for SAFE-MODE demo authentication."""
+        def hash(self, password: str) -> str:
+            # Not used in demo mode - demo auth bypasses password verification
+            return f"demo_hash_{password}"
+        
+        def verify(self, plain_password: str, hashed_password: str) -> bool:
+            # Not used in demo mode - demo auth bypasses password verification
+            return False
+    
+    pwd_context = DummyContext()
+else:
+    print("[SECURITY_INIT] Loading bcrypt CryptContext", file=sys.stderr, flush=True)
+    from passlib.context import CryptContext
+    # Password hashing context using bcrypt
+    pwd_context = CryptContext(
+        schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12  # CJIS-compliant work factor
+    )
+# DEMO_AUTH_BLOCK_END
 
 
 class SecurityManager:
@@ -287,3 +309,115 @@ security_manager = SecurityManager()
 
 # Global rate limiter for login attempts
 login_rate_limiter = RateLimiter(max_attempts=5, lockout_duration_minutes=15)
+
+
+# Module-level convenience functions that delegate to SecurityManager
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt."""
+    return security_manager.hash_password(password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash."""
+    return security_manager.verify_password(plain_password, hashed_password)
+
+
+def create_access_token(
+    subject: str,
+    username: str,
+    role: Any,
+    expires_delta: timedelta | None = None,
+) -> str:
+    """Create a JWT access token."""
+    data = {
+        "sub": subject,
+        "username": username,
+        "role": role.value if hasattr(role, "value") else str(role),
+    }
+    return security_manager.create_access_token(data, expires_delta)
+
+
+# FastAPI dependency functions for authentication
+from typing import Annotated
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+security_bearer = HTTPBearer(auto_error=False)
+
+
+async def get_current_user(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security_bearer)],
+) -> "UserInDB":
+    """
+    Get the current authenticated user from JWT token.
+    
+    Args:
+        credentials: HTTP Bearer credentials
+        
+    Returns:
+        UserInDB: User object with id, username, and role
+        
+    Raises:
+        HTTPException: If token is missing or invalid
+    """
+    from app.schemas.auth import Role, UserInDB
+    
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing authentication token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    payload = security_manager.decode_token(credentials.credentials)
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    user_id = payload.get("sub", "unknown")
+    role_str = payload.get("role", "officer")
+    
+    try:
+        role = Role(role_str)
+    except ValueError:
+        role = Role.OFFICER
+    
+    return UserInDB(
+        id=user_id,
+        username=user_id,
+        role=role,
+        email=f"{user_id}@rtcc.local",
+        hashed_password="",
+        is_active=True,
+    )
+
+
+def require_roles(*required_roles: str):
+    """
+    Create a dependency that requires specific roles.
+    
+    Args:
+        required_roles: List of required role names
+        
+    Returns:
+        Dependency function
+    """
+    from app.schemas.auth import Role
+    
+    async def role_checker(
+        credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security_bearer)],
+    ) -> "UserInDB":
+        user = await get_current_user(credentials)
+        
+        if user.role.value not in required_roles and user.role.value != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Insufficient permissions. Required roles: {required_roles}",
+            )
+        
+        return user
+    
+    return role_checker

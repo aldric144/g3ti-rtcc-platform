@@ -6,9 +6,9 @@ const nextConfig = {
 
   // Environment variables exposed to the browser
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://g3ti-rtcc-backend-harpclib.fly.dev/api/v1',
     NEXT_PUBLIC_WS_URL:
-      process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/api/v1/realtime/ws/events',
+      process.env.NEXT_PUBLIC_WS_URL || 'wss://g3ti-rtcc-backend-harpclib.fly.dev/api/v1/realtime/ws/events',
     NEXT_PUBLIC_MAPBOX_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '',
   },
 

@@ -5,10 +5,12 @@ import '@/styles/globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'G3TI RTCC-UIP',
-  description: 'Real Time Crime Center Unified Intelligence Platform',
+  title: 'Riviera Beach RTCC-UIP',
+  description: 'Riviera Beach Police Department - Real Time Crime Center Unified Intelligence Platform',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/assets/rbpd/favicon.ico',
+    shortcut: '/assets/rbpd/favicon.ico',
+    apple: '/assets/rbpd/rbpd_logo_256.png',
   },
 };
 

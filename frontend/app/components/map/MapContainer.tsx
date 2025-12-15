@@ -30,8 +30,7 @@ export function MapContainer({ onEventSelect }: MapContainerProps) {
     const initMap = async () => {
       try {
         const mapboxgl = (await import('mapbox-gl')).default;
-        // @ts-ignore - CSS import for mapbox styles
-        await import('mapbox-gl/dist/mapbox-gl.css');
+        // CSS is imported in globals.css
 
         if (!mapContainer.current) return;
 

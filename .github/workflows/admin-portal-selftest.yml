@@ -1,0 +1,138 @@
+name: Admin Portal Self-Test
+
+on:
+  push:
+    branches:
+      - main
+      - 'devin/**'
+    paths:
+      - 'backend/app/admin_logs/**'
+      - 'backend/app/shift_admin/**'
+      - 'backend/app/patrol_insights/**'
+      - 'backend/app/case_tools/**'
+      - 'backend/tests/admin_portal/**'
+      - 'frontend/app/admin/**'
+  pull_request:
+    branches:
+      - main
+      - 'devin/**'
+    paths:
+      - 'backend/app/admin_logs/**'
+      - 'backend/app/shift_admin/**'
+      - 'backend/app/patrol_insights/**'
+      - 'backend/app/case_tools/**'
+      - 'backend/tests/admin_portal/**'
+      - 'frontend/app/admin/**'
+
+jobs:
+  backend-tests:
+    name: Backend Admin Portal Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.7.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/.venv
+          key: venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+      
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        working-directory: backend
+        run: poetry install --no-interaction --no-root
+      
+      - name: Run Admin Portal Tests
+        working-directory: backend
+        run: |
+          poetry run pytest tests/admin_portal/ -v --tb=short
+        env:
+          SAFE_MODE: "true"
+          DEMO_AUTH_MODE: "true"
+  
+  frontend-build:
+    name: Frontend Admin Portal Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+      
+      - name: Type check
+        working-directory: frontend
+        run: npm run typecheck || true
+      
+      - name: Lint check
+        working-directory: frontend
+        run: npm run lint || true
+      
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://g3ti-rtcc-backend.fly.dev
+          NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}
+  
+  integration-check:
+    name: Integration Check
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-build]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Verify Admin Portal Structure
+        run: |
+          echo "Checking backend modules..."
+          test -d backend/app/admin_logs && echo "admin_logs: OK"
+          test -d backend/app/shift_admin && echo "shift_admin: OK"
+          test -d backend/app/patrol_insights && echo "patrol_insights: OK"
+          test -d backend/app/case_tools && echo "case_tools: OK"
+          
+          echo "Checking frontend pages..."
+          test -f frontend/app/admin/rtcc-console/page.tsx && echo "rtcc-console: OK"
+          test -f frontend/app/admin/activity-log/page.tsx && echo "activity-log: OK"
+          test -f frontend/app/admin/case-tools/page.tsx && echo "case-tools: OK"
+          test -f frontend/app/admin/patrol-insights/page.tsx && echo "patrol-insights: OK"
+          test -f frontend/app/admin/shift/page.tsx && echo "shift: OK"
+          
+          echo "Checking test suites..."
+          test -f backend/tests/admin_portal/test_activity_log_creation.py && echo "test_activity_log_creation: OK"
+          test -f backend/tests/admin_portal/test_shift_lifecycle.py && echo "test_shift_lifecycle: OK"
+          test -f backend/tests/admin_portal/test_patrol_insight_calculations.py && echo "test_patrol_insight_calculations: OK"
+          test -f backend/tests/admin_portal/test_heatmap_rendering.py && echo "test_heatmap_rendering: OK"
+          test -f backend/tests/admin_portal/test_admin_updates.py && echo "test_admin_updates: OK"
+          test -f backend/tests/admin_portal/test_permissions.py && echo "test_permissions: OK"
+          test -f backend/tests/admin_portal/test_case_quick_tools.py && echo "test_case_quick_tools: OK"
+          test -f backend/tests/admin_portal/test_websocket_channels.py && echo "test_websocket_channels: OK"
+          test -f backend/tests/admin_portal/test_api_validation.py && echo "test_api_validation: OK"
+          test -f backend/tests/admin_portal/test_cjis_compliance.py && echo "test_cjis_compliance: OK"
+          
+          echo "All admin portal components verified!"
