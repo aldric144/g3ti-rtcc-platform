@@ -301,6 +301,80 @@ async def log_requests(request: Request, call_next):
     return response
 
 
+# ============================================================================
+# ULTRA-SAFE MODE ENDPOINTS
+# These endpoints are defined BEFORE the main API router so they take precedence
+# They have NO dependencies and return static responses instantly
+# This prevents OOM crashes on low-memory machines
+# ============================================================================
+
+ULTRA_SAFE_MODE = settings.safe_mode and settings.demo_auth_mode
+
+if ULTRA_SAFE_MODE:
+    from app.schemas.auth import Token, LoginRequest
+    
+    logger.warning("ULTRA_SAFE_MODE_ACTIVE", message="Auth endpoints will return static responses")
+    
+    @app.post(f"{settings.api_v1_prefix}/auth/login", response_model=Token, tags=["Authentication (Ultra-Safe)"])
+    async def login_ultra_safe(login_data: LoginRequest) -> Token:
+        """
+        ULTRA-SAFE MODE login endpoint.
+        
+        Returns a static demo token without any database lookups,
+        token generation, or heavy initialization.
+        
+        Accepts: admin/admin123 or demo/demo123
+        """
+        logger.info("ultra_safe_login_attempt", username=login_data.username)
+        
+        # Static credential check
+        valid_credentials = {
+            "admin": "admin123",
+            "demo": "demo123",
+        }
+        
+        if login_data.username in valid_credentials:
+            if login_data.password == valid_credentials[login_data.username]:
+                logger.warning("ULTRA_SAFE_MODE_LOGIN_SUCCESS", username=login_data.username)
+                return Token(
+                    access_token="demo-token-ultra-safe",
+                    refresh_token="demo-refresh-ultra-safe",
+                    token_type="bearer",
+                    expires_in=86400,  # 24 hours
+                )
+        
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid demo credentials. Use admin/admin123 or demo/demo123",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    @app.get(f"{settings.api_v1_prefix}/auth/me", tags=["Authentication (Ultra-Safe)"])
+    async def get_current_user_ultra_safe() -> dict:
+        """
+        ULTRA-SAFE MODE /me endpoint.
+        
+        Returns a static demo user without any token validation,
+        database lookups, or heavy initialization.
+        
+        This endpoint has NO dependencies - it returns instantly.
+        """
+        logger.info("ultra_safe_me_called")
+        return {
+            "id": "demo-admin-001",
+            "username": "admin",
+            "email": "admin@g3ti-demo.com",
+            "first_name": "Demo",
+            "last_name": "Admin",
+            "badge_number": "DEMO-001",
+            "department": "System Administration",
+            "role": "admin",
+            "is_active": True,
+            "permissions": ["all"],
+            "status": "ok",
+        }
+
 # Include API router
 app.include_router(api_router, prefix=settings.api_v1_prefix)
 
