@@ -24,10 +24,16 @@ from app.cameras import (
 # Import FDOT router
 from app.api.cameras.fdot_router import router as fdot_router
 
+# Import RBPD router
+from app.api.cameras.rbpd_router import router as rbpd_router
+
 router = APIRouter(prefix="/cameras", tags=["cameras"])
 
 # Include FDOT sub-router (routes will be at /cameras/fdot/*)
 router.include_router(fdot_router)
+
+# Include RBPD sub-router (routes will be at /cameras/rbpd/*)
+router.include_router(rbpd_router)
 
 
 class CameraCreateRequest(BaseModel):
