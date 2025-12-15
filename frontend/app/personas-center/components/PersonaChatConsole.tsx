@@ -9,7 +9,7 @@ interface Persona {
   role: string;
   status: string;
   emotional_state: string;
-  compliance_score?: number;
+  compliance_score: number;
 }
 
 interface ChatMessage {
