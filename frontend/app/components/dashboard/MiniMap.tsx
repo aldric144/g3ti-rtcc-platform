@@ -25,7 +25,7 @@ export function MiniMap() {
     const initMap = async () => {
       try {
         const mapboxgl = (await import('mapbox-gl')).default;
-        await import('mapbox-gl/dist/mapbox-gl.css');
+        // CSS is imported in globals.css
 
         if (!mapContainer.current) return;
 
