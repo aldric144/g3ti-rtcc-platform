@@ -109,7 +109,7 @@ class CameraIngestionEngine:
         
         # 3. Ingest FDOT cameras (lowest priority)
         fdot_scraper = get_fdot_scraper()
-        fdot_cameras = fdot_scraper.get_all_cameras()
+        fdot_cameras = fdot_scraper.get_all_cameras_sync()
         for cam_data in fdot_cameras:
             # Normalize FDOT camera data
             # Ensure ID is set (use fdot_id if id is missing)
