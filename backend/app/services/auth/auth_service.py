@@ -94,7 +94,7 @@ class AuthService:
             demo_user = UserInDB(
                 id=DEMO_USER_ID,
                 username=DEMO_USERNAME,
-                email="admin@demo.local",
+                email="admin@g3ti-demo.com",
                 hashed_password="",  # Not used for demo auth
                 first_name="Demo",
                 last_name="Admin",

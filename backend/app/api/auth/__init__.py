@@ -60,7 +60,7 @@ def _get_demo_user_response() -> UserResponse:
     return UserResponse(
         id=DEMO_USER_ID,
         username=DEMO_USERNAME,
-        email="admin@demo.local",
+        email="admin@g3ti-demo.com",
         first_name="Demo",
         last_name="Admin",
         badge_number="DEMO-001",
