@@ -16,14 +16,31 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from app.core.config import settings
 
-# Password hashing context using bcrypt
-pwd_context = CryptContext(
-    schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12  # CJIS-compliant work factor
-)
+# DEMO_AUTH_BLOCK_BEGIN
+# In SAFE-MODE, use a lightweight dummy context to avoid bcrypt memory overhead
+# This is only for demo/preview purposes - production should always use bcrypt
+if settings.safe_mode:
+    class DummyContext:
+        """Lightweight password context for SAFE-MODE demo authentication."""
+        def hash(self, password: str) -> str:
+            # Not used in demo mode - demo auth bypasses password verification
+            return f"demo_hash_{password}"
+        
+        def verify(self, plain_password: str, hashed_password: str) -> bool:
+            # Not used in demo mode - demo auth bypasses password verification
+            return False
+    
+    pwd_context = DummyContext()
+else:
+    from passlib.context import CryptContext
+    # Password hashing context using bcrypt
+    pwd_context = CryptContext(
+        schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12  # CJIS-compliant work factor
+    )
+# DEMO_AUTH_BLOCK_END
 
 
 class SecurityManager:
