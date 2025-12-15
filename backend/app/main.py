@@ -71,21 +71,30 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         # Initialize database connections only when NOT in SAFE_MODE
         try:
             neo4j = await get_neo4j()
-            await neo4j.initialize_schema()
-            logger.info("neo4j_initialized")
+            if neo4j._driver is not None:
+                await neo4j.initialize_schema()
+                logger.info("neo4j_initialized")
+            else:
+                logger.warning("neo4j_running_in_demo_mode")
         except Exception as e:
             logger.warning("neo4j_init_failed", error=str(e))
 
         try:
             es = await get_elasticsearch()
-            await es.initialize_indices()
-            logger.info("elasticsearch_initialized")
+            if es._client is not None:
+                await es.initialize_indices()
+                logger.info("elasticsearch_initialized")
+            else:
+                logger.warning("elasticsearch_running_in_demo_mode")
         except Exception as e:
             logger.warning("elasticsearch_init_failed", error=str(e))
 
         try:
-            await get_redis()
-            logger.info("redis_initialized")
+            redis_mgr = await get_redis()
+            if redis_mgr._client is not None:
+                logger.info("redis_initialized")
+            else:
+                logger.warning("redis_running_in_demo_mode")
         except Exception as e:
             logger.warning("redis_init_failed", error=str(e))
 

@@ -168,3 +168,8 @@ async def get_metrics(token: RequireAdmin) -> dict[str, Any]:
         },
         "uptime": "N/A",  # Would track actual uptime in production
     }
+
+
+from .prelaunch_router import router as prelaunch_router
+
+__all__ = ["router", "prelaunch_router"]
