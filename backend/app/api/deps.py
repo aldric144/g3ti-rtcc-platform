@@ -19,7 +19,6 @@ from app.core.exceptions import (
 )
 from app.core.logging import audit_logger, get_logger
 from app.schemas.auth import Role, TokenPayload
-from app.services.auth.auth_service import AuthService, get_auth_service
 
 logger = get_logger(__name__)
 
@@ -29,7 +28,6 @@ security = HTTPBearer(auto_error=False)
 
 async def get_token_payload(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security)],
-    auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> TokenPayload:
     """
     Validate JWT token and return payload.
@@ -39,7 +37,6 @@ async def get_token_payload(
 
     Args:
         credentials: HTTP Bearer credentials
-        auth_service: Authentication service
 
     Returns:
         TokenPayload: Decoded token payload
@@ -54,21 +51,51 @@ async def get_token_payload(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    try:
-        payload = await auth_service.validate_token(credentials.credentials)
-        return payload
-    except TokenExpiredError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
-            headers={"WWW-Authenticate": "Bearer"},
-        ) from e
-    except InvalidTokenError as e:
+    # DEMO_AUTH_BLOCK_BEGIN
+    # Use lightweight token validation that doesn't require AuthService
+    # This avoids instantiating UserService which has heavy initialization
+    from app.core.security import SecurityManager
+    from datetime import UTC, datetime
+    
+    security_manager = SecurityManager()
+    payload = security_manager.decode_token(credentials.credentials)
+    
+    if not payload:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication token",
             headers={"WWW-Authenticate": "Bearer"},
-        ) from e
+        )
+    
+    # Check token type
+    if payload.get("type") != "access":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token type",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Check expiration
+    exp = payload.get("exp")
+    if exp:
+        exp_datetime = datetime.fromtimestamp(exp, tz=UTC)
+        if datetime.now(UTC) > exp_datetime:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has expired",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    
+    return TokenPayload(
+        sub=payload["sub"],
+        username=payload["username"],
+        role=Role(payload["role"]),
+        exp=datetime.fromtimestamp(payload["exp"], tz=UTC),
+        iat=datetime.fromtimestamp(payload["iat"], tz=UTC),
+        type=payload["type"],
+        jti=payload.get("jti"),
+    )
+    # DEMO_AUTH_BLOCK_END
 
 
 async def get_current_user_id(token: Annotated[TokenPayload, Depends(get_token_payload)]) -> str:

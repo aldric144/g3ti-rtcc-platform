@@ -38,14 +38,11 @@ logger = get_logger(__name__)
 # DEMO_AUTH_BLOCK_BEGIN
 # Demo authentication credentials for SAFE-MODE when databases are unavailable
 # WARNING: DO NOT USE IN PRODUCTION - This is for demonstration purposes only
-DEMO_AUTH_ENABLED = settings.safe_mode
+DEMO_AUTH_ENABLED = settings.demo_auth_mode  # Use centralized config
 DEMO_USERNAME = "admin"
 DEMO_PASSWORD = "admin123"
 DEMO_USER_ID = "demo-admin-001"
 DEMO_ROLE = Role.ADMIN
-
-if DEMO_AUTH_ENABLED:
-    logger.warning("SAFE-MODE ACTIVE — DEMO AUTH ENABLED. DO NOT USE IN PRODUCTION.")
 # DEMO_AUTH_BLOCK_END
 
 

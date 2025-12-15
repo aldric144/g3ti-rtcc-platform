@@ -77,6 +77,12 @@ class Settings(BaseSettings):
         default=True,
         description="Enable safe mode for graceful degradation when services unavailable",
     )
+    
+    # Demo Auth Mode - enable demo authentication when in SAFE_MODE
+    demo_auth_mode: bool = Field(
+        default=True,
+        description="Enable demo authentication mode (admin/admin123) when in SAFE_MODE",
+    )
 
     # Neo4j Database Settings
     neo4j_uri: str = Field(default="bolt://neo4j:7687", description="Neo4j connection URI")
