@@ -180,7 +180,6 @@ async def logout(
 @router.get("/me", response_model=UserResponse)
 async def get_current_user(
     user_id: CurrentUserId,
-    user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserResponse:
     """
     Get current authenticated user's profile.
@@ -189,10 +188,13 @@ async def get_current_user(
     """
     # DEMO_AUTH_BLOCK_BEGIN
     # Return demo user if in SAFE-MODE and user_id matches demo user
+    # This check runs BEFORE any heavy service initialization
     if DEMO_AUTH_ENABLED and user_id == DEMO_USER_ID:
         return _get_demo_user_response()
     # DEMO_AUTH_BLOCK_END
     
+    # For non-demo users, use the full user service
+    user_service = get_user_service()
     try:
         user = await user_service.get_user(user_id)
         return user
