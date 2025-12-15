@@ -142,6 +142,14 @@ export default function CameraDirectoryPage() {
     }
   };
 
+  const getTypeLabel = (camera: CameraData) => {
+    const type = camera.camera_type || camera.type || 'cctv';
+    if (camera.jurisdiction === 'FDOT') {
+      return 'Traffic (FDOT)';
+    }
+    return type.toUpperCase();
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -302,7 +310,7 @@ export default function CameraDirectoryPage() {
                 {/* Type Badge */}
                 <div className="absolute top-2 right-2">
                   <span className={`text-xs text-white px-2 py-0.5 rounded ${getTypeColor(camera.camera_type || camera.type || '')}`}>
-                    {(camera.camera_type || camera.type || 'CCTV').toUpperCase()}
+                    {getTypeLabel(camera)}
                   </span>
                 </div>
               </div>
@@ -353,7 +361,7 @@ export default function CameraDirectoryPage() {
               {/* Status & Type */}
               <div className="flex items-center gap-2">
                 <span className={`text-xs text-white px-2 py-0.5 rounded ${getTypeColor(camera.camera_type || camera.type || '')}`}>
-                  {(camera.camera_type || camera.type || 'CCTV').toUpperCase()}
+                  {getTypeLabel(camera)}
                 </span>
                 <span className={`w-3 h-3 rounded-full ${getStatusColor(camera.status)}`} />
               </div>

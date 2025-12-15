@@ -111,10 +111,37 @@ class CameraIngestionEngine:
         fdot_scraper = get_fdot_scraper()
         fdot_cameras = fdot_scraper.get_all_cameras()
         for cam_data in fdot_cameras:
-            location_key = self._get_location_key(
-                cam_data.get("latitude", 0),
-                cam_data.get("longitude", 0)
-            )
+            # Normalize FDOT camera data
+            # Ensure ID is set (use fdot_id if id is missing)
+            if not cam_data.get("id") and cam_data.get("fdot_id"):
+                cam_data["id"] = f"fdot-{cam_data['fdot_id']}"
+            elif not cam_data.get("id"):
+                cam_data["id"] = f"fdot-{stats['fdot_count']}"
+            
+            # Ensure camera type is set to traffic for FDOT cameras
+            cam_data["camera_type"] = "traffic"
+            cam_data["type"] = "traffic"
+            
+            # Ensure jurisdiction is set
+            cam_data["jurisdiction"] = "FDOT"
+            
+            # Ensure stream_url is set (use snapshot_url as fallback)
+            if not cam_data.get("stream_url"):
+                cam_data["stream_url"] = cam_data.get("snapshot_url") or "https://via.placeholder.com/640x360?text=FDOT"
+            
+            # Get coordinates
+            lat = cam_data.get("latitude", 0)
+            lng = cam_data.get("longitude", 0)
+            
+            # Skip cameras with no valid coordinates
+            if not lat or not lng or (lat == 0 and lng == 0):
+                # Use fallback center for Riviera Beach area
+                lat = 26.7850
+                lng = -80.0650
+                cam_data["latitude"] = lat
+                cam_data["longitude"] = lng
+            
+            location_key = self._get_location_key(lat, lng)
             
             if location_key not in seen_locations:
                 self._add_camera_to_registry(cam_data, CameraJurisdiction.FDOT)
