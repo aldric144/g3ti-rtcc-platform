@@ -1,0 +1,84 @@
+{
+  "cameras": [
+    {
+      "id": "cam-001",
+      "name": "City Hall - Main Entrance",
+      "location": {"latitude": 26.7753, "longitude": -80.0589},
+      "address": "600 W Blue Heron Blvd, Riviera Beach, FL",
+      "status": "online",
+      "type": "fixed",
+      "zone": "downtown",
+      "last_seen": "2024-12-15T18:00:00Z"
+    },
+    {
+      "id": "cam-002",
+      "name": "Marina Village - North",
+      "location": {"latitude": 26.7821, "longitude": -80.0512},
+      "address": "200 E 13th St, Riviera Beach, FL",
+      "status": "online",
+      "type": "ptz",
+      "zone": "marina",
+      "last_seen": "2024-12-15T18:00:00Z"
+    },
+    {
+      "id": "cam-003",
+      "name": "Blue Heron & Congress",
+      "location": {"latitude": 26.7748, "longitude": -80.0721},
+      "address": "Blue Heron Blvd & Congress Ave",
+      "status": "online",
+      "type": "fixed",
+      "zone": "commercial",
+      "last_seen": "2024-12-15T18:00:00Z"
+    },
+    {
+      "id": "cam-004",
+      "name": "Riviera Beach Marina",
+      "location": {"latitude": 26.7789, "longitude": -80.0478},
+      "address": "200 E 13th St, Riviera Beach, FL",
+      "status": "online",
+      "type": "ptz",
+      "zone": "marina",
+      "last_seen": "2024-12-15T18:00:00Z"
+    },
+    {
+      "id": "cam-005",
+      "name": "Singer Island Beach Access",
+      "location": {"latitude": 26.7912, "longitude": -80.0345},
+      "address": "Singer Island, Riviera Beach, FL",
+      "status": "online",
+      "type": "fixed",
+      "zone": "beach",
+      "last_seen": "2024-12-15T18:00:00Z"
+    },
+    {
+      "id": "cam-006",
+      "name": "MLK Jr Blvd & Avenue E",
+      "location": {"latitude": 26.7698, "longitude": -80.0612},
+      "address": "MLK Jr Blvd & Avenue E",
+      "status": "online",
+      "type": "fixed",
+      "zone": "residential",
+      "last_seen": "2024-12-15T18:00:00Z"
+    },
+    {
+      "id": "cam-007",
+      "name": "Port of Palm Beach - Gate 1",
+      "location": {"latitude": 26.7634, "longitude": -80.0534},
+      "address": "Port of Palm Beach, Riviera Beach, FL",
+      "status": "online",
+      "type": "fixed",
+      "zone": "port",
+      "last_seen": "2024-12-15T18:00:00Z"
+    },
+    {
+      "id": "cam-008",
+      "name": "Barracuda Bay - Pool Area",
+      "location": {"latitude": 26.7856, "longitude": -80.0423},
+      "address": "Barracuda Bay, Riviera Beach, FL",
+      "status": "offline",
+      "type": "fixed",
+      "zone": "recreation",
+      "last_seen": "2024-12-15T12:00:00Z"
+    }
+  ]
+}

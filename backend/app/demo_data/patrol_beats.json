@@ -1,0 +1,100 @@
+{
+  "patrol_beats": [
+    {
+      "id": "beat-1",
+      "name": "Beat 1 - Downtown/City Hall",
+      "zone": "downtown",
+      "assigned_units": ["Unit-01", "Unit-12"],
+      "priority_level": "high",
+      "boundaries": {
+        "north": 26.7800,
+        "south": 26.7700,
+        "east": -80.0500,
+        "west": -80.0700
+      },
+      "center": {"latitude": 26.7753, "longitude": -80.0589},
+      "active_incidents": 2,
+      "crime_index": 7.5
+    },
+    {
+      "id": "beat-2",
+      "name": "Beat 2 - Residential East",
+      "zone": "residential",
+      "assigned_units": ["Unit-03"],
+      "priority_level": "medium",
+      "boundaries": {
+        "north": 26.7750,
+        "south": 26.7650,
+        "east": -80.0550,
+        "west": -80.0700
+      },
+      "center": {"latitude": 26.7712, "longitude": -80.0656},
+      "active_incidents": 1,
+      "crime_index": 5.2
+    },
+    {
+      "id": "beat-3",
+      "name": "Beat 3 - Commercial West",
+      "zone": "commercial",
+      "assigned_units": ["Unit-07"],
+      "priority_level": "medium",
+      "boundaries": {
+        "north": 26.7750,
+        "south": 26.7650,
+        "east": -80.0700,
+        "west": -80.0850
+      },
+      "center": {"latitude": 26.7698, "longitude": -80.0789},
+      "active_incidents": 1,
+      "crime_index": 6.1
+    },
+    {
+      "id": "beat-4",
+      "name": "Beat 4 - Marina District",
+      "zone": "marina",
+      "assigned_units": ["Unit-08"],
+      "priority_level": "low",
+      "boundaries": {
+        "north": 26.7900,
+        "south": 26.7780,
+        "east": -80.0400,
+        "west": -80.0550
+      },
+      "center": {"latitude": 26.7821, "longitude": -80.0512},
+      "active_incidents": 1,
+      "crime_index": 3.8
+    },
+    {
+      "id": "beat-5",
+      "name": "Beat 5 - Port Area",
+      "zone": "port",
+      "assigned_units": ["Unit-11"],
+      "priority_level": "high",
+      "boundaries": {
+        "north": 26.7700,
+        "south": 26.7580,
+        "east": -80.0450,
+        "west": -80.0600
+      },
+      "center": {"latitude": 26.7634, "longitude": -80.0534},
+      "active_incidents": 0,
+      "crime_index": 4.5
+    },
+    {
+      "id": "beat-6",
+      "name": "Beat 6 - Singer Island",
+      "zone": "beach",
+      "assigned_units": ["Unit-15"],
+      "priority_level": "low",
+      "boundaries": {
+        "north": 26.8000,
+        "south": 26.7850,
+        "east": -80.0250,
+        "west": -80.0400
+      },
+      "center": {"latitude": 26.7912, "longitude": -80.0345},
+      "active_incidents": 1,
+      "crime_index": 2.1
+    }
+  ]
+}

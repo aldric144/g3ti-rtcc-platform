@@ -96,24 +96,32 @@ async def login(
     
     # DEMO_AUTH_BLOCK_BEGIN
     # Fast path for demo authentication - bypass all heavy initialization
-    if DEMO_AUTH_ENABLED and login_data.username == DEMO_USERNAME and login_data.password == "admin123":
-        logger.warning("SAFE-MODE ACTIVE — DEMO AUTH ENABLED. DO NOT USE IN PRODUCTION.")
-        from app.core.security import SecurityManager
-        security = SecurityManager()
-        token_data = {
-            "sub": DEMO_USER_ID,
-            "username": DEMO_USERNAME,
-            "role": DEMO_ROLE.value,
-        }
-        access_token = security.create_access_token(token_data)
-        refresh_token = security.create_refresh_token(token_data)
-        from app.core.config import settings
-        return Token(
-            access_token=access_token,
-            refresh_token=refresh_token,
-            token_type="bearer",
-            expires_in=settings.access_token_expire_minutes * 60,
-        )
+    # Supports both admin/admin123 and demo/demo123 credentials
+    DEMO_CREDENTIALS = {
+        "admin": ("admin123", DEMO_USER_ID, DEMO_USERNAME, DEMO_ROLE),
+        "demo": ("demo123", "demo-user-001", "demo", DEMO_ROLE),
+    }
+    
+    if DEMO_AUTH_ENABLED and login_data.username in DEMO_CREDENTIALS:
+        expected_password, user_id, username, role = DEMO_CREDENTIALS[login_data.username]
+        if login_data.password == expected_password:
+            logger.warning("SAFE-MODE ACTIVE — DEMO AUTH ENABLED. DO NOT USE IN PRODUCTION.")
+            from app.core.security import SecurityManager
+            security = SecurityManager()
+            token_data = {
+                "sub": user_id,
+                "username": username,
+                "role": role.value,
+            }
+            access_token = security.create_access_token(token_data)
+            refresh_token = security.create_refresh_token(token_data)
+            from app.core.config import settings
+            return Token(
+                access_token=access_token,
+                refresh_token=refresh_token,
+                token_type="bearer",
+                expires_in=settings.access_token_expire_minutes * 60,
+            )
     # DEMO_AUTH_BLOCK_END
     
     # For non-demo auth, use the full auth service
@@ -185,12 +193,29 @@ async def get_current_user(
     Get current authenticated user's profile.
 
     Returns the profile information for the currently authenticated user.
+    In DEMO_MODE, returns immediately without any database lookup.
     """
     # DEMO_AUTH_BLOCK_BEGIN
-    # Return demo user if in SAFE-MODE and user_id matches demo user
+    # Return demo user if in SAFE-MODE - check for any demo user ID
     # This check runs BEFORE any heavy service initialization
-    if DEMO_AUTH_ENABLED and user_id == DEMO_USER_ID:
-        return _get_demo_user_response()
+    if DEMO_AUTH_ENABLED:
+        # Handle both admin and demo user IDs
+        if user_id == DEMO_USER_ID:
+            return _get_demo_user_response()
+        elif user_id == "demo-user-001":
+            return UserResponse(
+                id="demo-user-001",
+                username="demo",
+                email="demo@g3ti-demo.com",
+                first_name="Demo",
+                last_name="User",
+                badge_number="DEMO-002",
+                department="Demo Operations",
+                role=DEMO_ROLE,
+                is_active=True,
+                created_at=datetime.now(UTC),
+                updated_at=datetime.now(UTC),
+            )
     # DEMO_AUTH_BLOCK_END
     
     # For non-demo users, use the full user service

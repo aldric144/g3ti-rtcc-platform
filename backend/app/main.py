@@ -304,11 +304,29 @@ async def simple_health() -> dict:
     Simple health endpoint showing SAFE_MODE and DEMO_AUTH status.
     
     This endpoint is lightweight and doesn't require any database connections.
+    Always returns HTTP 200 to prevent Fly.io machine restarts in DEMO mode.
     """
     return {
         "status": "ok",
         "safe_mode": settings.safe_mode,
+        "demo_mode": settings.demo_mode,
         "demo_auth": settings.demo_auth_mode,
+        "timestamp": datetime.now(UTC).isoformat(),
+    }
+
+
+# Fly.io healthcheck endpoint - always returns 200
+@app.get("/healthz")
+async def flyio_healthcheck() -> dict:
+    """
+    Fly.io healthcheck endpoint.
+    
+    Always returns HTTP 200 to prevent machine restarts due to missing DB connections.
+    This is critical for DEMO mode operation.
+    """
+    return {
+        "status": "healthy",
+        "demo_mode": settings.demo_mode,
     }
 
 

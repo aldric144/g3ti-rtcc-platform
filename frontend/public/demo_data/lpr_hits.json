@@ -1,0 +1,69 @@
+{
+  "lpr_hits": [
+    {
+      "id": "lpr-001",
+      "plate_number": "ABC-1234",
+      "plate_state": "FL",
+      "hit_type": "stolen_vehicle",
+      "confidence": 98.5,
+      "location": {"latitude": 26.7753, "longitude": -80.0621},
+      "address": "Blue Heron Blvd & Congress Ave",
+      "camera_id": "cam-003",
+      "timestamp": "2024-12-15T17:45:00Z",
+      "alert_status": "active",
+      "vehicle_description": "2019 Honda Accord, Black"
+    },
+    {
+      "id": "lpr-002",
+      "plate_number": "DEF-5678",
+      "plate_state": "FL",
+      "hit_type": "wanted_person",
+      "confidence": 92.3,
+      "location": {"latitude": 26.7821, "longitude": -80.0512},
+      "address": "Marina Village Parking",
+      "camera_id": "cam-002",
+      "timestamp": "2024-12-15T16:30:00Z",
+      "alert_status": "acknowledged",
+      "vehicle_description": "2020 Toyota Camry, Silver"
+    },
+    {
+      "id": "lpr-003",
+      "plate_number": "GHI-9012",
+      "plate_state": "GA",
+      "hit_type": "bolo",
+      "confidence": 89.7,
+      "location": {"latitude": 26.7634, "longitude": -80.0534},
+      "address": "Port of Palm Beach Gate 1",
+      "camera_id": "cam-007",
+      "timestamp": "2024-12-15T15:15:00Z",
+      "alert_status": "resolved",
+      "vehicle_description": "2018 Ford F-150, White"
+    },
+    {
+      "id": "lpr-004",
+      "plate_number": "XYZ-3456",
+      "plate_state": "FL",
+      "hit_type": "expired_registration",
+      "confidence": 95.1,
+      "location": {"latitude": 26.7698, "longitude": -80.0789},
+      "address": "MLK Jr Blvd & Avenue E",
+      "camera_id": "cam-006",
+      "timestamp": "2024-12-15T14:00:00Z",
+      "alert_status": "resolved",
+      "vehicle_description": "2015 Chevrolet Malibu, Blue"
+    },
+    {
+      "id": "lpr-005",
+      "plate_number": "JKL-7890",
+      "plate_state": "FL",
+      "hit_type": "amber_alert",
+      "confidence": 97.3,
+      "location": {"latitude": 26.7912, "longitude": -80.0345},
+      "address": "Singer Island Beach Access",
+      "camera_id": "cam-005",
+      "timestamp": "2024-12-15T18:00:00Z",
+      "alert_status": "active",
+      "vehicle_description": "2021 Nissan Altima, Red"
+    }
+  ]
+}

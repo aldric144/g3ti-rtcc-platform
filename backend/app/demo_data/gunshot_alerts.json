@@ -1,0 +1,56 @@
+{
+  "gunshot_alerts": [
+    {
+      "id": "gs-001",
+      "alert_type": "gunshot",
+      "rounds_detected": 3,
+      "confidence": 95.5,
+      "location": {"latitude": 26.7712, "longitude": -80.0656},
+      "address": "400 Block Avenue E, Riviera Beach, FL",
+      "timestamp": "2024-12-15T17:30:00Z",
+      "status": "active",
+      "responding_units": ["Unit-01", "Unit-03", "Unit-12"],
+      "sensor_id": "ss-sensor-012",
+      "incident_id": null
+    },
+    {
+      "id": "gs-002",
+      "alert_type": "gunshot",
+      "rounds_detected": 1,
+      "confidence": 88.2,
+      "location": {"latitude": 26.7698, "longitude": -80.0789},
+      "address": "1500 W Blue Heron Blvd, Riviera Beach, FL",
+      "timestamp": "2024-12-15T15:45:00Z",
+      "status": "investigating",
+      "responding_units": ["Unit-07"],
+      "sensor_id": "ss-sensor-008",
+      "incident_id": "inc-2024-001230"
+    },
+    {
+      "id": "gs-003",
+      "alert_type": "gunshot",
+      "rounds_detected": 6,
+      "confidence": 98.1,
+      "location": {"latitude": 26.7634, "longitude": -80.0612},
+      "address": "MLK Jr Blvd & 10th St, Riviera Beach, FL",
+      "timestamp": "2024-12-15T02:15:00Z",
+      "status": "resolved",
+      "responding_units": ["Unit-01", "Unit-03", "Unit-08", "Unit-11"],
+      "sensor_id": "ss-sensor-005",
+      "incident_id": "inc-2024-001215"
+    },
+    {
+      "id": "gs-004",
+      "alert_type": "possible_gunshot",
+      "rounds_detected": 2,
+      "confidence": 72.5,
+      "location": {"latitude": 26.7789, "longitude": -80.0478},
+      "address": "Riviera Beach Marina, Riviera Beach, FL",
+      "timestamp": "2024-12-15T12:00:00Z",
+      "status": "false_alarm",
+      "responding_units": ["Unit-15"],
+      "sensor_id": "ss-sensor-003",
+      "incident_id": null
+    }
+  ]
+}

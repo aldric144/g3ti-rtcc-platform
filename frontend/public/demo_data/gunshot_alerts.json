@@ -1,0 +1,52 @@
+{
+  "gunshot_alerts": [
+    {
+      "id": "gs-001",
+      "alert_type": "gunshot",
+      "rounds_detected": 3,
+      "confidence": 95.5,
+      "location": {"latitude": 26.7712, "longitude": -80.0656},
+      "address": "400 Block Avenue E, Riviera Beach, FL",
+      "timestamp": "2024-12-15T17:30:00Z",
+      "status": "active",
+      "responding_units": ["Unit-01", "Unit-03", "Unit-12"],
+      "sensor_id": "ss-sensor-012"
+    },
+    {
+      "id": "gs-002",
+      "alert_type": "gunshot",
+      "rounds_detected": 1,
+      "confidence": 78.2,
+      "location": {"latitude": 26.7634, "longitude": -80.0612},
+      "address": "1200 Block W 10th St, Riviera Beach, FL",
+      "timestamp": "2024-12-15T14:15:00Z",
+      "status": "investigating",
+      "responding_units": ["Unit-08"],
+      "sensor_id": "ss-sensor-008"
+    },
+    {
+      "id": "gs-003",
+      "alert_type": "gunshot",
+      "rounds_detected": 6,
+      "confidence": 98.1,
+      "location": {"latitude": 26.7698, "longitude": -80.0789},
+      "address": "1500 Block Blue Heron Blvd, Riviera Beach, FL",
+      "timestamp": "2024-12-15T10:45:00Z",
+      "status": "resolved",
+      "responding_units": ["Unit-03", "Unit-07", "Unit-11", "Unit-15"],
+      "sensor_id": "ss-sensor-015"
+    },
+    {
+      "id": "gs-004",
+      "alert_type": "gunshot",
+      "rounds_detected": 2,
+      "confidence": 65.3,
+      "location": {"latitude": 26.7856, "longitude": -80.0423},
+      "address": "Barracuda Bay Area, Riviera Beach, FL",
+      "timestamp": "2024-12-15T08:30:00Z",
+      "status": "false_alarm",
+      "responding_units": ["Unit-01"],
+      "sensor_id": "ss-sensor-003"
+    }
+  ]
+}
