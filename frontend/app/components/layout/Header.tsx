@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Bell, Search, User, LogOut, Settings, ChevronDown, Moon, Sun } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useAuthStore } from '@/lib/store/auth';
@@ -31,8 +32,20 @@ export function Header() {
 
   return (
     <header className="flex h-16 items-center justify-between border-b bg-white px-6 dark:border-gray-700 dark:bg-gray-800">
-      {/* Search */}
+      {/* RBPD Branding + Search */}
       <div className="flex items-center gap-4">
+        {/* Mini badge and title */}
+        <div className="flex items-center gap-2">
+          <Image
+            src="/assets/rbpd/rbpd_logo_32.png"
+            alt="RBPD Badge"
+            width={32}
+            height={32}
+          />
+          <span className="hidden text-sm font-semibold text-gray-900 dark:text-white sm:block">
+            Riviera Beach RTCC
+          </span>
+        </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -10,7 +11,6 @@ import {
   FileText,
   Users,
   Settings,
-  Shield,
   ChevronLeft,
   ChevronRight,
   Activity,
@@ -58,15 +58,29 @@ export function Sidebar() {
         collapsed ? 'w-16' : 'w-64'
       )}
     >
-      {/* Logo */}
-      <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
-        {!collapsed && (
+      {/* Logo - RBPD Badge */}
+      <div className="flex h-20 items-center justify-center border-b border-white/10 px-2">
+        {!collapsed ? (
           <div className="flex items-center gap-2">
-            <Shield className="h-8 w-8 text-rtcc-accent" />
-            <span className="text-lg font-bold text-white">RTCC-UIP</span>
+            <Image
+              src="/assets/rbpd/rbpd_logo_64.png"
+              alt="RBPD Badge"
+              width={64}
+              height={64}
+            />
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-white">RBPD</span>
+              <span className="text-xs text-white/70">RTCC-UIP</span>
+            </div>
           </div>
+        ) : (
+          <Image
+            src="/assets/rbpd/rbpd_logo_48.png"
+            alt="RBPD Badge"
+            width={48}
+            height={48}
+          />
         )}
-        {collapsed && <Shield className="mx-auto h-8 w-8 text-rtcc-accent" />}
       </div>
 
       {/* Navigation */}
