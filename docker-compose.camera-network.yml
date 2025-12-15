@@ -1,0 +1,113 @@
+# Docker Compose configuration for Camera Network services
+# Part of Phase CAM-NET-X: Complete Camera Intelligence Stack
+
+version: '3.8'
+
+services:
+  # Camera Network API Service
+  camera-network-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: g3ti-camera-network-api
+    environment:
+      - DEMO_MODE=true
+      - SAFE_MODE=true
+      - CAMERA_HEALTH_CHECK_INTERVAL=30
+      - CAMERA_STREAM_TIMEOUT=5000
+      - VIDEO_WALL_SESSION_TIMEOUT=3600
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - camera-thumbnails:/app/thumbnails
+    networks:
+      - g3ti-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Camera Health Monitor Service
+  camera-health-monitor:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: g3ti-camera-health-monitor
+    command: python -m app.camera_network.health_monitor_worker
+    environment:
+      - DEMO_MODE=true
+      - HEALTH_CHECK_INTERVAL=30
+      - HEALTH_CHECK_TIMEOUT=5
+    volumes:
+      - ./backend/app:/app/app
+    networks:
+      - g3ti-network
+    depends_on:
+      - camera-network-api
+    restart: unless-stopped
+
+  # FDOT Scraper Service
+  fdot-scraper:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: g3ti-fdot-scraper
+    command: python -m app.camera_network.fdot_scraper_worker
+    environment:
+      - DEMO_MODE=true
+      - FDOT_SCRAPE_INTERVAL=300
+      - FDOT_API_TIMEOUT=10
+    volumes:
+      - ./backend/app:/app/app
+    networks:
+      - g3ti-network
+    depends_on:
+      - camera-network-api
+    restart: unless-stopped
+
+  # Video Wall WebSocket Service
+  video-wall-ws:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: g3ti-video-wall-ws
+    command: uvicorn app.api.camera_network.websocket:router --host 0.0.0.0 --port 8002
+    environment:
+      - DEMO_MODE=true
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./backend/app:/app/app
+    networks:
+      - g3ti-network
+    depends_on:
+      - camera-network-api
+    restart: unless-stopped
+
+  # Thumbnail Cache Service (Redis)
+  thumbnail-cache:
+    image: redis:7-alpine
+    container_name: g3ti-thumbnail-cache
+    ports:
+      - "6380:6379"
+    volumes:
+      - thumbnail-cache-data:/data
+    networks:
+      - g3ti-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  g3ti-network:
+    driver: bridge
+
+volumes:
+  camera-thumbnails:
+  thumbnail-cache-data:
