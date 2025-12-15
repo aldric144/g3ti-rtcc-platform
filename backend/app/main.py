@@ -312,35 +312,50 @@ ULTRA_SAFE_MODE = settings.safe_mode and settings.demo_auth_mode
 
 if ULTRA_SAFE_MODE:
     from app.schemas.auth import Token, LoginRequest
+    from app.core.security import SecurityManager
     
     logger.warning("ULTRA_SAFE_MODE_ACTIVE", message="Auth endpoints will return static responses")
+    
+    # Create a single SecurityManager instance for token generation
+    _ultra_safe_security = SecurityManager()
     
     @app.post(f"{settings.api_v1_prefix}/auth/login", response_model=Token, tags=["Authentication (Ultra-Safe)"])
     async def login_ultra_safe(login_data: LoginRequest) -> Token:
         """
         ULTRA-SAFE MODE login endpoint.
         
-        Returns a static demo token without any database lookups,
-        token generation, or heavy initialization.
+        Returns a valid JWT token without any database lookups.
+        The token is properly signed so the frontend can decode it.
         
         Accepts: admin/admin123 or demo/demo123
         """
         logger.info("ultra_safe_login_attempt", username=login_data.username)
         
-        # Static credential check
+        # Static credential check with user info
         valid_credentials = {
-            "admin": "admin123",
-            "demo": "demo123",
+            "admin": ("admin123", "demo-admin-001", "admin"),
+            "demo": ("demo123", "demo-user-001", "admin"),
         }
         
         if login_data.username in valid_credentials:
-            if login_data.password == valid_credentials[login_data.username]:
+            expected_password, user_id, role = valid_credentials[login_data.username]
+            if login_data.password == expected_password:
                 logger.warning("ULTRA_SAFE_MODE_LOGIN_SUCCESS", username=login_data.username)
+                
+                # Generate valid JWT tokens
+                token_data = {
+                    "sub": user_id,
+                    "username": login_data.username,
+                    "role": role,
+                }
+                access_token = _ultra_safe_security.create_access_token(token_data)
+                refresh_token = _ultra_safe_security.create_refresh_token(token_data)
+                
                 return Token(
-                    access_token="demo-token-ultra-safe",
-                    refresh_token="demo-refresh-ultra-safe",
+                    access_token=access_token,
+                    refresh_token=refresh_token,
                     token_type="bearer",
-                    expires_in=86400,  # 24 hours
+                    expires_in=settings.access_token_expire_minutes * 60,
                 )
         
         from fastapi import HTTPException
