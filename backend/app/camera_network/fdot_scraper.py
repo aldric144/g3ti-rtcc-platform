@@ -238,15 +238,19 @@ class FDOTScraper:
     async def fetch_cameras(self) -> List[Dict[str, Any]]:
         """
         Fetch cameras from FDOT API.
-        Falls back to demo data if API is unavailable.
+        Falls back to demo data if API is unavailable or returns empty.
         """
         # Try SmartTraffic first
-        cameras = await self.fetch_cameras_from_smarttraffic()
-        if cameras:
-            self._cameras = cameras
-            self._demo_mode = False
-            self._last_fetch = datetime.now(timezone.utc)
-            return self._cameras
+        try:
+            cameras = await self.fetch_cameras_from_smarttraffic()
+            if cameras and len(cameras) > 0:
+                self._cameras = cameras
+                self._demo_mode = False
+                self._last_fetch = datetime.now(timezone.utc)
+                print(f"[FDOT] Loaded {len(cameras)} cameras from SmartTraffic")
+                return self._cameras
+        except Exception as e:
+            print(f"[FDOT] SmartTraffic fetch error: {e}")
         
         # Try FDOT API
         client = await self._get_http_client()
@@ -255,13 +259,18 @@ class FDOTScraper:
                 response = await client.get(FDOT_API_URL)
                 if response.status_code == 200:
                     data = response.json()
-                    self._cameras = self._parse_fdot_response(data)
-                    self._demo_mode = False
-                    self._last_fetch = datetime.now(timezone.utc)
-                    return self._cameras
+                    cameras = self._parse_fdot_response(data)
+                    if cameras and len(cameras) > 0:
+                        self._cameras = cameras
+                        self._demo_mode = False
+                        self._last_fetch = datetime.now(timezone.utc)
+                        print(f"[FDOT] Loaded {len(cameras)} cameras from FDOT API")
+                        return self._cameras
             except Exception as e:
                 print(f"[FDOT] API error: {e}")
         
+        # Always fall back to demo cameras
+        print("[FDOT] Using demo cameras (external APIs returned empty or failed)")
         return self._load_demo_cameras()
     
     def fetch_cameras_sync(self) -> List[Dict[str, Any]]:
