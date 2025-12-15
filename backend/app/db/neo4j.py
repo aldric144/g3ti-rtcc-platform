@@ -229,6 +229,7 @@ async def get_neo4j() -> Neo4jManager:
     Get the Neo4j manager instance.
 
     This function is designed to be used as a FastAPI dependency.
+    In demo mode, returns a manager even if connection fails.
 
     Returns:
         Neo4jManager: The Neo4j manager instance
@@ -236,7 +237,10 @@ async def get_neo4j() -> Neo4jManager:
     global _neo4j_manager
     if _neo4j_manager is None:
         _neo4j_manager = Neo4jManager()
-        await _neo4j_manager.connect()
+        try:
+            await _neo4j_manager.connect()
+        except Exception as e:
+            logger.warning("neo4j_connection_skipped_demo_mode", error=str(e))
     return _neo4j_manager
 
 
