@@ -21,13 +21,29 @@ interface Persona {
 interface Mission {
   mission_id: string;
   title: string;
+  description: string;
+  mission_type: string;
   status: string;
   priority: string;
+  created_by: string;
+  assigned_personas: string[];
+  tasks: Array<{
+    task_id: string;
+    task_type: string;
+    description: string;
+    status: string;
+    sequence_number: number;
+  }>;
   progress: {
     completion_percentage: number;
     total_tasks: number;
     completed: number;
+    in_progress: number;
+    failed: number;
   };
+  created_at: string;
+  started_at?: string;
+  completed_at?: string;
 }
 
 export default function PersonasCenterPage() {
