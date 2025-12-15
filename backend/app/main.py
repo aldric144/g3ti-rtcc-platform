@@ -117,22 +117,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     else:
         logger.info("ai_engine_skipped_safe_mode")
 
-    # Skip Camera Ingestion Engine in SAFE_MODE to reduce memory footprint
-    # Cameras will be loaded on-demand when API endpoints are called
-    if not settings.safe_mode:
-        try:
-            ingestion_engine = get_ingestion_engine()
-            stats = ingestion_engine.ingest_all()
-            logger.info(
-                "camera_ingestion_initialized",
-                total_cameras=stats.get("total_count", 0),
-                rbpd_count=stats.get("rbpd_count", 0),
-                fdot_count=stats.get("fdot_count", 0),
-            )
-        except Exception as e:
-            logger.warning("camera_ingestion_init_failed", error=str(e))
-    else:
-        logger.info("camera_ingestion_skipped_safe_mode")
+    # Initialize Camera Ingestion Engine (enabled in all modes for FDOT visibility)
+    # This is lightweight and doesn't require database connections
+    try:
+        ingestion_engine = get_ingestion_engine()
+        stats = ingestion_engine.ingest_all()
+        logger.info(
+            "camera_ingestion_initialized",
+            total_cameras=stats.get("total_count", 0),
+            rbpd_count=stats.get("rbpd_count", 0),
+            fdot_count=stats.get("fdot_count", 0),
+            safe_mode=settings.safe_mode,
+        )
+    except Exception as e:
+        logger.warning("camera_ingestion_init_failed", error=str(e))
 
     # Log startup complete
     audit_logger.log_system_event(
