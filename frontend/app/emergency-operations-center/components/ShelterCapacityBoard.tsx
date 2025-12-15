@@ -6,7 +6,7 @@ interface Shelter {
   shelter_id: string;
   name: string;
   shelter_type: string;
-  capacity: int;
+  capacity: number;
   current_occupancy: number;
   status: string;
   address: {

@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: 'export',
+  trailingSlash: true,
 
   // Environment variables exposed to the browser
   env: {
@@ -10,8 +12,9 @@ const nextConfig = {
     NEXT_PUBLIC_MAPBOX_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '',
   },
 
-  // Image optimization
+  // Image optimization - unoptimized for static export
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
