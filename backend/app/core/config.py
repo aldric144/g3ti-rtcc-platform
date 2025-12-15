@@ -153,8 +153,20 @@ class Settings(BaseSettings):
     def parse_cors_origins(cls, v: str | list[str]) -> list[str]:
         """Parse CORS origins from comma-separated string or list."""
         if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",")]
-        return v
+            origins = [origin.strip() for origin in v.split(",")]
+        else:
+            origins = list(v)
+        
+        # Always ensure critical origins are included
+        critical_origins = [
+            "https://session-recovery-app-i18v0ake.devinapps.com",
+            "http://localhost:3000",
+        ]
+        for origin in critical_origins:
+            if origin not in origins:
+                origins.append(origin)
+        
+        return origins
 
     @field_validator("elasticsearch_hosts", mode="before")
     @classmethod
