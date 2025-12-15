@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from typing import Optional
 import asyncio
 
-from app.cameras.fdot_scraper import (
+from app.camera_network.fdot_scraper import (
     get_fdot_scraper,
     generate_mjpeg_stream,
     FDOTScraper,

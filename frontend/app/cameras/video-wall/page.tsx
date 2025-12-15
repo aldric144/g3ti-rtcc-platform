@@ -25,6 +25,7 @@ interface CameraData {
   jurisdiction?: string;
   sector?: string;
   status?: string;
+  fdot_id?: string;
 }
 
 interface VideoWallSlot {
@@ -33,6 +34,8 @@ interface VideoWallSlot {
   camera_name: string | null;
   stream_url: string | null;
   is_empty: boolean;
+  jurisdiction?: string | null;
+  fdot_id?: string | null;
 }
 
 interface VideoWallSession {
@@ -125,10 +128,21 @@ export default function VideoWallPage() {
             camera_name: camera.name,
             stream_url: camera.stream_url,
             is_empty: false,
+            jurisdiction: camera.jurisdiction || null,
+            fdot_id: camera.fdot_id || null,
           }
         : slot
     ));
     setShowCameraSelector(null);
+  };
+
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
+  const getStreamUrl = (slot: VideoWallSlot) => {
+    if (slot.jurisdiction === 'FDOT') {
+      return `${apiBaseUrl}/api/cameras/fdot/${slot.fdot_id || slot.camera_id}/stream`;
+    }
+    return slot.stream_url || 'https://via.placeholder.com/640x360?text=Camera';
   };
 
   const removeCameraFromSlot = (position: number) => {
@@ -304,7 +318,7 @@ export default function VideoWallPage() {
               /* Camera Feed */
               <>
                 <img
-                  src={slot.stream_url || 'https://via.placeholder.com/640x360?text=Camera'}
+                  src={getStreamUrl(slot)}
                   alt={slot.camera_name || 'Camera'}
                   className="w-full h-full object-cover"
                 />

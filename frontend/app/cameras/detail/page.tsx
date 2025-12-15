@@ -229,11 +229,19 @@ function CameraDetailContent() {
             <div className="bg-gray-800 rounded-lg overflow-hidden">
               {/* Video */}
               <div className="relative aspect-video bg-black">
-                <img
-                  src={camera.stream_url || 'https://via.placeholder.com/1280x720?text=Camera+Feed'}
-                  alt={camera.name}
-                  className="w-full h-full object-contain"
-                />
+                {camera.jurisdiction === 'FDOT' ? (
+                  <img
+                    src={`${apiBaseUrl}/api/cameras/fdot/${camera.id}/stream`}
+                    alt={camera.name}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <img
+                    src={camera.stream_url || 'https://via.placeholder.com/1280x720?text=Camera+Feed'}
+                    alt={camera.name}
+                    className="w-full h-full object-contain"
+                  />
+                )}
 
                 {/* Status Overlay */}
                 <div className="absolute top-4 left-4 flex items-center gap-2">
