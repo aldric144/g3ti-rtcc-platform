@@ -67,6 +67,35 @@ class RBPDCameraStatsResponse(BaseModel):
 # API Endpoints
 # ============================================================================
 
+@router.get("", response_model=RBPDCameraListResponse)
+async def get_rbpd_cameras_root(
+    sector: Optional[str] = Query(None, description="Filter by sector (e.g., 'Sector 1', 'HQ')"),
+    camera_type: Optional[str] = Query(None, description="Filter by camera type ('CCTV', 'PTZ', 'LPR')"),
+):
+    """
+    Get all RBPD internal mock cameras (root endpoint).
+    
+    Optionally filter by sector or camera type.
+    
+    Returns:
+        List of RBPD cameras with metadata.
+    """
+    cameras = get_cached_rbpd_cameras()
+    
+    # Apply sector filter
+    if sector:
+        cameras = [c for c in cameras if c.get("assigned_sector") == sector]
+    
+    # Apply type filter
+    if camera_type:
+        cameras = [c for c in cameras if c.get("camera_type") == camera_type]
+    
+    return RBPDCameraListResponse(
+        cameras=cameras,
+        total=len(cameras),
+    )
+
+
 @router.get("/list", response_model=RBPDCameraListResponse)
 async def list_rbpd_cameras(
     sector: Optional[str] = Query(None, description="Filter by sector (e.g., 'Sector 1', 'HQ')"),

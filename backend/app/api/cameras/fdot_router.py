@@ -56,6 +56,28 @@ class FDOTStatusResponse(BaseModel):
     last_updated: Optional[str]
 
 
+@router.get("", response_model=FDOTCameraListResponse)
+async def get_fdot_cameras_root(
+    sector: Optional[str] = None,
+) -> FDOTCameraListResponse:
+    """
+    Get all FDOT traffic cameras (root endpoint).
+    
+    Optionally filter by patrol sector.
+    """
+    scraper = get_fdot_scraper()
+    cameras = await scraper.get_all_cameras()
+    
+    if sector:
+        cameras = [cam for cam in cameras if cam.get("sector") == sector]
+    
+    return FDOTCameraListResponse(
+        cameras=cameras,
+        total=len(cameras),
+        demo_mode=scraper.is_demo_mode(),
+    )
+
+
 @router.get("/list", response_model=FDOTCameraListResponse)
 async def list_fdot_cameras(
     sector: Optional[str] = None,

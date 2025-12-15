@@ -46,12 +46,12 @@ export default function CameraDirectoryPage() {
     status: '',
   });
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
   const fetchCameras = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/cameras`);
+      const response = await fetch(`${apiBaseUrl}/api/cameras`);
       if (response.ok) {
         const data = await response.json();
         setCameras(data.cameras || []);
@@ -78,7 +78,7 @@ export default function CameraDirectoryPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [apiUrl]);
+  }, [apiBaseUrl]);
 
   useEffect(() => {
     fetchCameras();

@@ -86,6 +86,89 @@ class CameraStatsResponse(BaseModel):
     by_sector: dict
 
 
+@router.get("")
+async def get_all_cameras(
+    camera_type: Optional[str] = Query(None, description="Filter by camera type"),
+    source: Optional[str] = Query(None, description="Filter by data source"),
+    sector: Optional[str] = Query(None, description="Filter by patrol sector"),
+    jurisdiction: Optional[str] = Query(None, description="Filter by jurisdiction (FDOT, RBPD, public)"),
+    status: Optional[str] = Query(None, description="Filter by status (online, offline)"),
+) -> dict:
+    """
+    Get all cameras from all sources (unified camera directory).
+    
+    Returns the full catalog of cameras including FDOT traffic cameras,
+    RBPD internal cameras, and public cameras.
+    
+    Supports filtering by type, source, sector, jurisdiction, and status.
+    """
+    from app.camera_network.camera_ingestion_engine import get_ingestion_engine
+    
+    ingestion_engine = get_ingestion_engine()
+    
+    # Get all cameras from the unified registry
+    all_cameras = ingestion_engine.get_all_cameras()
+    
+    # Apply filters
+    if camera_type:
+        all_cameras = [c for c in all_cameras if c.get("camera_type") == camera_type or c.get("type") == camera_type]
+    if source:
+        all_cameras = [c for c in all_cameras if c.get("source") == source]
+    if sector:
+        all_cameras = [c for c in all_cameras if c.get("sector") == sector]
+    if jurisdiction:
+        all_cameras = [c for c in all_cameras if c.get("jurisdiction") == jurisdiction]
+    if status:
+        all_cameras = [c for c in all_cameras if c.get("status") == status]
+    
+    return {
+        "cameras": all_cameras,
+        "total": len(all_cameras),
+        "filters": {
+            "jurisdiction": jurisdiction,
+            "camera_type": camera_type,
+            "sector": sector,
+            "status": status,
+        }
+    }
+
+
+@router.get("/map")
+async def get_cameras_for_map() -> dict:
+    """
+    Get all cameras formatted for map display.
+    
+    Returns cameras with GPS coordinates for map markers.
+    """
+    from app.camera_network.camera_ingestion_engine import get_ingestion_engine
+    
+    ingestion_engine = get_ingestion_engine()
+    all_cameras = ingestion_engine.get_all_cameras()
+    
+    # Format for map display
+    map_cameras = []
+    for cam in all_cameras:
+        gps = cam.get("gps", {})
+        if not gps:
+            gps = {"latitude": cam.get("latitude"), "longitude": cam.get("longitude")}
+        
+        map_cameras.append({
+            "id": cam.get("id"),
+            "name": cam.get("name"),
+            "latitude": gps.get("latitude"),
+            "longitude": gps.get("longitude"),
+            "type": cam.get("type") or cam.get("camera_type"),
+            "status": cam.get("status", "online"),
+            "jurisdiction": cam.get("jurisdiction", "public"),
+            "sector": cam.get("sector"),
+        })
+    
+    return {
+        "cameras": map_cameras,
+        "total": len(map_cameras),
+    }
+
+
 @router.get("/test")
 async def camera_api_test() -> dict:
     """

@@ -61,7 +61,7 @@ function CameraDetailContent() {
   const [error, setError] = useState<string | null>(null);
   const [isPTZ, setIsPTZ] = useState(false);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
   const fetchCamera = useCallback(async () => {
     if (!cameraId) {
@@ -70,7 +70,7 @@ function CameraDetailContent() {
     }
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/cameras/${cameraId}`);
+      const response = await fetch(`${apiBaseUrl}/api/cameras/public/${cameraId}`);
       if (response.ok) {
         const data = await response.json();
         setCamera(data);
@@ -99,7 +99,7 @@ function CameraDetailContent() {
     } finally {
       setIsLoading(false);
     }
-  }, [apiUrl, cameraId]);
+  }, [apiBaseUrl, cameraId]);
 
   useEffect(() => {
     if (cameraId) {
@@ -111,7 +111,7 @@ function CameraDetailContent() {
     if (!isPTZ) return;
 
     try {
-      const response = await fetch(`${apiUrl}/cameras/ptz/${cameraId}/command`, {
+      const response = await fetch(`${apiBaseUrl}/api/cameras/ptz/${cameraId}/command`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ command, value }),
