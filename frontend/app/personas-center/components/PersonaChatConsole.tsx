@@ -10,6 +10,13 @@ interface Persona {
   status: string;
   emotional_state: string;
   compliance_score: number;
+  metrics: {
+    total_interactions: number;
+    successful_interactions: number;
+    average_response_time_ms: number;
+    missions_completed: number;
+    missions_failed: number;
+  };
 }
 
 interface ChatMessage {
