@@ -69,6 +69,8 @@ class Camera:
     last_ping: Optional[datetime] = None
     source_priority: int = 0
     description: str = ""
+    supports_mjpeg: bool = False
+    snapshot_url: str = ""
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -99,6 +101,8 @@ class Camera:
             "last_ping": self.last_ping.isoformat() if self.last_ping else None,
             "source_priority": self.source_priority,
             "description": self.description,
+            "supports_mjpeg": self.supports_mjpeg,
+            "snapshot_url": self.snapshot_url,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "metadata": self.metadata,
@@ -140,6 +144,8 @@ class Camera:
             sector=data.get("sector", ""),
             status=status,
             description=data.get("description", ""),
+            supports_mjpeg=data.get("supports_mjpeg", False),
+            snapshot_url=data.get("snapshot_url", ""),
             metadata=data.get("metadata", {}),
         )
 

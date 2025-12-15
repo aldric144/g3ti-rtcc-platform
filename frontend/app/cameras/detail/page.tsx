@@ -39,6 +39,8 @@ interface CameraData {
   address?: string;
   created_at?: string;
   updated_at?: string;
+  supports_mjpeg?: boolean;
+  snapshot_url?: string;
 }
 
 interface HealthData {
@@ -229,15 +231,16 @@ function CameraDetailContent() {
             <div className="bg-gray-800 rounded-lg overflow-hidden">
               {/* Video */}
               <div className="relative aspect-video bg-black">
-                {camera.jurisdiction === 'FDOT' ? (
+                {camera.supports_mjpeg ? (
                   <img
-                    src={`${apiBaseUrl}/api/cameras/fdot/${camera.id}/stream`}
+                    src={`${apiBaseUrl}${camera.stream_url}`}
                     alt={camera.name}
                     className="w-full h-full object-contain"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   />
                 ) : (
                   <img
-                    src={camera.stream_url || 'https://via.placeholder.com/1280x720?text=Camera+Feed'}
+                    src={camera.snapshot_url || camera.stream_url || 'https://via.placeholder.com/1280x720?text=Camera+Feed'}
                     alt={camera.name}
                     className="w-full h-full object-contain"
                   />

@@ -125,9 +125,14 @@ class CameraIngestionEngine:
             # Ensure jurisdiction is set
             cam_data["jurisdiction"] = "FDOT"
             
-            # Ensure stream_url is set (use snapshot_url as fallback)
-            if not cam_data.get("stream_url"):
-                cam_data["stream_url"] = cam_data.get("snapshot_url") or "https://via.placeholder.com/640x360?text=FDOT"
+            # Set MJPEG stream URL for FDOT cameras
+            camera_id = cam_data.get("id") or cam_data.get("fdot_id") or f"fdot-{stats['fdot_count']}"
+            cam_data["stream_url"] = f"/api/cameras/fdot/{camera_id}/stream"
+            cam_data["supports_mjpeg"] = True
+            
+            # Keep snapshot_url for fallback
+            if not cam_data.get("snapshot_url"):
+                cam_data["snapshot_url"] = "https://via.placeholder.com/640x360?text=FDOT"
             
             # Get coordinates
             lat = cam_data.get("latitude", 0)
