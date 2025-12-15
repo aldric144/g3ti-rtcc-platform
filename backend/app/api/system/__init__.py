@@ -157,19 +157,19 @@ async def get_metrics(token: RequireAdmin) -> dict[str, Any]:
 
     Returns current system metrics and statistics.
     """
-        from app.services.events.websocket_manager import get_websocket_manager
+    from app.services.events.websocket_manager import get_websocket_manager
 
-        ws_manager = get_websocket_manager()
+    ws_manager = get_websocket_manager()
 
-        return {
-            "timestamp": datetime.now(UTC).isoformat(),
-            "websocket": {
-                "active_connections": ws_manager.get_connection_count(),
-            },
-            "uptime": "N/A",  # Would track actual uptime in production
-        }
+    return {
+        "timestamp": datetime.now(UTC).isoformat(),
+        "websocket": {
+            "active_connections": ws_manager.get_connection_count(),
+        },
+        "uptime": "N/A",  # Would track actual uptime in production
+    }
 
 
-    from .prelaunch_router import router as prelaunch_router
+from .prelaunch_router import router as prelaunch_router
 
-    __all__ = ["router", "prelaunch_router"]
+__all__ = ["router", "prelaunch_router"]
