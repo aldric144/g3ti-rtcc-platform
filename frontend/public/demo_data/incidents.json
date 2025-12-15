@@ -1,0 +1,56 @@
+{
+  "incidents": [
+    {
+      "id": "inc-2024-001234",
+      "incident_number": "2024-001234",
+      "incident_type": "traffic_accident",
+      "status": "active",
+      "priority": "medium",
+      "title": "Vehicle Collision - Blue Heron Blvd",
+      "description": "Two-vehicle collision with minor injuries reported",
+      "location": {"latitude": 26.7753, "longitude": -80.0621},
+      "address": "Blue Heron Blvd & Congress Ave, Riviera Beach, FL",
+      "reported_at": "2024-12-15T17:30:00Z",
+      "assigned_units": ["Unit-12", "Unit-15"]
+    },
+    {
+      "id": "inc-2024-001235",
+      "incident_number": "2024-001235",
+      "incident_type": "suspicious_activity",
+      "status": "active",
+      "priority": "low",
+      "title": "Suspicious Vehicle - Marina Area",
+      "description": "White sedan circling marina parking lot for 30+ minutes",
+      "location": {"latitude": 26.7821, "longitude": -80.0512},
+      "address": "200 E 13th St, Riviera Beach, FL",
+      "reported_at": "2024-12-15T17:45:00Z",
+      "assigned_units": ["Unit-08"]
+    },
+    {
+      "id": "inc-2024-001236",
+      "incident_number": "2024-001236",
+      "incident_type": "theft",
+      "status": "investigating",
+      "priority": "medium",
+      "title": "Retail Theft - Shopping Center",
+      "description": "Shoplifting reported at retail store, suspect fled on foot",
+      "location": {"latitude": 26.7698, "longitude": -80.0789},
+      "address": "1500 W Blue Heron Blvd, Riviera Beach, FL",
+      "reported_at": "2024-12-15T16:15:00Z",
+      "assigned_units": ["Unit-03", "Unit-07"]
+    },
+    {
+      "id": "inc-2024-001238",
+      "incident_number": "2024-001238",
+      "incident_type": "medical_emergency",
+      "status": "active",
+      "priority": "critical",
+      "title": "Medical Emergency - Beach Area",
+      "description": "Possible drowning, lifeguards on scene, EMS en route",
+      "location": {"latitude": 26.7912, "longitude": -80.0345},
+      "address": "Singer Island Beach, Riviera Beach, FL",
+      "reported_at": "2024-12-15T18:10:00Z",
+      "assigned_units": ["Unit-01", "EMS-02"]
+    }
+  ]
+}

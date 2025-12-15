@@ -1,0 +1,68 @@
+{
+  "users": [
+    {
+      "id": "demo-user-001",
+      "username": "demo",
+      "email": "demo@g3ti-demo.com",
+      "first_name": "Demo",
+      "last_name": "User",
+      "badge_number": "DEMO001",
+      "department": "RTCC Operations",
+      "role": "admin",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "admin-user-001",
+      "username": "admin",
+      "email": "admin@g3ti-demo.com",
+      "first_name": "Admin",
+      "last_name": "User",
+      "badge_number": "ADMIN001",
+      "department": "Administration",
+      "role": "admin",
+      "is_active": true,
+      "created_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "supervisor-001",
+      "username": "supervisor",
+      "email": "supervisor@g3ti-demo.com",
+      "first_name": "Sarah",
+      "last_name": "Johnson",
+      "badge_number": "SUP001",
+      "department": "RTCC Operations",
+      "role": "supervisor",
+      "is_active": true,
+      "created_at": "2024-01-15T00:00:00Z"
+    },
+    {
+      "id": "analyst-001",
+      "username": "analyst",
+      "email": "analyst@g3ti-demo.com",
+      "first_name": "Michael",
+      "last_name": "Chen",
+      "badge_number": "ANL001",
+      "department": "Intelligence",
+      "role": "analyst",
+      "is_active": true,
+      "created_at": "2024-02-01T00:00:00Z"
+    },
+    {
+      "id": "operator-001",
+      "username": "operator",
+      "email": "operator@g3ti-demo.com",
+      "first_name": "James",
+      "last_name": "Williams",
+      "badge_number": "OPR001",
+      "department": "RTCC Operations",
+      "role": "operator",
+      "is_active": true,
+      "created_at": "2024-02-15T00:00:00Z"
+    }
+  ],
+  "demo_credentials": {
+    "demo": "demo123",
+    "admin": "admin123"
+  }
+}

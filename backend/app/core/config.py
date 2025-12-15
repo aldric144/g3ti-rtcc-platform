@@ -78,10 +78,22 @@ class Settings(BaseSettings):
         description="Enable safe mode for graceful degradation when services unavailable",
     )
     
+    # Demo Mode - full demo mode with mock data (superset of safe_mode)
+    demo_mode: bool = Field(
+        default=True,
+        description="Enable full demo mode with mock datasets and simulated data",
+    )
+    
     # Demo Auth Mode - enable demo authentication when in SAFE_MODE
     demo_auth_mode: bool = Field(
         default=True,
-        description="Enable demo authentication mode (admin/admin123) when in SAFE_MODE",
+        description="Enable demo authentication mode (admin/admin123, demo/demo123) when in SAFE_MODE",
+    )
+    
+    # API Timeout for fail-safe responses
+    api_timeout_seconds: float = Field(
+        default=2.5,
+        description="Timeout in seconds before returning demo response",
     )
 
     # Neo4j Database Settings

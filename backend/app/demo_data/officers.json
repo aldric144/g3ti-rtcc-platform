@@ -1,0 +1,108 @@
+{
+  "officers": [
+    {
+      "id": "officer-001",
+      "badge_number": "1001",
+      "name": "Officer James Rodriguez",
+      "rank": "Patrol Officer",
+      "unit_id": "Unit-01",
+      "status": "on_duty",
+      "current_location": {"latitude": 26.7753, "longitude": -80.0589},
+      "assigned_beat": "Beat-1",
+      "shift": "day",
+      "radio_channel": "Channel 1",
+      "last_update": "2024-12-15T18:00:00Z"
+    },
+    {
+      "id": "officer-002",
+      "badge_number": "1002",
+      "name": "Officer Maria Santos",
+      "rank": "Patrol Officer",
+      "unit_id": "Unit-03",
+      "status": "responding",
+      "current_location": {"latitude": 26.7712, "longitude": -80.0656},
+      "assigned_beat": "Beat-2",
+      "shift": "day",
+      "radio_channel": "Channel 1",
+      "last_update": "2024-12-15T17:55:00Z"
+    },
+    {
+      "id": "officer-003",
+      "badge_number": "1003",
+      "name": "Sergeant Michael Thompson",
+      "rank": "Sergeant",
+      "unit_id": "Unit-07",
+      "status": "on_duty",
+      "current_location": {"latitude": 26.7698, "longitude": -80.0789},
+      "assigned_beat": "Beat-3",
+      "shift": "day",
+      "radio_channel": "Channel 2",
+      "last_update": "2024-12-15T18:05:00Z"
+    },
+    {
+      "id": "officer-004",
+      "badge_number": "1004",
+      "name": "Officer David Kim",
+      "rank": "Patrol Officer",
+      "unit_id": "Unit-08",
+      "status": "on_scene",
+      "current_location": {"latitude": 26.7821, "longitude": -80.0512},
+      "assigned_beat": "Beat-4",
+      "shift": "day",
+      "radio_channel": "Channel 1",
+      "last_update": "2024-12-15T17:50:00Z"
+    },
+    {
+      "id": "officer-005",
+      "badge_number": "1005",
+      "name": "Officer Lisa Chen",
+      "rank": "Patrol Officer",
+      "unit_id": "Unit-11",
+      "status": "available",
+      "current_location": {"latitude": 26.7634, "longitude": -80.0534},
+      "assigned_beat": "Beat-5",
+      "shift": "day",
+      "radio_channel": "Channel 2",
+      "last_update": "2024-12-15T18:10:00Z"
+    },
+    {
+      "id": "officer-006",
+      "badge_number": "1006",
+      "name": "Officer Robert Johnson",
+      "rank": "Patrol Officer",
+      "unit_id": "Unit-12",
+      "status": "responding",
+      "current_location": {"latitude": 26.7748, "longitude": -80.0721},
+      "assigned_beat": "Beat-1",
+      "shift": "day",
+      "radio_channel": "Channel 1",
+      "last_update": "2024-12-15T17:35:00Z"
+    },
+    {
+      "id": "officer-007",
+      "badge_number": "1007",
+      "name": "Officer Amanda Williams",
+      "rank": "Patrol Officer",
+      "unit_id": "Unit-15",
+      "status": "on_duty",
+      "current_location": {"latitude": 26.7912, "longitude": -80.0345},
+      "assigned_beat": "Beat-6",
+      "shift": "day",
+      "radio_channel": "Channel 2",
+      "last_update": "2024-12-15T18:00:00Z"
+    },
+    {
+      "id": "officer-008",
+      "badge_number": "1008",
+      "name": "Lieutenant Sarah Martinez",
+      "rank": "Lieutenant",
+      "unit_id": "Command-01",
+      "status": "on_duty",
+      "current_location": {"latitude": 26.7753, "longitude": -80.0589},
+      "assigned_beat": null,
+      "shift": "day",
+      "radio_channel": "Command",
+      "last_update": "2024-12-15T18:00:00Z"
+    }
+  ]
+}

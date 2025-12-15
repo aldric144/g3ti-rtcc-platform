@@ -1,0 +1,18 @@
+{
+  "stats": {
+    "active_incidents": 4,
+    "total_cameras": 8,
+    "online_cameras": 7,
+    "officers_on_duty": 8,
+    "open_cases": 5,
+    "lpr_hits_today": 5,
+    "gunshot_alerts_today": 2,
+    "patrol_beats_active": 6,
+    "response_time_avg_minutes": 4.2,
+    "calls_for_service_today": 47,
+    "arrests_today": 3,
+    "citations_today": 12
+  },
+  "demo_mode": true,
+  "last_updated": "2024-12-15T18:00:00Z"
+}
