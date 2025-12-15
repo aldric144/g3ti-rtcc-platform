@@ -311,6 +311,32 @@ security_manager = SecurityManager()
 login_rate_limiter = RateLimiter(max_attempts=5, lockout_duration_minutes=15)
 
 
+# Module-level convenience functions that delegate to SecurityManager
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt."""
+    return security_manager.hash_password(password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash."""
+    return security_manager.verify_password(plain_password, hashed_password)
+
+
+def create_access_token(
+    subject: str,
+    username: str,
+    role: Any,
+    expires_delta: timedelta | None = None,
+) -> str:
+    """Create a JWT access token."""
+    data = {
+        "sub": subject,
+        "username": username,
+        "role": role.value if hasattr(role, "value") else str(role),
+    }
+    return security_manager.create_access_token(data, expires_delta)
+
+
 # FastAPI dependency functions for authentication
 from typing import Annotated
 from fastapi import Depends, HTTPException, status
