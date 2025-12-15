@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Activity,
   Database,
+  Camera,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useAuthStore } from '@/lib/store/auth';
@@ -25,6 +26,7 @@ import { useAuthStore } from '@/lib/store/auth';
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/map', label: 'Live Map', icon: Map },
+  { href: '/cameras', label: 'Cameras', icon: Camera },
   { href: '/investigations', label: 'Investigations', icon: Search },
   { href: '/entities', label: 'Entities', icon: Database },
   { href: '/events', label: 'Events', icon: Activity },

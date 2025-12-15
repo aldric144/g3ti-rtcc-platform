@@ -20,6 +20,9 @@ from fastapi.responses import JSONResponse
 
 from app.ai_engine import get_ai_manager
 from app.api import api_router
+from app.api.cameras import router as cameras_router
+from app.camera_network.camera_ingestion_engine import get_ingestion_engine
+from app.camera_network.camera_health_monitor import get_health_monitor
 from app.core.config import settings
 from app.core.exceptions import (
     AuthenticationError,
@@ -113,6 +116,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             logger.warning("ai_engine_init_failed", error=str(e))
     else:
         logger.info("ai_engine_skipped_safe_mode")
+
+    # Initialize Camera Ingestion Engine (works in both SAFE_MODE and normal mode)
+    try:
+        ingestion_engine = get_ingestion_engine()
+        stats = ingestion_engine.ingest_all()
+        logger.info(
+            "camera_ingestion_initialized",
+            total_cameras=stats.get("total_count", 0),
+            rbpd_count=stats.get("rbpd_count", 0),
+            fdot_count=stats.get("fdot_count", 0),
+        )
+    except Exception as e:
+        logger.warning("camera_ingestion_init_failed", error=str(e))
 
     # Log startup complete
     audit_logger.log_system_event(
@@ -282,6 +298,9 @@ async def log_requests(request: Request, call_next):
 
 # Include API router
 app.include_router(api_router, prefix=settings.api_v1_prefix)
+
+# Include cameras router at /api/cameras for direct access (alias)
+app.include_router(cameras_router, prefix="/api", tags=["Cameras (alias)"])
 
 
 # Root endpoint

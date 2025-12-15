@@ -46,7 +46,7 @@ export default function CameraMapPage() {
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
   const theme = getMapTheme(themeId);
 
@@ -59,7 +59,7 @@ export default function CameraMapPage() {
   const fetchCameras = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/cameras/map`);
+      const response = await fetch(`${apiBaseUrl}/api/cameras/map`);
       if (response.ok) {
         const data = await response.json();
         setCameras(data.cameras || []);
@@ -83,7 +83,7 @@ export default function CameraMapPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [apiUrl]);
+  }, [apiBaseUrl]);
 
   useEffect(() => {
     fetchCameras();

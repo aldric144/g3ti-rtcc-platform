@@ -46,12 +46,12 @@ export default function CameraDirectoryPage() {
     status: '',
   });
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
   const fetchCameras = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/cameras`);
+      const response = await fetch(`${apiBaseUrl}/api/cameras`);
       if (response.ok) {
         const data = await response.json();
         setCameras(data.cameras || []);
@@ -78,7 +78,7 @@ export default function CameraDirectoryPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [apiUrl]);
+  }, [apiBaseUrl]);
 
   useEffect(() => {
     fetchCameras();
@@ -279,7 +279,7 @@ export default function CameraDirectoryPage() {
           {filteredCameras.map((camera) => (
             <Link
               key={camera.id}
-              href={`/cameras/${camera.id}`}
+              href={`/cameras/detail?id=${camera.id}`}
               className="bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all"
             >
               {/* Thumbnail */}
@@ -320,7 +320,7 @@ export default function CameraDirectoryPage() {
           {filteredCameras.map((camera) => (
             <Link
               key={camera.id}
-              href={`/cameras/${camera.id}`}
+              href={`/cameras/detail?id=${camera.id}`}
               className="flex items-center gap-4 bg-gray-800 rounded-lg p-3 hover:bg-gray-700/50"
             >
               {/* Thumbnail */}

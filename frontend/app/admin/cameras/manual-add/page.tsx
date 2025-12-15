@@ -9,10 +9,16 @@ interface CameraEntry {
   latitude: number;
   longitude: number;
   camera_type: string;
+  type?: string;
   source: string;
   stream_url: string;
   status: string;
+  sector?: string;
   description?: string;
+  gps?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 const CAMERA_TYPES = ['traffic', 'marine', 'public', 'beach', 'cctv'];
