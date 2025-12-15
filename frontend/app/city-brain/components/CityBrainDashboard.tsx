@@ -131,25 +131,25 @@ export default function CityBrainDashboard({ cityState }: CityBrainDashboardProp
               <div className="flex justify-between">
                 <span className="text-gray-400">Temperature</span>
                 <span className="text-white">
-                  {(cityState.weather as Record<string, unknown>).temperature_f || "N/A"}°F
+                  {String((cityState.weather as Record<string, unknown>).temperature_f ?? "N/A")}°F
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Humidity</span>
                 <span className="text-white">
-                  {(cityState.weather as Record<string, unknown>).humidity_percent || "N/A"}%
+                  {String((cityState.weather as Record<string, unknown>).humidity_percent ?? "N/A")}%
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Wind</span>
                 <span className="text-white">
-                  {(cityState.weather as Record<string, unknown>).wind_speed_mph || "N/A"} mph
+                  {String((cityState.weather as Record<string, unknown>).wind_speed_mph ?? "N/A")} mph
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Conditions</span>
                 <span className="text-white">
-                  {(cityState.weather as Record<string, unknown>).conditions || "N/A"}
+                  {String((cityState.weather as Record<string, unknown>).conditions ?? "N/A")}
                 </span>
               </div>
             </div>
@@ -169,19 +169,19 @@ export default function CityBrainDashboard({ cityState }: CityBrainDashboardProp
                     ? "text-green-400"
                     : "text-yellow-400"
                 }`}>
-                  {(cityState.traffic as Record<string, unknown>).overall_status || "N/A"}
+                  {String((cityState.traffic as Record<string, unknown>).overall_status ?? "N/A")}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Active Incidents</span>
                 <span className="text-white">
-                  {(cityState.traffic as Record<string, unknown>).incident_count || 0}
+                  {String((cityState.traffic as Record<string, unknown>).incident_count ?? 0)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Congested Roads</span>
                 <span className="text-white">
-                  {(cityState.traffic as Record<string, unknown>).congested_segments || 0}
+                  {String((cityState.traffic as Record<string, unknown>).congested_segments ?? 0)}
                 </span>
               </div>
             </div>
@@ -201,7 +201,7 @@ export default function CityBrainDashboard({ cityState }: CityBrainDashboardProp
                     ? "text-green-400"
                     : "text-yellow-400"
                 }`}>
-                  {(cityState.utilities as Record<string, unknown>).power_status || "N/A"}
+                  {String((cityState.utilities as Record<string, unknown>).power_status ?? "N/A")}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -211,13 +211,13 @@ export default function CityBrainDashboard({ cityState }: CityBrainDashboardProp
                     ? "text-green-400"
                     : "text-yellow-400"
                 }`}>
-                  {(cityState.utilities as Record<string, unknown>).water_status || "N/A"}
+                  {String((cityState.utilities as Record<string, unknown>).water_status ?? "N/A")}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Active Outages</span>
                 <span className="text-white">
-                  {(cityState.utilities as Record<string, unknown>).outage_count || 0}
+                  {String((cityState.utilities as Record<string, unknown>).outage_count ?? 0)}
                 </span>
               </div>
             </div>

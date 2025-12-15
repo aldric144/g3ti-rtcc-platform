@@ -437,6 +437,7 @@ async def get_redis() -> RedisManager:
     Get the Redis manager instance.
 
     This function is designed to be used as a FastAPI dependency.
+    In demo mode, returns a manager even if connection fails.
 
     Returns:
         RedisManager: The Redis manager instance
@@ -444,7 +445,10 @@ async def get_redis() -> RedisManager:
     global _redis_manager
     if _redis_manager is None:
         _redis_manager = RedisManager()
-        await _redis_manager.connect()
+        try:
+            await _redis_manager.connect()
+        except Exception as e:
+            logger.warning("redis_connection_skipped_demo_mode", error=str(e))
     return _redis_manager
 
 
