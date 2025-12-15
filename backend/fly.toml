@@ -1,0 +1,51 @@
+# G3TI RTCC-UIP Backend - Fly.io Configuration
+# See https://fly.io/docs/reference/configuration/ for information about this file.
+
+app = "g3ti-rtcc-preview-api"
+primary_region = "mia"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  # Application settings
+  ENVIRONMENT = "production"
+  DEBUG = "false"
+  
+  # API settings
+  API_HOST = "0.0.0.0"
+  API_PORT = "8000"
+  
+  # CORS - Allow Vercel preview domains
+  CORS_ORIGINS = "https://g3ti-rtcc-preview-ui.vercel.app,https://*.vercel.app,http://localhost:3000"
+  
+  # Safe mode - graceful degradation when services unavailable
+  SAFE_MODE = "true"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 250
+    soft_limit = 200
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512
+
+[checks]
+  [checks.health]
+    grace_period = "30s"
+    interval = "15s"
+    method = "GET"
+    path = "/api/v1/system/health"
+    port = 8000
+    timeout = "10s"
+    type = "http"

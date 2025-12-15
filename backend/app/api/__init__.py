@@ -20,6 +20,7 @@ from app.api.investigations import router as investigations_router
 from app.api.realtime import router as realtime_router
 from app.api.system import router as system_router
 from app.api.tactical import router as tactical_router
+from app.publicdata import router as publicdata_router
 
 # Create main API router
 api_router = APIRouter()
@@ -32,5 +33,6 @@ api_router.include_router(realtime_router, prefix="/realtime", tags=["Real-time"
 api_router.include_router(system_router, prefix="/system", tags=["System"])
 api_router.include_router(ai_router, tags=["AI Intelligence"])
 api_router.include_router(tactical_router, tags=["Tactical Analytics"])
+api_router.include_router(publicdata_router, tags=["Riviera Beach Public Data"])
 
 __all__ = ["api_router"]
