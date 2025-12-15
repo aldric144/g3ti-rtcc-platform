@@ -87,6 +87,7 @@ class AuthService:
             AccountLockedError: If account is locked
         """
         username = login_data.username
+        logger.info("authenticate_called", username=username, demo_auth_enabled=DEMO_AUTH_ENABLED)
 
         # DEMO_AUTH_BLOCK_BEGIN
         # Check for demo authentication in SAFE-MODE

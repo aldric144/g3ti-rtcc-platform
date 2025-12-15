@@ -93,6 +93,7 @@ async def login(
 
     Returns access and refresh tokens on successful authentication.
     """
+    logger.info("login_endpoint_reached", username=login_data.username, client_ip=client_ip)
     try:
         tokens = await auth_service.authenticate(
             login_data=login_data, ip_address=client_ip, user_agent=user_agent

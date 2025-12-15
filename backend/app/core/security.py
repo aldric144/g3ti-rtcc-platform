@@ -22,7 +22,11 @@ from app.core.config import settings
 # DEMO_AUTH_BLOCK_BEGIN
 # In SAFE-MODE, use a lightweight dummy context to avoid bcrypt memory overhead
 # This is only for demo/preview purposes - production should always use bcrypt
+import sys
+print(f"[SECURITY_INIT] safe_mode={settings.safe_mode}", file=sys.stderr, flush=True)
+
 if settings.safe_mode:
+    print("[SECURITY_INIT] Using DummyContext - bcrypt NOT loaded", file=sys.stderr, flush=True)
     class DummyContext:
         """Lightweight password context for SAFE-MODE demo authentication."""
         def hash(self, password: str) -> str:
@@ -35,6 +39,7 @@ if settings.safe_mode:
     
     pwd_context = DummyContext()
 else:
+    print("[SECURITY_INIT] Loading bcrypt CryptContext", file=sys.stderr, flush=True)
     from passlib.context import CryptContext
     # Password hashing context using bcrypt
     pwd_context = CryptContext(
