@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { 
+import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import {
   Camera, 
   RefreshCw, 
   ArrowLeft,
@@ -50,10 +50,10 @@ interface HealthData {
   consecutive_failures: number;
 }
 
-export default function CameraDetailPage() {
-  const params = useParams();
+function CameraDetailContent() {
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const cameraId = params.id as string;
+  const cameraId = searchParams.get('id') || '';
 
   const [camera, setCamera] = useState<CameraData | null>(null);
   const [health, setHealth] = useState<HealthData | null>(null);
@@ -64,6 +64,10 @@ export default function CameraDetailPage() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
   const fetchCamera = useCallback(async () => {
+    if (!cameraId) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     try {
       const response = await fetch(`${apiUrl}/cameras/${cameraId}`);
@@ -149,12 +153,12 @@ export default function CameraDetailPage() {
     );
   }
 
-  if (!camera) {
+  if (!cameraId || !camera) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
         <Camera className="h-16 w-16 text-gray-600 mb-4" />
         <h1 className="text-2xl font-bold mb-2">Camera Not Found</h1>
-        <p className="text-gray-400 mb-4">The camera you're looking for doesn't exist.</p>
+        <p className="text-gray-400 mb-4">The camera you are looking for does not exist or no ID was provided.</p>
         <Link
           href="/cameras"
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
@@ -184,9 +188,9 @@ export default function CameraDetailPage() {
               <h1 className="text-xl font-bold">{camera.name}</h1>
               <div className="flex items-center gap-3 mt-1 text-sm text-gray-400">
                 <span>{camera.jurisdiction}</span>
-                <span>•</span>
+                <span>-</span>
                 <span>{camera.sector}</span>
-                <span>•</span>
+                <span>-</span>
                 <span className={`px-2 py-0.5 rounded text-white ${getTypeColor(camType)}`}>
                   {camType.toUpperCase()}
                 </span>
@@ -449,5 +453,18 @@ export default function CameraDetailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CameraDetailPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+        <RefreshCw className="h-8 w-8 text-blue-400 animate-spin" />
+        <span className="ml-3 text-gray-300">Loading camera...</span>
+      </div>
+    }>
+      <CameraDetailContent />
+    </Suspense>
   );
 }

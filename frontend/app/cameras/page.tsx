@@ -279,7 +279,7 @@ export default function CameraDirectoryPage() {
           {filteredCameras.map((camera) => (
             <Link
               key={camera.id}
-              href={`/cameras/${camera.id}`}
+              href={`/cameras/detail?id=${camera.id}`}
               className="bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all"
             >
               {/* Thumbnail */}
@@ -320,7 +320,7 @@ export default function CameraDirectoryPage() {
           {filteredCameras.map((camera) => (
             <Link
               key={camera.id}
-              href={`/cameras/${camera.id}`}
+              href={`/cameras/detail?id=${camera.id}`}
               className="flex items-center gap-4 bg-gray-800 rounded-lg p-3 hover:bg-gray-700/50"
             >
               {/* Thumbnail */}
