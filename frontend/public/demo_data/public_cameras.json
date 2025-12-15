@@ -1,0 +1,164 @@
+{
+  "cameras": [
+    {
+      "id": "fdot-001",
+      "name": "Blue Heron @ I-95 EB",
+      "gps": {"latitude": 26.784945, "longitude": -80.094221},
+      "stream_url": "https://via.placeholder.com/640x360?text=No+Live+Feed+Available",
+      "type": "traffic",
+      "source": "FDOT",
+      "sector": "Zone-3-Commercial",
+      "status": "online",
+      "description": "FDOT traffic camera at Blue Heron Blvd and I-95 Eastbound"
+    },
+    {
+      "id": "fdot-002",
+      "name": "Blue Heron @ I-95 WB",
+      "gps": {"latitude": 26.784820, "longitude": -80.095600},
+      "stream_url": "https://via.placeholder.com/640x360?text=No+Live+Feed+Available",
+      "type": "traffic",
+      "source": "FDOT",
+      "sector": "Zone-3-Commercial",
+      "status": "online",
+      "description": "FDOT traffic camera at Blue Heron Blvd and I-95 Westbound"
+    },
+    {
+      "id": "fdot-003",
+      "name": "Blue Heron @ Broadway (US-1)",
+      "gps": {"latitude": 26.784600, "longitude": -80.059700},
+      "stream_url": "https://via.placeholder.com/640x360?text=No+Live+Feed+Available",
+      "type": "traffic",
+      "source": "FDOT",
+      "sector": "Zone-1-Downtown",
+      "status": "online",
+      "description": "FDOT traffic camera at Blue Heron Blvd and Broadway (US-1)"
+    },
+    {
+      "id": "fdot-004",
+      "name": "Military Trl @ Blue Heron",
+      "gps": {"latitude": 26.785000, "longitude": -80.116000},
+      "stream_url": "https://via.placeholder.com/640x360?text=No+Live+Feed+Available",
+      "type": "traffic",
+      "source": "FDOT",
+      "sector": "Zone-3-Commercial",
+      "status": "online",
+      "description": "FDOT traffic camera at Military Trail and Blue Heron Blvd"
+    },
+    {
+      "id": "fdot-005",
+      "name": "US-1 @ Silver Beach Rd",
+      "gps": {"latitude": 26.792900, "longitude": -80.056900},
+      "stream_url": "https://via.placeholder.com/640x360?text=No+Live+Feed+Available",
+      "type": "traffic",
+      "source": "FDOT",
+      "sector": "Zone-6-Beach",
+      "status": "online",
+      "description": "FDOT traffic camera at US-1 and Silver Beach Road"
+    },
+    {
+      "id": "fdot-006",
+      "name": "US-1 @ Park Ave",
+      "gps": {"latitude": 26.778600, "longitude": -80.056700},
+      "stream_url": "https://via.placeholder.com/640x360?text=No+Live+Feed+Available",
+      "type": "traffic",
+      "source": "FDOT",
+      "sector": "Zone-1-Downtown",
+      "status": "online",
+      "description": "FDOT traffic camera at US-1 and Park Avenue"
+    },
+    {
+      "id": "fdot-007",
+      "name": "Congress Ave @ Blue Heron",
+      "gps": {"latitude": 26.784500, "longitude": -80.099900},
+      "stream_url": "https://via.placeholder.com/640x360?text=No+Live+Feed+Available",
+      "type": "traffic",
+      "source": "FDOT",
+      "sector": "Zone-3-Commercial",
+      "status": "online",
+      "description": "FDOT traffic camera at Congress Avenue and Blue Heron Blvd"
+    },
+    {
+      "id": "port-001",
+      "name": "Port South Gate Cam",
+      "gps": {"latitude": 26.777830, "longitude": -80.054260},
+      "stream_url": "https://via.placeholder.com/640x360?text=No+Live+Feed+Available",
+      "type": "marine",
+      "source": "Port of Palm Beach",
+      "sector": "Zone-5-Port",
+      "status": "online",
+      "description": "Port of Palm Beach south gate security camera"
+    },
+    {
+      "id": "port-002",
+      "name": "Port Main Entrance Cam",
+      "gps": {"latitude": 26.779100, "longitude": -80.058200},
+      "stream_url": "https://via.placeholder.com/640x360?text=No+Live+Feed+Available",
+      "type": "cctv",
+      "source": "Port of Palm Beach",
+      "sector": "Zone-5-Port",
+      "status": "online",
+      "description": "Port of Palm Beach main entrance security camera"
+    },
+    {
+      "id": "singer-001",
+      "name": "Singer Island Beach Cam",
+      "gps": {"latitude": 26.778000, "longitude": -80.032500},
+      "stream_url": "https://via.placeholder.com/640x360?text=No+Live+Feed+Available",
+      "type": "beach",
+      "source": "Singer Island",
+      "sector": "Zone-6-Beach",
+      "status": "online",
+      "description": "Public beach camera on Singer Island"
+    },
+    {
+      "id": "singer-002",
+      "name": "Palm Beach Shores Inlet Cam",
+      "gps": {"latitude": 26.774000, "longitude": -80.038100},
+      "stream_url": "https://via.placeholder.com/640x360?text=No+Live+Feed+Available",
+      "type": "marine",
+      "source": "Singer Island",
+      "sector": "Zone-6-Beach",
+      "status": "online",
+      "description": "Palm Beach Shores inlet marine camera"
+    },
+    {
+      "id": "marina-001",
+      "name": "Marina Harbor Cam",
+      "gps": {"latitude": 26.772871, "longitude": -80.050105},
+      "stream_url": "https://via.placeholder.com/640x360?text=No+Live+Feed+Available",
+      "type": "marine",
+      "source": "Marina",
+      "sector": "Zone-2-Marina",
+      "status": "online",
+      "description": "Riviera Beach Marina harbor overview camera"
+    },
+    {
+      "id": "marina-002",
+      "name": "Marina Fuel Dock Cam",
+      "gps": {"latitude": 26.772300, "longitude": -80.050800},
+      "stream_url": "https://via.placeholder.com/640x360?text=No+Live+Feed+Available",
+      "type": "cctv",
+      "source": "Marina",
+      "sector": "Zone-2-Marina",
+      "status": "online",
+      "description": "Riviera Beach Marina fuel dock security camera"
+    }
+  ],
+  "stats": {
+    "total_cameras": 13,
+    "online_cameras": 13,
+    "offline_cameras": 0,
+    "by_type": {
+      "traffic": 7,
+      "marine": 4,
+      "cctv": 2,
+      "beach": 1
+    },
+    "by_source": {
+      "FDOT": 7,
+      "Port of Palm Beach": 2,
+      "Singer Island": 2,
+      "Marina": 2
+    }
+  }
+}

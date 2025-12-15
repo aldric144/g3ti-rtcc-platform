@@ -16,6 +16,7 @@ from fastapi import APIRouter
 
 from app.api.ai import router as ai_router
 from app.api.auth import router as auth_router
+from app.api.cameras import router as cameras_router
 from app.api.entities import router as entities_router
 from app.api.investigations import router as investigations_router
 from app.api.realtime import router as realtime_router
@@ -34,6 +35,7 @@ api_router = APIRouter()
 
 # Include all sub-routers
 api_router.include_router(auth_router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(cameras_router, tags=["Cameras"])
 api_router.include_router(entities_router, prefix="/entities", tags=["Entities"])
 api_router.include_router(investigations_router, prefix="/investigations", tags=["Investigations"])
 api_router.include_router(realtime_router, prefix="/realtime", tags=["Real-time"])
