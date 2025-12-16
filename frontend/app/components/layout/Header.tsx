@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Bell, Search, User, LogOut, Settings, ChevronDown, Moon, Sun } from 'lucide-react';
+import { Bell, Search, User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useAuthStore } from '@/lib/store/auth';
 import { useEventStore } from '@/lib/store/events';
+import { ThemeSelector } from '@/components/theme/ThemeSelector';
 
 /**
  * Header component with search, notifications, and user menu.
@@ -18,16 +19,10 @@ export function Header() {
 
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [isDark, setIsDark] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     router.push('/login');
-  };
-
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle('dark');
   };
 
   return (
@@ -61,13 +56,8 @@ export function Header() {
 
       {/* Right side */}
       <div className="flex items-center gap-4">
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
-        >
-          {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-        </button>
+        {/* Theme Selector - Neural Cosmic Matrix */}
+        <ThemeSelector />
 
         {/* Notifications */}
         <div className="relative">
