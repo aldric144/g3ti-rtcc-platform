@@ -203,19 +203,34 @@ export const useAuthStore = create<AuthState>()(
 
       /**
        * Check current auth state on app load.
+       * Includes timeout to prevent infinite loading states.
        */
       checkAuth: () => {
         const { accessToken, refreshToken, refreshAuth } = get();
 
+        // Safety timeout - ensure isLoading is set to false after 5 seconds max
+        const safetyTimeout = setTimeout(() => {
+          const currentState = get();
+          if (currentState.isLoading) {
+            console.warn('[Auth] Safety timeout triggered - forcing isLoading to false');
+            set({ isLoading: false, isAuthenticated: false });
+          }
+        }, 5000);
+
         if (!accessToken) {
+          clearTimeout(safetyTimeout);
           set({ isLoading: false, isAuthenticated: false });
           return;
         }
 
         if (isTokenExpired(accessToken)) {
           if (refreshToken && !isTokenExpired(refreshToken)) {
-            refreshAuth();
+            // Call refreshAuth and ensure timeout is cleared when it completes
+            refreshAuth().finally(() => {
+              clearTimeout(safetyTimeout);
+            });
           } else {
+            clearTimeout(safetyTimeout);
             set({
               user: null,
               accessToken: null,
@@ -225,6 +240,7 @@ export const useAuthStore = create<AuthState>()(
             });
           }
         } else {
+          clearTimeout(safetyTimeout);
           set({ isLoading: false, isAuthenticated: true });
         }
       },
