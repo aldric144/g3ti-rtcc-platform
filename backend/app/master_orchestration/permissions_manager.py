@@ -89,9 +89,14 @@ class GlobalPermissionsManager:
 
     def _initialize_roles(self):
         self._roles = {
+            "system-integrator": {
+                "name": "System Integrator",
+                "level": 100,
+                "description": "Full system access for integration and configuration",
+            },
             "super_admin": {
                 "name": "Super Administrator",
-                "level": 100,
+                "level": 95,
                 "description": "Full system access",
             },
             "admin": {

@@ -23,11 +23,19 @@ class Role(str, Enum):
     """
     User roles for RBAC.
 
-    Roles are hierarchical with admin having the highest privileges.
+    Roles are hierarchical with system-integrator having the highest privileges.
+    Enterprise RTCC roles for law enforcement command centers.
     """
 
-    ADMIN = "admin"
+    # Core operational roles
+    VIEWER = "viewer"
+    ANALYST = "analyst"
     SUPERVISOR = "supervisor"
+    ADMIN = "admin"
+    COMMANDER = "commander"
+    SYSTEM_INTEGRATOR = "system-integrator"
+    
+    # Legacy roles (kept for backward compatibility)
     DETECTIVE = "detective"
     RTCC_ANALYST = "rtcc_analyst"
     OFFICER = "officer"
@@ -36,11 +44,15 @@ class Role(str, Enum):
     def get_hierarchy(cls) -> dict[str, int]:
         """Get role hierarchy levels (higher = more privileges)."""
         return {
-            cls.OFFICER.value: 1,
-            cls.RTCC_ANALYST.value: 2,
-            cls.DETECTIVE.value: 3,
-            cls.SUPERVISOR.value: 4,
-            cls.ADMIN.value: 5,
+            cls.VIEWER.value: 1,
+            cls.OFFICER.value: 2,
+            cls.RTCC_ANALYST.value: 3,
+            cls.ANALYST.value: 3,
+            cls.DETECTIVE.value: 4,
+            cls.SUPERVISOR.value: 5,
+            cls.ADMIN.value: 6,
+            cls.COMMANDER.value: 7,
+            cls.SYSTEM_INTEGRATOR.value: 8,
         }
 
     def has_permission(self, required_role: "Role") -> bool:
