@@ -1,13 +1,16 @@
 /**
  * Map Themes for G3TI RTCC-UIP Platform
  * 
- * Three selectable map styles:
- * 1. Police Tactical Dark Theme (Black / Blue) - tactical_dark
- * 2. City Operations Theme (White / Blue / Green) - city_ops
- * 3. RTCC Night Ops Theme (Dark Navy / Gold) - night_ops
+ * Neural Cosmic Matrix Super Theme Integration:
+ * 1. Neural Cosmic Dark - Primary command center theme
+ * 2. Cosmic Light Ops - High visibility mode
+ * 3. High-Contrast Tactical - ADA accessibility mode
+ * 
+ * Legacy themes (deprecated):
+ * - tactical_dark, city_ops, night_ops
  */
 
-export type MapThemeId = 'tactical_dark' | 'city_ops' | 'night_ops';
+export type MapThemeId = 'neural_cosmic_dark' | 'cosmic_light_ops' | 'high_contrast_tactical' | 'tactical_dark' | 'city_ops' | 'night_ops';
 
 export interface MapTheme {
   id: MapThemeId;
@@ -126,18 +129,111 @@ export const NIGHT_OPS_THEME: MapTheme = {
 };
 
 /**
+ * Neural Cosmic Dark Theme (PRIMARY / DEFAULT)
+ * Deep cosmic black with nebula gradients, neural blue glow, authority gold hierarchy
+ */
+export const NEURAL_COSMIC_DARK_THEME: MapTheme = {
+  id: 'neural_cosmic_dark',
+  name: 'Neural Cosmic Dark',
+  description: 'Primary command center theme with cosmic visuals',
+  mapboxStyle: 'mapbox://styles/mapbox/dark-v11',
+  markerColors: {
+    rbpd: '#1E90FF',      // Neural Electric Blue - RBPD Blue Glow
+    fdot: '#22C55E',      // FDOT Green Glow
+    lpr: '#FF2740',       // Threat Red - LPR Red Glow
+    ptz: '#D9B252',       // Authority Gold - PTZ Gold Glow
+    default: '#9CA3AF',   // Starlight Silver
+    incident: '#FF2740',  // Threat Red
+    alert: '#FF4FB2',     // Quantum Pink
+  },
+  uiColors: {
+    background: '#030308',  // Cosmic Black
+    surface: '#0a0a12',     // Background Secondary
+    primary: '#1E90FF',     // Neural Electric Blue
+    secondary: '#D9B252',   // Authority Gold
+    accent: '#FF4FB2',      // Quantum Pink
+    text: '#DCE2EB',        // Starlight Silver
+    textMuted: '#6B7280',   // Muted Gray
+    border: 'rgba(30, 144, 255, 0.3)',  // Neural Blue Border
+  },
+};
+
+/**
+ * Cosmic Light Ops Theme (HIGH VISIBILITY MODE)
+ * White-silver gradient with gold borders and blue accents
+ */
+export const COSMIC_LIGHT_OPS_THEME: MapTheme = {
+  id: 'cosmic_light_ops',
+  name: 'Cosmic Light Ops',
+  description: 'High visibility mode for daylight operations',
+  mapboxStyle: 'mapbox://styles/mapbox/light-v11',
+  markerColors: {
+    rbpd: '#2563EB',      // Blue 600 - RBPD
+    fdot: '#16A34A',      // Green 600 - FDOT
+    lpr: '#DC2626',       // Red 600 - LPR
+    ptz: '#D9B252',       // Authority Gold - PTZ
+    default: '#4B5563',   // Gray 600
+    incident: '#DC2626',  // Red 600
+    alert: '#EC4899',     // Pink 500
+  },
+  uiColors: {
+    background: '#F5F8FB',  // Light Background
+    surface: '#FFFFFF',     // White
+    primary: '#2563EB',     // Blue 600
+    secondary: '#D9B252',   // Authority Gold
+    accent: '#EC4899',      // Pink 500
+    text: '#1F2937',        // Gray 800
+    textMuted: '#9CA3AF',   // Gray 400
+    border: 'rgba(217, 178, 82, 0.4)',  // Gold Border
+  },
+};
+
+/**
+ * High-Contrast Tactical Theme (ACCESSIBILITY MODE)
+ * Matte black with pure white text, neon colors, no animations
+ */
+export const HIGH_CONTRAST_TACTICAL_THEME: MapTheme = {
+  id: 'high_contrast_tactical',
+  name: 'High-Contrast Tactical',
+  description: 'ADA accessibility mode with maximum contrast',
+  mapboxStyle: 'mapbox://styles/mapbox/dark-v11',
+  markerColors: {
+    rbpd: '#00BFFF',      // Neon Blue - RBPD
+    fdot: '#00FF00',      // Neon Green - FDOT
+    lpr: '#FF0000',       // Neon Red - LPR
+    ptz: '#FFD700',       // Gold - PTZ
+    default: '#FFFFFF',   // Pure White
+    incident: '#FF0000',  // Neon Red
+    alert: '#FFFF00',     // Neon Yellow
+  },
+  uiColors: {
+    background: '#000000',  // Matte Black
+    surface: '#0A0A0A',     // Near Black
+    primary: '#00BFFF',     // Neon Blue
+    secondary: '#FFD700',   // Gold
+    accent: '#FF69B4',      // Hot Pink
+    text: '#FFFFFF',        // Pure White
+    textMuted: '#E5E5E5',   // Light Gray
+    border: '#00BFFF',      // Neon Blue Border
+  },
+};
+
+/**
  * All available map themes
  */
 export const MAP_THEMES: Record<MapThemeId, MapTheme> = {
+  neural_cosmic_dark: NEURAL_COSMIC_DARK_THEME,
+  cosmic_light_ops: COSMIC_LIGHT_OPS_THEME,
+  high_contrast_tactical: HIGH_CONTRAST_TACTICAL_THEME,
   tactical_dark: TACTICAL_DARK_THEME,
   city_ops: CITY_OPS_THEME,
   night_ops: NIGHT_OPS_THEME,
 };
 
 /**
- * Default theme
+ * Default theme - Neural Cosmic Dark
  */
-export const DEFAULT_THEME: MapThemeId = 'tactical_dark';
+export const DEFAULT_THEME: MapThemeId = 'neural_cosmic_dark';
 
 /**
  * Get theme by ID
