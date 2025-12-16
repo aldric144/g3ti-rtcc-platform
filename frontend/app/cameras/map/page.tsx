@@ -59,10 +59,20 @@ export default function CameraMapPage() {
   const fetchCameras = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiBaseUrl}/api/cameras/map`);
+      // Fetch from unified camera endpoint to get all cameras including FDOT
+      const response = await fetch(`${apiBaseUrl}/api/cameras`);
       if (response.ok) {
         const data = await response.json();
-        setCameras(data.cameras || []);
+        // Normalize camera data for map display
+        const normalizedCameras = (data.cameras || []).map((cam: any) => ({
+          ...cam,
+          latitude: cam.latitude || cam.gps?.latitude || 0,
+          longitude: cam.longitude || cam.gps?.longitude || 0,
+          camera_type: cam.camera_type || cam.type || 'cctv',
+          jurisdiction: cam.jurisdiction || 'public',
+          status: cam.status || 'online',
+        })).filter((cam: CameraData) => cam.latitude && cam.longitude);
+        setCameras(normalizedCameras);
         setError(null);
       } else {
         throw new Error('Failed to fetch cameras');
@@ -211,7 +221,7 @@ export default function CameraMapPage() {
 
         {/* Camera Markers Overlay (simplified) */}
         <div className="absolute inset-0 pointer-events-none">
-          {cameras.slice(0, 20).map((camera, index) => {
+          {cameras.map((camera, index) => {
             // Simple positioning based on lat/lng relative to center
             const offsetX = ((camera.longitude - mapCenter.lng) * 5000) + 50;
             const offsetY = ((mapCenter.lat - camera.latitude) * 5000) + 50;

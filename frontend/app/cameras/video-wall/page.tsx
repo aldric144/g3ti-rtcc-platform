@@ -26,6 +26,8 @@ interface CameraData {
   sector?: string;
   status?: string;
   fdot_id?: string;
+  supports_mjpeg?: boolean;
+  snapshot_url?: string;
 }
 
 interface VideoWallSlot {
@@ -36,6 +38,8 @@ interface VideoWallSlot {
   is_empty: boolean;
   jurisdiction?: string | null;
   fdot_id?: string | null;
+  supports_mjpeg?: boolean;
+  snapshot_url?: string | null;
 }
 
 interface VideoWallSession {
@@ -130,6 +134,8 @@ export default function VideoWallPage() {
             is_empty: false,
             jurisdiction: camera.jurisdiction || null,
             fdot_id: camera.fdot_id || null,
+            supports_mjpeg: camera.supports_mjpeg || false,
+            snapshot_url: camera.snapshot_url || null,
           }
         : slot
     ));
@@ -139,10 +145,10 @@ export default function VideoWallPage() {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
   const getStreamUrl = (slot: VideoWallSlot) => {
-    if (slot.jurisdiction === 'FDOT') {
-      return `${apiBaseUrl}/api/cameras/fdot/${slot.fdot_id || slot.camera_id}/stream`;
+    if (slot.supports_mjpeg) {
+      return `${apiBaseUrl}${slot.stream_url}`;
     }
-    return slot.stream_url || 'https://via.placeholder.com/640x360?text=Camera';
+    return slot.snapshot_url || slot.stream_url || 'https://via.placeholder.com/640x360?text=Camera';
   };
 
   const removeCameraFromSlot = (position: number) => {

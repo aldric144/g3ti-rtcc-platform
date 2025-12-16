@@ -210,3 +210,444 @@
 .event-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* ============================================
+   G3TI SUPER THEME - NEURAL COSMIC MATRIX
+   ============================================ */
+
+/* Theme CSS Variables */
+:root {
+  --g3ti-background: #030308;
+  --g3ti-background-secondary: #0a0a12;
+  --g3ti-background-tertiary: #12121f;
+  --g3ti-text-primary: #DCE2EB;
+  --g3ti-text-secondary: #9CA3AF;
+  --g3ti-text-muted: #6B7280;
+  --g3ti-neural-blue: #1E90FF;
+  --g3ti-authority-gold: #D9B252;
+  --g3ti-quantum-pink: #FF4FB2;
+  --g3ti-threat-red: #FF2740;
+  --g3ti-panel-background: rgba(10, 10, 18, 0.85);
+  --g3ti-panel-border: rgba(30, 144, 255, 0.3);
+  --g3ti-panel-glow: rgba(30, 144, 255, 0.15);
+  --g3ti-online: #22C55E;
+  --g3ti-offline: #EF4444;
+  --g3ti-degraded: #F59E0B;
+  --g3ti-camera-rbpd: #1E90FF;
+  --g3ti-camera-fdot: #22C55E;
+  --g3ti-camera-lpr: #EF4444;
+  --g3ti-camera-ptz: #D9B252;
+}
+
+/* Theme transition styles */
+body.theme-transitioning {
+  transition: background-color 0.8s ease-in-out, color 0.8s ease-in-out;
+}
+
+body.theme-transitioning * {
+  transition: background-color 0.8s ease-in-out, color 0.8s ease-in-out, border-color 0.8s ease-in-out, box-shadow 0.8s ease-in-out !important;
+}
+
+/* Neural Cosmic Dark Theme */
+body.theme-neural-cosmic-dark {
+  background: var(--g3ti-background);
+  color: var(--g3ti-text-primary);
+}
+
+/* Cosmic Light Ops Theme */
+body.theme-cosmic-light-ops {
+  background: linear-gradient(135deg, #F5F8FB 0%, #E6EBF2 100%);
+  color: #1F2937;
+}
+
+/* High-Contrast Tactical Theme */
+body.theme-high-contrast-tactical {
+  background: #000000;
+  color: #FFFFFF;
+}
+
+/* G3TI Panel Styles */
+.g3ti-panel {
+  background: var(--g3ti-panel-background);
+  border: 1px solid var(--g3ti-panel-border);
+  box-shadow: 0 0 20px var(--g3ti-panel-glow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.g3ti-panel-gold {
+  background: var(--g3ti-panel-background);
+  border: 1px solid var(--g3ti-authority-gold);
+  box-shadow: 0 0 20px rgba(217, 178, 82, 0.15), inset 0 1px 0 rgba(217, 178, 82, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+/* G3TI Glass Effect */
+.g3ti-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* G3TI Glow Effects */
+.g3ti-glow-blue {
+  box-shadow: 0 0 20px var(--g3ti-neural-blue), 0 0 40px rgba(30, 144, 255, 0.3);
+}
+
+.g3ti-glow-gold {
+  box-shadow: 0 0 20px var(--g3ti-authority-gold), 0 0 40px rgba(217, 178, 82, 0.3);
+}
+
+.g3ti-glow-pink {
+  box-shadow: 0 0 20px var(--g3ti-quantum-pink), 0 0 40px rgba(255, 79, 178, 0.3);
+}
+
+.g3ti-glow-red {
+  box-shadow: 0 0 20px var(--g3ti-threat-red), 0 0 40px rgba(255, 39, 64, 0.3);
+}
+
+/* Camera Tile Styles */
+.g3ti-camera-tile {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--g3ti-background-secondary);
+  border: 2px solid var(--g3ti-authority-gold);
+  box-shadow: 
+    0 0 0 1px rgba(217, 178, 82, 0.3),
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(217, 178, 82, 0.2);
+  transition: all 0.3s ease;
+}
+
+.g3ti-camera-tile:hover {
+  border-color: var(--g3ti-neural-blue);
+  box-shadow: 
+    0 0 0 1px var(--g3ti-neural-blue),
+    0 0 30px rgba(30, 144, 255, 0.4),
+    0 8px 30px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+.g3ti-camera-tile.threat {
+  border-color: var(--g3ti-threat-red);
+  box-shadow: 
+    0 0 0 1px var(--g3ti-threat-red),
+    0 0 30px rgba(255, 39, 64, 0.5),
+    0 8px 30px rgba(0, 0, 0, 0.5);
+  animation: threatPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes threatPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 1px var(--g3ti-threat-red),
+      0 0 30px rgba(255, 39, 64, 0.5),
+      0 8px 30px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 2px var(--g3ti-threat-red),
+      0 0 50px rgba(255, 39, 64, 0.7),
+      0 8px 30px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Camera Metadata Panel */
+.g3ti-camera-metadata {
+  background: rgba(10, 10, 18, 0.9);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(217, 178, 82, 0.3);
+  padding: 8px 12px;
+}
+
+/* Cosmic Pulse Animation */
+@keyframes cosmicPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(30, 144, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(30, 144, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(30, 144, 255, 0);
+  }
+}
+
+.g3ti-pulse {
+  animation: cosmicPulse 2s infinite;
+}
+
+/* Shockwave Animation for LPR Hits */
+@keyframes shockwave {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.g3ti-shockwave::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--g3ti-threat-red);
+  animation: shockwave 1s ease-out infinite;
+}
+
+/* Spark Effect for Live Incidents */
+@keyframes spark {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+.g3ti-spark {
+  animation: spark 0.5s ease-in-out infinite;
+}
+
+/* Sidebar Styles */
+.g3ti-sidebar {
+  background: linear-gradient(180deg, var(--g3ti-background-secondary) 0%, var(--g3ti-background) 100%);
+  border-right: 1px solid var(--g3ti-panel-border);
+}
+
+.g3ti-sidebar-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  color: var(--g3ti-text-secondary);
+}
+
+.g3ti-sidebar-item:hover {
+  background: rgba(30, 144, 255, 0.1);
+  color: var(--g3ti-text-primary);
+}
+
+.g3ti-sidebar-item.active {
+  background: rgba(30, 144, 255, 0.15);
+  color: var(--g3ti-neural-blue);
+  border-left: 3px solid var(--g3ti-neural-blue);
+}
+
+.g3ti-sidebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--g3ti-authority-gold);
+  background: rgba(217, 178, 82, 0.1);
+  transition: all 0.3s ease;
+}
+
+.g3ti-sidebar-item:hover .g3ti-sidebar-icon {
+  box-shadow: 0 0 15px rgba(217, 178, 82, 0.4);
+}
+
+.g3ti-sidebar-item.active .g3ti-sidebar-icon {
+  border-color: var(--g3ti-neural-blue);
+  background: rgba(30, 144, 255, 0.2);
+  box-shadow: 0 0 15px rgba(30, 144, 255, 0.4);
+}
+
+/* Particle Trail Hover Effect */
+.g3ti-particle-trail {
+  position: relative;
+  overflow: hidden;
+}
+
+.g3ti-particle-trail::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--g3ti-neural-blue), transparent);
+  transition: left 0.5s ease;
+}
+
+.g3ti-particle-trail:hover::before {
+  left: 100%;
+}
+
+/* Category Group Labels */
+.g3ti-category-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--g3ti-authority-gold);
+  padding: 8px 16px;
+  margin-top: 16px;
+  text-shadow: 0 0 10px rgba(217, 178, 82, 0.3);
+}
+
+/* Map Pin Styles */
+.g3ti-map-pin {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.g3ti-map-pin:hover {
+  transform: scale(1.2);
+}
+
+.g3ti-map-pin.rbpd {
+  background: var(--g3ti-camera-rbpd);
+  box-shadow: 0 0 15px var(--g3ti-camera-rbpd);
+}
+
+.g3ti-map-pin.fdot {
+  background: var(--g3ti-camera-fdot);
+  box-shadow: 0 0 15px var(--g3ti-camera-fdot);
+}
+
+.g3ti-map-pin.lpr {
+  background: var(--g3ti-camera-lpr);
+  box-shadow: 0 0 15px var(--g3ti-camera-lpr);
+}
+
+.g3ti-map-pin.ptz {
+  background: var(--g3ti-camera-ptz);
+  box-shadow: 0 0 15px var(--g3ti-camera-ptz);
+}
+
+.g3ti-map-pin.active {
+  animation: cosmicPulse 2s infinite;
+}
+
+/* Login Screen Federal Command Center Style */
+.g3ti-login-container {
+  background: radial-gradient(ellipse at center, #0a0a12 0%, #030308 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.g3ti-login-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(30, 144, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(217, 178, 82, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.g3ti-login-card {
+  background: rgba(10, 10, 18, 0.9);
+  border: 1px solid var(--g3ti-authority-gold);
+  border-radius: 16px;
+  padding: 48px;
+  box-shadow: 
+    0 0 40px rgba(217, 178, 82, 0.2),
+    0 0 80px rgba(30, 144, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  max-width: 420px;
+  width: 100%;
+}
+
+/* High Contrast Tactical Mode Overrides */
+body.theme-high-contrast-tactical .g3ti-panel,
+body.theme-high-contrast-tactical .g3ti-panel-gold {
+  background: #0A0A0A;
+  border: 2px solid #00BFFF;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+body.theme-high-contrast-tactical .g3ti-camera-tile {
+  border: 2px solid #FFD700;
+  box-shadow: none;
+}
+
+body.theme-high-contrast-tactical .g3ti-camera-tile:hover {
+  border-color: #00BFFF;
+  box-shadow: none;
+  transform: none;
+}
+
+body.theme-high-contrast-tactical .g3ti-sidebar {
+  background: #000000;
+  border-right: 2px solid #00BFFF;
+}
+
+body.theme-high-contrast-tactical .g3ti-sidebar-icon {
+  border: 2px solid #FFD700;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.theme-high-contrast-tactical * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Cosmic Light Ops Mode Overrides */
+body.theme-cosmic-light-ops .g3ti-panel,
+body.theme-cosmic-light-ops .g3ti-panel-gold {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(217, 178, 82, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+body.theme-cosmic-light-ops .g3ti-camera-tile {
+  background: #FFFFFF;
+  border: 2px solid var(--g3ti-authority-gold);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+body.theme-cosmic-light-ops .g3ti-sidebar {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5F8FB 100%);
+  border-right: 1px solid rgba(217, 178, 82, 0.3);
+}
+
+body.theme-cosmic-light-ops .g3ti-sidebar-item {
+  color: #4B5563;
+}
+
+body.theme-cosmic-light-ops .g3ti-sidebar-item:hover {
+  background: rgba(37, 99, 235, 0.1);
+  color: #1F2937;
+}
+
+body.theme-cosmic-light-ops .g3ti-sidebar-item.active {
+  background: rgba(37, 99, 235, 0.15);
+  color: #2563EB;
+  border-left-color: #2563EB;
+}
+
+body.theme-cosmic-light-ops .g3ti-login-container {
+  background: linear-gradient(135deg, #F5F8FB 0%, #E6EBF2 100%);
+}
+
+body.theme-cosmic-light-ops .g3ti-login-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--g3ti-authority-gold);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+}

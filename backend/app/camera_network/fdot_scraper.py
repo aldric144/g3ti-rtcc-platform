@@ -348,6 +348,12 @@ class FDOTScraper:
             await self.fetch_cameras()
         return self._cameras
     
+    def get_all_cameras_sync(self) -> List[Dict[str, Any]]:
+        """Get all cached cameras (synchronous version for ingestion engine)."""
+        if not self._cameras:
+            self._load_demo_cameras()
+        return self._cameras
+    
     async def get_camera(self, camera_id: str) -> Optional[Dict[str, Any]]:
         """Get a specific camera by ID (async)."""
         cameras = await self.get_all_cameras()
