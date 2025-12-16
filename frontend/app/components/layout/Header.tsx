@@ -7,7 +7,7 @@ import { Bell, Search, User, LogOut, Settings, ChevronDown } from 'lucide-react'
 import { clsx } from 'clsx';
 import { useAuthStore } from '@/lib/store/auth';
 import { useEventStore } from '@/lib/store/events';
-import { ThemeSelector } from '@/components/theme/ThemeSelector';
+import { ThemeSelector } from '../../../components/theme/ThemeSelector';
 
 /**
  * Header component with search, notifications, and user menu.
