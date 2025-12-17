@@ -31,6 +31,9 @@ from app.shift_admin.shift_api import router as shift_router
 from app.patrol_insights.patrol_insights_api import router as patrol_insights_router
 from app.case_tools.case_tools_api import router as case_tools_router
 
+# FDOT Streams router (additive module)
+from app.fdot_streams import router as fdot_streams_router
+
 # Create main API router
 api_router = APIRouter()
 
@@ -51,5 +54,8 @@ api_router.include_router(activity_log_router, tags=["Admin Logs"])
 api_router.include_router(shift_router, tags=["Shift Management"])
 api_router.include_router(patrol_insights_router, tags=["Patrol Insights"])
 api_router.include_router(case_tools_router, tags=["Case Tools"])
+
+# FDOT Streams (additive module - does not modify existing camera integrations)
+api_router.include_router(fdot_streams_router, tags=["FDOT Streams"])
 
 __all__ = ["api_router"]
