@@ -21,6 +21,8 @@ from fastapi.responses import JSONResponse
 from app.ai_engine import get_ai_manager
 from app.api import api_router
 from app.api.cameras import router as cameras_router
+from app.crime_analysis import crime_router
+from app.crime_analysis.websocket_handler import crime_alerts_websocket
 from app.camera_network.camera_ingestion_engine import get_ingestion_engine
 from app.camera_network.camera_health_monitor import get_health_monitor
 from app.core.config import settings
@@ -393,6 +395,18 @@ app.include_router(api_router, prefix=settings.api_v1_prefix)
 
 # Include cameras router at /api/cameras for direct access (alias)
 app.include_router(cameras_router, prefix="/api", tags=["Cameras (alias)"])
+
+# Include crime analysis router
+app.include_router(crime_router)
+
+
+# WebSocket endpoint for crime alerts
+from fastapi import WebSocket
+
+@app.websocket("/ws/crime/alerts")
+async def crime_alerts_ws_endpoint(websocket: WebSocket):
+    """WebSocket endpoint for real-time crime alerts."""
+    await crime_alerts_websocket(websocket)
 
 
 # Root endpoint
