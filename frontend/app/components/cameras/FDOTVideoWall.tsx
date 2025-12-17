@@ -26,7 +26,7 @@ interface FDOTVideoWallProps {
 }
 
 export function FDOTVideoWall({
-  apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1',
+  apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://g3ti-rtcc-backend-harpclib.fly.dev/api/v1',
   refreshInterval = 5000,
   columns = 3,
 }: FDOTVideoWallProps) {

@@ -49,7 +49,7 @@ export default function CameraDirectoryPage() {
     status: '',
   });
 
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://g3ti-rtcc-backend-harpclib.fly.dev';
 
   const fetchCameras = useCallback(async () => {
     setIsLoading(true);
