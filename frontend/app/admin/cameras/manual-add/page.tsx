@@ -43,7 +43,7 @@ export default function ManualAddCameraPage() {
     description: '',
   });
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://g3ti-rtcc-backend-harpclib.fly.dev/api/v1';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://g3ti-rtcc-backend.fly.dev/api/v1';
 
   const fetchCameras = async () => {
     setIsLoading(true);

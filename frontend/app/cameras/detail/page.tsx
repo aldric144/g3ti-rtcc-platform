@@ -63,7 +63,7 @@ function CameraDetailContent() {
   const [error, setError] = useState<string | null>(null);
   const [isPTZ, setIsPTZ] = useState(false);
 
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://g3ti-rtcc-backend-harpclib.fly.dev';
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://g3ti-rtcc-backend.fly.dev';
 
   const fetchCamera = useCallback(async () => {
     if (!cameraId) {
