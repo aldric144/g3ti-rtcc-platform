@@ -62,7 +62,7 @@ export default function DVRiskHomesAdminPage() {
   const fetchHomes = async () => {
     setLoading(true);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://g3ti-rtcc-backend-harpclib.fly.dev';
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://g3ti-rtcc-backend.fly.dev';
       const response = await fetch(`${backendUrl}/api/admin/dv_risk_homes`);
       if (response.ok) {
         const data = await response.json();

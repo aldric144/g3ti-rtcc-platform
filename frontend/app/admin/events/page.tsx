@@ -72,7 +72,7 @@ export default function EventsAdminPage() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://g3ti-rtcc-backend-harpclib.fly.dev';
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://g3ti-rtcc-backend.fly.dev';
       const response = await fetch(`${backendUrl}/api/admin/events`);
       if (response.ok) {
         const data = await response.json();

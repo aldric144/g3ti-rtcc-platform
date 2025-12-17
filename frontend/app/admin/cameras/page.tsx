@@ -81,7 +81,7 @@ export default function CamerasAdminPage() {
   const fetchCameras = async () => {
     setLoading(true);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://g3ti-rtcc-backend-harpclib.fly.dev';
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://g3ti-rtcc-backend.fly.dev';
       const response = await fetch(`${backendUrl}/api/admin/cameras`);
       if (response.ok) {
         const data = await response.json();
@@ -153,7 +153,7 @@ export default function CamerasAdminPage() {
     }
 
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://g3ti-rtcc-backend-harpclib.fly.dev';
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://g3ti-rtcc-backend.fly.dev';
       const response = await fetch(`${backendUrl}/api/admin/cameras/${camera.id}`, {
         method: 'DELETE',
       });
@@ -178,7 +178,7 @@ export default function CamerasAdminPage() {
     setSaving(true);
 
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://g3ti-rtcc-backend-harpclib.fly.dev';
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://g3ti-rtcc-backend.fly.dev';
       const url = editingCamera
         ? `${backendUrl}/api/admin/cameras/${editingCamera.id}`
         : `${backendUrl}/api/admin/cameras`;
