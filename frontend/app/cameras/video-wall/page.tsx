@@ -134,7 +134,7 @@ export default function VideoWallPage() {
             is_empty: false,
             jurisdiction: camera.jurisdiction || null,
             fdot_id: camera.fdot_id || null,
-            supports_mjpeg: camera.supports_mjpeg || false,
+            supports_mjpeg: camera.supports_mjpeg || (camera.jurisdiction === 'FDOT'),
             snapshot_url: camera.snapshot_url || null,
           }
         : slot
@@ -145,8 +145,11 @@ export default function VideoWallPage() {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
   const getStreamUrl = (slot: VideoWallSlot) => {
-    if (slot.supports_mjpeg) {
+    if (slot.supports_mjpeg && slot.stream_url) {
       return `${apiBaseUrl}${slot.stream_url}`;
+    }
+    if (slot.jurisdiction === 'FDOT' && slot.fdot_id) {
+      return `${apiBaseUrl}/api/cameras/fdot/${slot.fdot_id}/stream`;
     }
     return slot.snapshot_url || slot.stream_url || 'https://via.placeholder.com/640x360?text=Camera';
   };

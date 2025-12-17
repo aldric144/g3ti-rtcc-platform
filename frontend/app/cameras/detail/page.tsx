@@ -231,9 +231,11 @@ function CameraDetailContent() {
             <div className="bg-gray-800 rounded-lg overflow-hidden">
               {/* Video */}
               <div className="relative aspect-video bg-black">
-                {camera.supports_mjpeg ? (
+                {camera.supports_mjpeg || camera.jurisdiction === 'FDOT' ? (
                   <img
-                    src={`${apiBaseUrl}${camera.stream_url}`}
+                    src={camera.stream_url 
+                      ? `${apiBaseUrl}${camera.stream_url}`
+                      : `${apiBaseUrl}/api/cameras/fdot/${camera.id}/stream`}
                     alt={camera.name}
                     className="w-full h-full object-contain"
                     style={{ width: "100%", height: "100%", objectFit: "cover" }}

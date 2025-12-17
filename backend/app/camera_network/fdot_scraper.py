@@ -214,21 +214,44 @@ class FDOTScraper:
         cameras = []
         if isinstance(data, dict) and "cameras" in data:
             data = data["cameras"]
+        elif isinstance(data, dict) and "data" in data:
+            data = data["data"]
         
         if isinstance(data, list):
             for item in data:
                 try:
+                    cam_id = item.get('camera_id') or item.get('id', '')
+                    fdot_id = f"smarttraffic-{cam_id}"
+                    snapshot_url = (
+                        item.get("snapshot_url") or 
+                        item.get("snapshotUrl") or 
+                        item.get("imageUrl") or 
+                        item.get("image_url") or
+                        PLACEHOLDER_SNAPSHOT
+                    )
                     camera = {
-                        "fdot_id": f"smarttraffic-{item.get('id', '')}",
-                        "name": item.get("name", "Traffic Camera"),
-                        "latitude": float(item.get("latitude", 0)),
-                        "longitude": float(item.get("longitude", 0)),
-                        "snapshot_url": item.get("snapshotUrl") or item.get("imageUrl", PLACEHOLDER_SNAPSHOT),
-                        "description": item.get("description", ""),
+                        "id": fdot_id,
+                        "fdot_id": fdot_id,
+                        "name": item.get("name") or item.get("location") or "Traffic Camera",
+                        "latitude": float(item.get("lat") or item.get("latitude", 0)),
+                        "longitude": float(item.get("lng") or item.get("longitude", 0)),
+                        "gps": {
+                            "latitude": float(item.get("lat") or item.get("latitude", 0)),
+                            "longitude": float(item.get("lng") or item.get("longitude", 0)),
+                        },
+                        "snapshot_url": snapshot_url,
+                        "stream_url": f"/api/cameras/fdot/{fdot_id}/stream",
+                        "description": item.get("description") or item.get("direction") or "",
                         "camera_type": "traffic",
+                        "type": "traffic",
                         "jurisdiction": "FDOT",
-                        "status": "online" if item.get("active", True) else "offline",
+                        "status": "online" if item.get("status", "online") == "online" or item.get("active", True) else "offline",
                         "source": "smarttraffic",
+                        "supports_mjpeg": True,
+                        "sector": self._compute_sector(
+                            float(item.get("lat") or item.get("latitude", 0)),
+                            float(item.get("lng") or item.get("longitude", 0))
+                        ),
                     }
                     cameras.append(camera)
                 except Exception as e:
@@ -310,8 +333,10 @@ class FDOTScraper:
         
         cameras = []
         for cam in FDOT_DEMO_CAMERAS:
+            fdot_id = cam["fdot_id"]
             cameras.append({
                 **cam,
+                "id": fdot_id,
                 "gps": {"latitude": cam["latitude"], "longitude": cam["longitude"]},
                 "camera_type": "traffic",
                 "type": "traffic",
@@ -319,6 +344,8 @@ class FDOTScraper:
                 "status": "online",
                 "sector": self._compute_sector(cam["latitude"], cam["longitude"]),
                 "source": "FDOT",
+                "stream_url": f"/api/cameras/fdot/{fdot_id}/stream",
+                "supports_mjpeg": True,
                 "last_updated": datetime.now(timezone.utc).isoformat(),
             })
         
