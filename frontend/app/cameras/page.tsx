@@ -31,6 +31,8 @@ interface CameraData {
   description?: string;
   marker_color?: string;
   fdot_id?: string;
+  supports_mjpeg?: boolean;
+  snapshot_url?: string;
 }
 
 export default function CameraDirectoryPage() {
@@ -294,9 +296,11 @@ export default function CameraDirectoryPage() {
               {/* Thumbnail */}
               <div className="relative aspect-video bg-black">
                 <img
-                  src={camera.jurisdiction === 'FDOT' 
-                    ? `${apiBaseUrl}/api/cameras/fdot/${camera.fdot_id || camera.id}/snapshot?ts=${Date.now()}`
-                    : (camera.stream_url || 'https://via.placeholder.com/640x360?text=Camera')}
+                  src={camera.supports_mjpeg 
+                    ? `${apiBaseUrl}${camera.stream_url}`
+                    : camera.jurisdiction === 'FDOT' 
+                      ? `${apiBaseUrl}/api/cameras/fdot/${camera.fdot_id || camera.id}/snapshot?ts=${Date.now()}`
+                      : (camera.snapshot_url || camera.stream_url || 'https://via.placeholder.com/640x360?text=Camera')}
                   alt={camera.name}
                   className="w-full h-full object-cover"
                 />
@@ -337,9 +341,11 @@ export default function CameraDirectoryPage() {
               {/* Thumbnail */}
               <div className="w-32 h-20 bg-black rounded overflow-hidden flex-shrink-0">
                 <img
-                  src={camera.jurisdiction === 'FDOT' 
-                    ? `${apiBaseUrl}/api/cameras/fdot/${camera.fdot_id || camera.id}/snapshot?ts=${Date.now()}`
-                    : (camera.stream_url || 'https://via.placeholder.com/640x360?text=Camera')}
+                  src={camera.supports_mjpeg 
+                    ? `${apiBaseUrl}${camera.stream_url}`
+                    : camera.jurisdiction === 'FDOT' 
+                      ? `${apiBaseUrl}/api/cameras/fdot/${camera.fdot_id || camera.id}/snapshot?ts=${Date.now()}`
+                      : (camera.snapshot_url || camera.stream_url || 'https://via.placeholder.com/640x360?text=Camera')}
                   alt={camera.name}
                   className="w-full h-full object-cover"
                 />
