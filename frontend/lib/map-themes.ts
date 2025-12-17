@@ -7,7 +7,7 @@
  * 3. RTCC Night Ops Theme (Dark Navy / Gold) - night_ops
  */
 
-export type MapThemeId = 'tactical_dark' | 'city_ops' | 'night_ops';
+export type MapThemeId = 'tactical_dark' | 'city_ops' | 'night_ops' | 'neptune_ops' | 'neptune_dark' | 'neptune_hivis';
 
 export interface MapTheme {
   id: MapThemeId;
@@ -126,12 +126,105 @@ export const NIGHT_OPS_THEME: MapTheme = {
 };
 
 /**
+ * Neptune Ops Mode Theme
+ * Neptune Blue base with aqua glow accents and gold sector boundaries
+ */
+export const NEPTUNE_OPS_THEME: MapTheme = {
+  id: 'neptune_ops',
+  name: 'Neptune Ops Mode',
+  description: 'Neptune blue base with aqua glow accents and gold boundaries',
+  mapboxStyle: 'mapbox://styles/mapbox/dark-v11',
+  markerColors: {
+    rbpd: '#4FE3FF',      // Aqua Glow
+    fdot: '#3A6EA5',      // Neptune Blue
+    lpr: '#FF6B6B',       // Soft Red
+    ptz: '#C9A34E',       // Gold
+    default: '#7A8B9A',   // Muted Blue-Gray
+    incident: '#FF4757',  // Alert Red
+    alert: '#FFA502',     // Warning Orange
+  },
+  uiColors: {
+    background: '#0A1A2F',  // Neptune Deep Navy
+    surface: '#122640',     // Neptune Surface
+    primary: '#3A6EA5',     // Neptune Blue
+    secondary: '#4FE3FF',   // Aqua Glow
+    accent: '#C9A34E',      // Gold
+    text: '#E8F4FF',        // Light Blue White
+    textMuted: '#7A9BBF',   // Muted Neptune
+    border: '#1E3A5F',      // Neptune Border
+  },
+};
+
+/**
+ * Neptune Deep Night Theme
+ * Deep navy with subtle blue glow for night operations
+ */
+export const NEPTUNE_DARK_THEME: MapTheme = {
+  id: 'neptune_dark',
+  name: 'Neptune Deep Night',
+  description: 'Deep navy with subtle blue glow for stealth night operations',
+  mapboxStyle: 'mapbox://styles/mapbox/navigation-night-v1',
+  markerColors: {
+    rbpd: '#4FE3FF',      // Aqua Glow
+    fdot: '#2D5A87',      // Darker Neptune Blue
+    lpr: '#FF5252',       // Red
+    ptz: '#C9A34E',       // Gold
+    default: '#5A6B7A',   // Dark Blue-Gray
+    incident: '#FF3D3D',  // Bright Red
+    alert: '#FF9500',     // Orange
+  },
+  uiColors: {
+    background: '#050D18',  // Ultra Deep Navy
+    surface: '#0A1A2F',     // Neptune Deep Navy
+    primary: '#3A6EA5',     // Neptune Blue
+    secondary: '#4FE3FF',   // Aqua Glow
+    accent: '#C9A34E',      // Gold
+    text: '#D4E6F7',        // Soft Blue White
+    textMuted: '#5A7A9A',   // Dark Muted Neptune
+    border: '#152A45',      // Dark Neptune Border
+  },
+};
+
+/**
+ * Neptune High Visibility Theme
+ * High contrast Neptune theme for maximum visibility
+ */
+export const NEPTUNE_HIVIS_THEME: MapTheme = {
+  id: 'neptune_hivis',
+  name: 'Neptune High Visibility',
+  description: 'High contrast Neptune theme for maximum visibility',
+  mapboxStyle: 'mapbox://styles/mapbox/streets-v12',
+  markerColors: {
+    rbpd: '#00D4FF',      // Bright Aqua
+    fdot: '#4A90D9',      // Bright Neptune Blue
+    lpr: '#FF4444',       // Bright Red
+    ptz: '#FFD700',       // Bright Gold
+    default: '#8899AA',   // Light Blue-Gray
+    incident: '#FF0000',  // Pure Red
+    alert: '#FF8C00',     // Dark Orange
+  },
+  uiColors: {
+    background: '#0F2847',  // Medium Neptune Navy
+    surface: '#1A3A5C',     // Lighter Neptune Surface
+    primary: '#4A90D9',     // Bright Neptune Blue
+    secondary: '#00D4FF',   // Bright Aqua
+    accent: '#FFD700',      // Bright Gold
+    text: '#FFFFFF',        // Pure White
+    textMuted: '#A0C4E8',   // Light Neptune
+    border: '#2A5A8C',      // Visible Neptune Border
+  },
+};
+
+/**
  * All available map themes
  */
 export const MAP_THEMES: Record<MapThemeId, MapTheme> = {
   tactical_dark: TACTICAL_DARK_THEME,
   city_ops: CITY_OPS_THEME,
   night_ops: NIGHT_OPS_THEME,
+  neptune_ops: NEPTUNE_OPS_THEME,
+  neptune_dark: NEPTUNE_DARK_THEME,
+  neptune_hivis: NEPTUNE_HIVIS_THEME,
 };
 
 /**
