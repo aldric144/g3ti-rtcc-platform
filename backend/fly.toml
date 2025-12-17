@@ -1,14 +1,14 @@
 # G3TI RTCC-UIP Backend - Fly.io Configuration
 # See https://fly.io/docs/reference/configuration/ for information about this file.
 
-app = "g3ti-rtcc-backend-harpclib"
-primary_region = "mia"
+app = "g3ti-rtcc-backend"
+primary_region = "iad"
 
 [build]
   dockerfile = "Dockerfile"
 
 [processes]
-  app = "/app/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000"
+  app = "uvicorn app.main:app --host 0.0.0.0 --port 8000"
 
 [env]
   # Application settings
@@ -19,10 +19,7 @@ primary_region = "mia"
   API_HOST = "0.0.0.0"
   API_PORT = "8000"
   
-  # CORS - Allow Vercel preview domains and Devin preview domains
-  CORS_ORIGINS = "https://g3ti-rtcc-preview-ui.vercel.app,https://*.vercel.app,http://localhost:3000,https://session-recovery-app-i18v0ake.devinapps.com,https://*.devinapps.com"
-  
-  # Safe mode - graceful degradation when services unavailable
+      # Safe mode - graceful degradation when services unavailable
   SAFE_MODE = "true"
 
 [http_service]
