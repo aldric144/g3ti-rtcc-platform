@@ -26,6 +26,14 @@ import {
   Navigation,
   Shield,
   LucideIcon,
+  TrendingUp,
+  MapPin,
+  Upload,
+  BarChart3,
+  Bot,
+  Eye,
+  Siren,
+  FileBarChart,
 } from 'lucide-react';
 import { useTheme } from '@/lib/theme';
 import { ThemeSelector } from './ThemeSelector';
@@ -39,22 +47,35 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  // Core Navigation
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, category: 'Core' },
-  { href: '/map', label: 'Live Map', icon: Map, category: 'Core' },
-  { href: '/cameras', label: 'Cameras', icon: Camera, category: 'Surveillance' },
-  { href: '/cameras/video-wall', label: 'Video Wall', icon: Activity, category: 'Surveillance' },
-  { href: '/drones', label: 'Drones', icon: Plane, category: 'Assets', hidden: true },
-  { href: '/quadruped', label: 'Quadruped Robot', icon: Dog, category: 'Assets', hidden: true },
-  { href: '/lpr', label: 'LPR Intelligence', icon: Car, category: 'Intelligence' },
-  { href: '/incidents', label: 'Real-Time Incidents', icon: AlertTriangle, category: 'Operations' },
-  { href: '/cad', label: 'CAD Feed', icon: Radio, category: 'Operations', hidden: true },
-  { href: '/heatmaps', label: 'Crime Heat Maps', icon: Flame, category: 'Analytics', hidden: true },
-  { href: '/social-pulse', label: 'Social Pulse AI', icon: MessageSquare, category: 'Intelligence', hidden: true },
-  { href: '/uav-dispatch', label: 'UAV Dispatch', icon: Navigation, category: 'Operations', hidden: true },
-  { href: '/officer-tracking', label: 'Officer Tracking', icon: Shield, category: 'Operations', hidden: true },
+  { href: '/live-map', label: 'Live Map', icon: Map, category: 'Core' },
+  { href: '/cameras', label: 'Cameras', icon: Camera, category: 'Core' },
   { href: '/investigations', label: 'Investigations', icon: Search, category: 'Core' },
   { href: '/entities', label: 'Entities', icon: Database, category: 'Core' },
   { href: '/events', label: 'Events', icon: Activity, category: 'Core' },
+  
+  // Crime Analysis
+  { href: '/analytics/crime/heatmap', label: 'Heatmap', icon: Flame, category: 'Crime Analysis' },
+  { href: '/analytics/crime/trends', label: 'Trends', icon: TrendingUp, category: 'Crime Analysis' },
+  { href: '/analytics/crime/forecast', label: 'Forecast', icon: BarChart3, category: 'Crime Analysis' },
+  { href: '/analytics/crime/repeat-locations', label: 'Repeat Locations', icon: MapPin, category: 'Crime Analysis' },
+  { href: '/analytics/crime/upload', label: 'Upload Data', icon: Upload, category: 'Crime Analysis' },
+  
+  // Intelligence
+  { href: '/lpr', label: 'LPR Intelligence', icon: Car, category: 'Intelligence' },
+  { href: '/social-threat', label: 'Social Threat AI', icon: MessageSquare, category: 'Intelligence' },
+  
+  // Assets
+  { href: '/drones', label: 'Drones', icon: Plane, category: 'Assets' },
+  { href: '/robots', label: 'Robotics Unit', icon: Bot, category: 'Assets' },
+  
+  // Operations
+  { href: '/cad', label: 'CAD Feed', icon: Radio, category: 'Operations' },
+  { href: '/officers', label: 'Officer Tracking', icon: Shield, category: 'Operations' },
+  
+  // Reports
+  { href: '/reports', label: 'RTCC Reports', icon: FileBarChart, category: 'Reports' },
 ];
 
 const adminItems: NavItem[] = [
