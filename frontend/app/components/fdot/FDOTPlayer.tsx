@@ -16,7 +16,7 @@ export default function FDOTPlayer({ cameraId, autoPlay = true, className = '' }
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://g3ti-rtcc-backend.fly.dev';
-  const snapshotUrl = `${backendUrl}/api/fdot/snapshot/${cameraId}`;
+  const snapshotUrl = `${backendUrl}/api/v1/fdot/snapshot/${cameraId}`;
 
   const loadSnapshot = useCallback(async () => {
     try {

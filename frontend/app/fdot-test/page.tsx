@@ -25,7 +25,7 @@ export default function FDOTTestPage() {
     const fetchCameras = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`${backendUrl}/api/fdot/list`);
+        const response = await fetch(`${backendUrl}/api/v1/fdot/list`);
         if (!response.ok) {
           throw new Error('Failed to fetch FDOT cameras');
         }
