@@ -26,9 +26,10 @@ RUN pip install poetry==1.7.1
 # Copy dependency files
 COPY pyproject.toml poetry.lock* ./
 
-# Configure Poetry and install dependencies
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --no-root
+# Configure Poetry to create venv at /app/.venv (required for Fly.io)
+RUN poetry config virtualenvs.in-project true \
+    && poetry install --no-interaction --no-ansi --no-root \
+    && poetry run pip install fastapi-cli
 
 # Copy application code
 COPY . .
