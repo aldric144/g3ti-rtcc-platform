@@ -46,7 +46,7 @@ export default function CameraMapPage() {
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://g3ti-rtcc-backend.fly.dev';
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
   const theme = getMapTheme(themeId);
 

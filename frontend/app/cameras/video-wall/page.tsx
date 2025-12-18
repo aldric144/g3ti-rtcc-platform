@@ -68,7 +68,7 @@ export default function VideoWallPage() {
   const [draggedSlot, setDraggedSlot] = useState<number | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://g3ti-rtcc-backend.fly.dev/api/v1';
 
   // Initialize slots based on layout
   useEffect(() => {
@@ -142,7 +142,7 @@ export default function VideoWallPage() {
     setShowCameraSelector(null);
   };
 
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://g3ti-rtcc-backend.fly.dev';
 
   const getStreamUrl = (slot: VideoWallSlot) => {
     if (slot.supports_mjpeg && slot.stream_url) {
