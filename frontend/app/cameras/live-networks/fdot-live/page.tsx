@@ -23,7 +23,7 @@ export default function FDOTLiveNetworkPage() {
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const [refreshInterval, setRefreshInterval] = useState(2);
 
-  const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://g3ti-rtcc-backend.fly.dev';
+  const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://g3ti-rtcc-backend-harpclib.fly.dev';
 
   const fetchCameras = useCallback(async () => {
     try {

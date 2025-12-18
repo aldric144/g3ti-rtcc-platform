@@ -70,7 +70,7 @@ export default function LiveVideoWallExtended({
   const [currentRefreshInterval, setCurrentRefreshInterval] = useState(refreshInterval);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://g3ti-rtcc-backend.fly.dev';
+  const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://g3ti-rtcc-backend-harpclib.fly.dev';
 
   const fetchCameras = useCallback(async () => {
     try {
