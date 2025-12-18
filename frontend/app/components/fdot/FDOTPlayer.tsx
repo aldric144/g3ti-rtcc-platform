@@ -9,115 +9,71 @@ interface FDOTPlayerProps {
 }
 
 export default function FDOTPlayer({ cameraId, autoPlay = true, className = '' }: FDOTPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
-  const maxRetries = 3;
+  const [imageUrl, setImageUrl] = useState<string>('');
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://g3ti-rtcc-backend.fly.dev';
-  const streamUrl = `${backendUrl}/api/fdot/stream/${cameraId}`;
+  const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://g3ti-rtcc-backend.fly.dev';
+  const snapshotUrl = `${backendUrl}/api/fdot/snapshot/${cameraId}`;
 
-  const loadStream = useCallback(async () => {
-    if (!videoRef.current) return;
-
-    setIsLoading(true);
-    setError(null);
-
+  const loadSnapshot = useCallback(async () => {
     try {
-      const Hls = (await import('hls.js')).default;
-
-      if (Hls.isSupported()) {
-        if (hlsRef.current) {
-          hlsRef.current.destroy();
-        }
-
-        const hls = new Hls({
-          enableWorker: true,
-          lowLatencyMode: true,
-          backBufferLength: 90,
-        });
-
-        hlsRef.current = hls;
-
-        hls.loadSource(streamUrl);
-        hls.attachMedia(videoRef.current);
-
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          setIsLoading(false);
-          if (autoPlay && videoRef.current) {
-            videoRef.current.play().catch(() => {});
-          }
-        });
-
-        hls.on(Hls.Events.ERROR, (_event: any, data: any) => {
-          if (data.fatal) {
-            switch (data.type) {
-              case Hls.ErrorTypes.NETWORK_ERROR:
-                if (retryCount < maxRetries) {
-                  setRetryCount(prev => prev + 1);
-                  setTimeout(() => hls.startLoad(), 2000);
-                } else {
-                  setError('Network error - stream unavailable');
-                  setIsLoading(false);
-                }
-                break;
-              case Hls.ErrorTypes.MEDIA_ERROR:
-                hls.recoverMediaError();
-                break;
-              default:
-                setError('Stream playback error');
-                setIsLoading(false);
-                break;
-            }
-          }
-        });
-      } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
-        videoRef.current.src = streamUrl;
-        videoRef.current.addEventListener('loadedmetadata', () => {
-          setIsLoading(false);
-          if (autoPlay) {
-            videoRef.current?.play().catch(() => {});
-          }
-        });
-        videoRef.current.addEventListener('error', () => {
-          setError('Stream playback error');
-          setIsLoading(false);
-        });
-      } else {
-        videoRef.current.src = streamUrl;
-        setIsLoading(false);
+      const timestamp = Date.now();
+      const url = `${snapshotUrl}?t=${timestamp}`;
+      
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to load camera snapshot');
       }
+      
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      
+      setImageUrl(prev => {
+        if (prev) URL.revokeObjectURL(prev);
+        return objectUrl;
+      });
+      setLastUpdate(new Date());
+      setIsLoading(false);
+      setError(null);
     } catch (err) {
-      setError('Failed to load video player');
+      setError(err instanceof Error ? err.message : 'Failed to load snapshot');
       setIsLoading(false);
     }
-  }, [cameraId, streamUrl, autoPlay, retryCount]);
+  }, [snapshotUrl]);
 
   useEffect(() => {
-    loadStream();
+    loadSnapshot();
+
+    if (autoPlay) {
+      intervalRef.current = setInterval(loadSnapshot, 10000);
+    }
 
     return () => {
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      if (imageUrl) {
+        URL.revokeObjectURL(imageUrl);
       }
     };
-  }, [loadStream]);
+  }, [loadSnapshot, autoPlay]);
 
   const handleRetry = () => {
-    setRetryCount(0);
-    loadStream();
+    setIsLoading(true);
+    setError(null);
+    loadSnapshot();
   };
 
   return (
     <div className={`relative bg-gray-900 rounded-lg overflow-hidden ${className}`}>
-      {isLoading && (
+      {isLoading && !imageUrl && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 z-10">
           <div className="flex flex-col items-center gap-2">
             <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm text-gray-400">Loading stream...</span>
+            <span className="text-sm text-gray-400">Loading camera...</span>
           </div>
         </div>
       )}
@@ -141,13 +97,19 @@ export default function FDOTPlayer({ cameraId, autoPlay = true, className = '' }
         </div>
       )}
 
-      <video
-        ref={videoRef}
-        className="w-full h-full object-contain"
-        controls
-        playsInline
-        muted
-      />
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt="FDOT Camera Feed"
+          className="w-full h-full object-contain"
+        />
+      )}
+
+      {lastUpdate && (
+        <div className="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded text-xs text-gray-300">
+          Live - Updated {lastUpdate.toLocaleTimeString()}
+        </div>
+      )}
     </div>
   );
 }

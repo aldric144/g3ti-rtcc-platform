@@ -114,6 +114,8 @@ async def get_stream_content_type(camera_id: str) -> str:
         return "video/mp2t"
     elif stream_url.endswith(".mp4"):
         return "video/mp4"
+    elif "fl511.com" in stream_url or stream_url.endswith(".png") or stream_url.endswith(".jpg"):
+        return "image/png"
     else:
         return "application/octet-stream"
 

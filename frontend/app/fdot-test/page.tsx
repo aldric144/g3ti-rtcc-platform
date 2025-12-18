@@ -19,7 +19,7 @@ export default function FDOTTestPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://g3ti-rtcc-backend.fly.dev';
+  const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://g3ti-rtcc-backend.fly.dev';
 
   useEffect(() => {
     const fetchCameras = async () => {
